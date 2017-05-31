@@ -83,13 +83,13 @@ body { position: absolute; right: 300px; left: 300px; top: 0; bottom: 0; }
 
 jsonRules = JSON.stringify(jsonRules, null, 2);
 
-// Append HTML to the original page to create the sidebar.
 let n = document.createElement('div');
 n.id = 'webscraping-container';
 n.innerHTML = `<i>Web scraper options:</i><textarea id="webscraping-config" placeholder="JSON goes here." style="display:none;">${jsonRules}</textarea>
   <div style="padding: 5px;">
     <label><input type="checkbox" id="webscraping-hide-cb"> Hide/Remove</label>
     <button id="webscraping-encode-button" title="Useful when using Sitemap sources">Encode</button>
+    <button id="webscraping-copy-button">Copy Rules to Clipboard</button>
   </div>
   <i>Fields:</i>
   <div id="webscraping-fields"></div>`;
@@ -216,12 +216,31 @@ let scrapePage = () => {
 };
 
 /**
+ * Copy JSON to clipboard.
+ */
+let copyJson = (bLeaveOpen, bEncode) => {
+    let n = document.getElementById('webscraping-config');
+	let json = JSON.parse(n.value);
+	n.value = JSON.stringify(json,null,2);
+    if (bEncode) {
+        // encode the JSON as a string. Useful for Sitemap sources.
+        n.value = '"' + JSON.stringify(json).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+    }
+    n.style.display = 'block';
+    n.focus();
+
+    document.execCommand('SelectAll');
+    document.execCommand("Copy", false, null);
+
+    if (bLeaveOpen!==true) {
+        n.style.display = 'none';
+    }
+};
+/**
  * Quick util function to encode the JSON as a string. Useful for Sitemap sources.
  */
 let encodeJson = () => {
-	let json = JSON.parse(document.getElementById('webscraping-config').value);
-	document.getElementById('webscraping-config').value = '"' + JSON.stringify(json).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
-	document.getElementById('webscraping-config').style.display = 'block';
+    copyJson(true, true);
 };
 /**
  * Toggle Hide/Remove for the exclude rules. The setting is saved in the localStorage and read again on page reload.
@@ -233,6 +252,7 @@ let toggleHide = () => {
 
 // set up onclick events for the Hide/Remove toggle and Encode button.
 document.getElementById('webscraping-encode-button').onclick = encodeJson;
+document.getElementById('webscraping-copy-button').onclick = copyJson;
 document.getElementById('webscraping-hide-cb').onclick = toggleHide;
 if ((localStorage.getItem('hideWhenExclude') === 'true')) {
 	document.getElementById('webscraping-hide-cb').checked = 'checked';
