@@ -83,6 +83,7 @@ body { position: absolute; right: 300px; left: 300px; top: 0; bottom: 0; }
 
 jsonRules = JSON.stringify(jsonRules, null, 2);
 
+// Append HTML to the original page to create the sidebar.
 let n = document.createElement('div');
 n.id = 'webscraping-container';
 n.innerHTML = `<i>Web scraper options:</i><textarea id="webscraping-config" placeholder="JSON goes here." style="display:none;">${jsonRules}</textarea>
