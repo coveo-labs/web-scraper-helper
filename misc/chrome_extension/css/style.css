@@ -1,0 +1,15 @@
+#json-config{
+	width: 100%;
+}
+
+#textarea-container{
+	padding-right: 7.5px;
+}
+
+#error{
+	color:red;
+}
+
+#log{
+	border: 1px solid silver;
+}

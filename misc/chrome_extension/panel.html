@@ -1,0 +1,34 @@
+<!doctype html>
+<!--
+ This page is shown when the extension button is clicked, because the
+ "browser_action" field in manifest.json contains the "default_popup" key with
+ value "popup.html".
+ -->
+<html>
+
+<head>
+  <title>Getting Started Extension's PANEL</title>
+  <script src="panel.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div id="status">Hello World</div>
+  <div id="textarea-container">
+    <textarea id="json-config" cols="50" rows="30"></textarea>
+  </div>
+
+  <br>
+
+  <button id="fetch">Run</button>
+  <br>
+  <p id="error"></p>
+
+  <br>
+
+  <table id="resultTable" border="1"></table>
+
+  <pre id="log"></pre>
+</body>
+
+</html>
