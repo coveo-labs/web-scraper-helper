@@ -16,14 +16,27 @@ var parseXPath = function (title, xpathString, getText) {
 	try {
 		let nodes = document.evaluate(xpathString, document);
 		let e, elements = [];
-		while (e = nodes.iterateNext()) {
-			if (getText) {
-				elements.push(e.nodeValue);
-			}
-			else {
-				elements.push(e);
+
+		if (nodes.resultType === XPathResult.UNORDERED_NODE_ITERATOR_TYPE || nodes.resultType === XPathResult.ORDERED_NODE_ITERATOR_TYPE) {
+			while (e = nodes.iterateNext()) {
+				if (getText) {
+					elements.push(e.nodeValue);
+				}
+				else {
+					elements.push(e);
+				}
 			}
 		}
+		else if (nodes.resultType === XPathResult.NUMBER_TYPE) {
+			elements.push(nodes.numberValue);
+		}
+		else if (nodes.resultType === XPathResult.STRING_TYPE) {
+			elements.push(nodes.stringValue);
+		}
+		else if (nodes.resultType === XPathResult.BOOLEAN_TYPE) {
+			elements.push(nodes.booleanValue);
+		}
+
 		return { type: title, value: elements };
 	}
 	catch (err) {
