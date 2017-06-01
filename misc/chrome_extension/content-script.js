@@ -85,10 +85,13 @@ chrome.runtime.onMessage.addListener(
 
 		//Show elements that were previously hidden from the elementsToHide global
 		if (elementsToHide.length > 0) {
+			console.log(elementsToHide);
 			elementsToHide.forEach(function (elementArray) {
-				elementArray['value'].forEach(function (element) {
-					element.style.opacity = 1;
-				}, this);
+				if (elementsToHide['type'] != "__error") {
+					elementArray['value'].forEach(function (element) {
+						element.style.opacity = 1;
+					}, this);
+				}
 			}, this);
 		}
 

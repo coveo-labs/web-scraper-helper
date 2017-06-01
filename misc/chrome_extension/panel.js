@@ -61,11 +61,19 @@
 		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, json: document.getElementById("json-config").value });
 	}
 
+	function pretty(){
+		let textArea = document.getElementById("json-config");
+		let uglyJson = JSON.parse(textArea.value);
+		let prettyJson = JSON.stringify(uglyJson, null, 2);
+		textArea.value = prettyJson;
+	}
+
 	//The init function
 	function init() {
 
 		//Adds the fetch function to the button
 		document.getElementById('fetch').onclick = fetch;
+		document.getElementById('pretty').onclick = pretty;
 
 		//Connects to the messeger
 		var backgroundPageConnection = chrome.runtime.connect({
@@ -90,13 +98,14 @@
 			//Parses through all the received messages
 			message['return'].forEach(function (element) {
 				try {
-
+					console.log(element);
 					//If the message received was an error
 					if (element['type'] == "__error") {
 						errorElement.innerHTML += element['value'] + "<br>";
 					}
 					//Else it adds it to the field table
 					else if (element['type'] != "__error") {
+						element['value'] = element['value'].join("<br>");
 						document.getElementById("resultTable").innerHTML += "<tr><td>" + element['type'] + "</td><td>" + element['value'] + "</td></tr>";
 					}
 				} catch (err) {

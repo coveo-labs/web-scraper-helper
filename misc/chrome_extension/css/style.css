@@ -13,3 +13,23 @@
 #log{
 	border: 1px solid silver;
 }
+
+body{
+	background-color: #F1F1E1;
+}
+
+#resultTable{
+	background-color: #FAFAFA;
+}
+
+#resultTable th{
+	color: #F58020;
+}
+
+#resultTable td{
+	color: #313A45;
+}
+
+#resultTable td:first-child{
+	color: #004990;
+}
