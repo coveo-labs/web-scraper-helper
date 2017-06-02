@@ -53,10 +53,10 @@
 		toAdd['path'] = query;
 
 		//Add to current json
-		if(metaType == "exclude"){
+		if (metaType == "exclude") {
 			currentJson[0]["exclude"].push(toAdd);
 		}
-		else if(metaType == "metadata"){
+		else if (metaType == "metadata") {
 			currentJson[0]['metadata'][field] = toAdd;
 		}
 
@@ -66,20 +66,24 @@
 	}
 
 	//Hides or shows the field option
-	function toggleField(){
+	function toggleField() {
 		let e = document.getElementById("queryToAddMeta");
 		let fieldElement = document.getElementById('fieldToAdd');
-		if(e.value == "metadata"){
+		if (e.value == "metadata") {
 			fieldElement.style.display = 'inline';
 		}
-		else{
+		else {
 			fieldElement.style.display = 'none';
 		}
 	}
 
 	//Resets the value table back to default
-	function resetValueTable(){
+	function resetValueTable() {
 		document.getElementById('resultTable').innerHTML = "<tr><th>Field</th><th>Value(s)</th></tr>";
+	}
+
+	function mouseAdd() {
+		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, mouse: "1" });
 	}
 
 	//The init function
@@ -90,6 +94,7 @@
 		document.getElementById('pretty').onclick = pretty;
 		document.getElementById('queryToAddButton').onclick = addToJson;
 		document.getElementById("queryToAddMeta").onchange = toggleField;
+		document.getElementById('mouseAdd').onclick = mouseAdd;
 
 		//Hides or shows the field by default
 		toggleField();
@@ -108,36 +113,45 @@
 		//The onMessage function
 		backgroundPageConnection.onMessage.addListener(function (message, sender, sendResponse) {
 
-			//Clear the past errors, logs and resets the field table
-			let errorElement = document.getElementById('error');
-			errorElement.innerHTML = "";
-			document.getElementById('log').innerText = "";
-			resetValueTable();			
+			if (message.return) {
 
-			//Turns the message into readable JSON
-			message['return'] = JSON.parse(message['return']);
+				//Clear the past errors, logs and resets the field table
+				let errorElement = document.getElementById('error');
+				errorElement.innerHTML = "";
+				document.getElementById('log').innerText = "";
+				resetValueTable();
 
-			//Parses through all the received messages
-			message['return'].forEach(function (element) {
-				try {
-					console.log(element);
-					//If the message received was an error
-					if (element['type'] == "__error") {
-						errorElement.innerHTML += element['value'] + "<br>";
-					}
-					//Else it adds it to the field table
-					else if (element['type'] != "__error") {
-						//Convert to list if greater than one
-						if(element['value'].length > 1){
-							element['value'] = "<ol><li>"+element['value'].join('</li><li>')+"</li></ol>";
+				//Turns the message into readable JSON
+				message['return'] = JSON.parse(message['return']);
+
+				//Parses through all the received messages
+				message['return'].forEach(function (element) {
+					try {
+						console.log(element);
+						//If the message received was an error
+						if (element['type'] == "__error") {
+							errorElement.innerHTML += element['value'] + "<br>";
 						}
-						document.getElementById("resultTable").innerHTML += "<tr><td>" + element['type'] + "</td><td>" + element['value'] + "</td></tr>";
+						//Else it adds it to the field table
+						else if (element['type'] != "__error") {
+							//Convert to list if greater than one
+							if (element['value'].length > 1) {
+								element['value'] = "<ol><li>" + element['value'].join('</li><li>') + "</li></ol>";
+							}
+							document.getElementById("resultTable").innerHTML += "<tr><td>" + element['type'] + "</td><td>" + element['value'] + "</td></tr>";
+						}
+					} catch (err) {
+						//If an error occurs, it goes in the log
+						log(err + "\n" + JSON.stringify(element, null, 2));
 					}
-				} catch (err) {
-					//If an error occurs, it goes in the log
-					log(err + "\n" + JSON.stringify(element, null, 2));
-				}
-			}, this);
+				}, this);
+			}
+
+			if(message.mouse){
+				document.getElementById('queryToAdd').value = message.mouse + ((document.getElementById("addText").checked) ? "/text()" : "");
+				document.getElementById('queryToAddType').selectedIndex = 0;
+			}
+
 		});
 
 		// Send a message to background page so that the background page can associate panel to the current host page
