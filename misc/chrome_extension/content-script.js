@@ -102,7 +102,7 @@ chrome.runtime.onMessage.addListener(
 		//Gets the textContent for CSS
 		for (let key in metadata) {
 			if (metadata[key]['type'] == "CSS") {
-				elements.push(parsetrueCss(key, metadata[key]['path'], true));
+				elements.push(parseCss(key, metadata[key]['path'], true));
 			}
 			else if (metadata[key]['type'] == "XPATH") {
 				elements.push(parseXPath(key, metadata[key]['path'], true));

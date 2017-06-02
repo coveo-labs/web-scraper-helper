@@ -22,7 +22,23 @@
   <br>
 
   <button id="fetch">Run</button>
+
   <br>
+
+  <select id="queryToAddMeta">
+    <option value="exclude">Exclude</option>
+    <option value="metadata">Metadata</option>
+  </select>
+  <input type="text" id="fieldToAdd" placeholder="Field">
+  <input type="text" id="queryToAdd" placeholder="Query">
+  <select id="queryToAddType">
+    <option value="XPATH">XPATH</option>
+    <option value="CSS">CSS</option>
+  </select>
+  <button id="queryToAddButton">Add</button>
+
+  <br>
+
   <p id="error"></p>
 
   <br>

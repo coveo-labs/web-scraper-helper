@@ -8,44 +8,8 @@
 			]
 		},
 		"exclude": [
-			{
-				"type": "CSS",
-				"path": "div.headerandfooter, div.product-bloc-recherche, div.product-espot-712, div.bloc-notice"
-			},
-			{
-				"type": "CSS",
-				"path": "div.product-page-right"
-			},
-			{
-				"type": "CSS",
-				"path": "div#header-usability"
-			}
 		],
 		"metadata": {
-			"format": {
-				"type": "XPATH",
-				"path": "//div[@id='details']/ul/li/div[@class='left']/span[contains(text(), 'Format')]/../../div[@class='right']/text()[normalize-space()]"
-			},
-			"pictureuri": {
-				"type": "XPATH",
-				"path": "//div[@class='product-description-image']//span[@class='image']/img/@src"
-			},
-			"producteur": {
-				"type": "XPATH",
-				"path": "//div[@id='details']/ul/li/div[@class='left']/span[contains(text(), 'Producteur')]/../../div[@class='right']/text()[normalize-space()]"
-			},
-			"appellation": {
-				"type": "XPATH",
-				"path": "//div[@id='details']/ul/li/div[@class='left']/span[contains(text(), 'Appellation')]/../../div[@class='right']/text()[normalize-space()]"
-			},
-			"degrealcool": {
-				"type": "XPATH",
-				"path": "//div[@id='details']/ul/li/div[@class='left']/span[contains(text(), 'alcool')]/../../div[@class='right']/text()[normalize-space()]"
-			},
-			"pays": {
-				"type": "XPATH",
-				"path": "//div[@id='details']/ul/li/div[@class='left']/span[contains(text(), 'Pays')]/../../div[@class='right']/text()[normalize-space()]"
-			}
 		}
 	}]
 
@@ -61,11 +25,61 @@
 		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, json: document.getElementById("json-config").value });
 	}
 
-	function pretty(){
+	//Formats the JSOn
+	function pretty() {
 		let textArea = document.getElementById("json-config");
 		let uglyJson = JSON.parse(textArea.value);
 		let prettyJson = JSON.stringify(uglyJson, null, 2);
 		textArea.value = prettyJson;
+	}
+
+	//Adds the query to the JSON
+	function addToJson() {
+		//Get the vars from the page
+		let e = document.getElementById("queryToAddMeta");
+		let metaType = e.options[e.selectedIndex].value;
+		e = document.getElementById("queryToAddType");
+		let queryType = e.options[e.selectedIndex].value;
+		let query = document.getElementById("queryToAdd").value;
+		let field = document.getElementById("fieldToAdd").value;
+
+		//Get the current json
+		let textArea = document.getElementById("json-config");
+		let currentJson = JSON.parse(textArea.value);
+
+		//json to add
+		let toAdd = {};
+		toAdd['type'] = queryType;
+		toAdd['path'] = query;
+
+		//Add to current json
+		if(metaType == "exclude"){
+			currentJson[0]["exclude"].push(toAdd);
+		}
+		else if(metaType == "metadata"){
+			currentJson[0]['metadata'][field] = toAdd;
+		}
+
+		//Add back to page
+		currentJson = JSON.stringify(currentJson, null, 2);
+		textArea.value = currentJson;
+	}
+
+	//Hides or shows the field option
+	function toggleField(){
+		let e = document.getElementById("queryToAddMeta");
+		let fieldElement = document.getElementById('fieldToAdd');
+		if(e.value == "metadata"){
+			fieldElement.style.display = 'inline';
+		}
+		else{
+			fieldElement.style.display = 'none';
+		}
+	}
+
+	//Resets the value table back to default
+	function resetValueTable(){
+		document.getElementById('resultTable').innerHTML = "<tr><th>Field</th><th>Value(s)</th></tr>";
 	}
 
 	//The init function
@@ -74,6 +88,14 @@
 		//Adds the fetch function to the button
 		document.getElementById('fetch').onclick = fetch;
 		document.getElementById('pretty').onclick = pretty;
+		document.getElementById('queryToAddButton').onclick = addToJson;
+		document.getElementById("queryToAddMeta").onchange = toggleField;
+
+		//Hides or shows the field by default
+		toggleField();
+
+		//Creates the value table
+		resetValueTable();
 
 		//Connects to the messeger
 		var backgroundPageConnection = chrome.runtime.connect({
@@ -90,7 +112,7 @@
 			let errorElement = document.getElementById('error');
 			errorElement.innerHTML = "";
 			document.getElementById('log').innerText = "";
-			document.getElementById('resultTable').innerHTML = "<tr><th>Field</th><th>Value(s)</th></tr>";
+			resetValueTable();			
 
 			//Turns the message into readable JSON
 			message['return'] = JSON.parse(message['return']);
