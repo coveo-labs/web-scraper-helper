@@ -40,7 +40,7 @@ var parseXPath = function (title, xpathString, getText) {
 		return { type: title, value: elements };
 	}
 	catch (err) {
-		return { type: "__error", value: "Failed to parse XPath \'" + xpathString + "\'<br>Error: " + err };
+		return { type: "__error", value: "Failed to parse XPath \'" + xpathString + "\'<br>" + err };
 	}
 }
 
@@ -67,7 +67,7 @@ var parseCss = function (title, cssSelector, getText) {
 		return { type: title, value: elements };
 	}
 	catch (err) {
-		return { type: "__error", value: "Failed to parse CSS \'" + cssSelector + "\'\nError: " + err };
+		return { type: "__error", value: "Failed to parse CSS \'" + cssSelector + "\'<br>" + err };
 	}
 }
 

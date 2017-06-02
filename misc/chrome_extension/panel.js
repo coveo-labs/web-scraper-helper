@@ -127,6 +127,7 @@
 					}
 					//Else it adds it to the field table
 					else if (element['type'] != "__error") {
+						//Convert to list if greater than one
 						if(element['value'].length > 1){
 							element['value'] = "<ol><li>"+element['value'].join('</li><li>')+"</li></ol>";
 						}
