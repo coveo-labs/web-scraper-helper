@@ -127,7 +127,9 @@
 					}
 					//Else it adds it to the field table
 					else if (element['type'] != "__error") {
-						element['value'] = element['value'].join("<br>");
+						if(element['value'].length > 1){
+							element['value'] = "<ol><li>"+element['value'].join('</li><li>')+"</li></ol>";
+						}
 						document.getElementById("resultTable").innerHTML += "<tr><td>" + element['type'] + "</td><td>" + element['value'] + "</td></tr>";
 					}
 				} catch (err) {

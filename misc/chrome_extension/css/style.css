@@ -33,3 +33,18 @@ body{
 #resultTable td:first-child{
 	color: #004990;
 }
+
+#resultTable ol{
+	padding-right: 0;
+	padding-left: 1em;
+	margin: 0;
+}
+
+#quickAddBorder{
+	border:1px solid black;
+	padding: 5px;
+}
+
+#quickAddContainer{
+	margin-top: 10px;
+}
