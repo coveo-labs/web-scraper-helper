@@ -40,7 +40,7 @@ var parseXPath = function (title, xpathString, getText) {
 		return { type: title, value: elements };
 	}
 	catch (err) {
-		return { type: "__error", value: "Failed to parse XPath \'" + xpathString + "\'\nError: " + err };
+		return { type: "__error", value: "Failed to parse XPath \'" + xpathString + "\'<br>Error: " + err };
 	}
 }
 
@@ -85,9 +85,8 @@ chrome.runtime.onMessage.addListener(
 
 		//Show elements that were previously hidden from the elementsToHide global
 		if (elementsToHide.length > 0) {
-			console.log(elementsToHide);
 			elementsToHide.forEach(function (elementArray) {
-				if (elementsToHide['type'] != "__error") {
+				if (elementArray['type'] != "__error") {
 					elementArray['value'].forEach(function (element) {
 						element.style.opacity = 1;
 					}, this);
@@ -121,10 +120,16 @@ chrome.runtime.onMessage.addListener(
 		}
 
 		//Reduces opacity of elements in elementsToHide
+		//If an error is found, adds it in elements to send back
 		elementsToHide.forEach(function (elementArray) {
-			elementArray['value'].forEach(function (element) {
-				element.style.opacity = 0.1;
-			}, this);
+			if (elementArray['type'] != "__error") {
+				elementArray['value'].forEach(function (element) {
+					element.style.opacity = 0.1;
+				}, this);
+			}
+			else {
+				elements.push(elementArray);
+			}
 		}, this);
 
 		//Send back the values found
