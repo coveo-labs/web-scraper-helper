@@ -140,7 +140,7 @@
 
 			if (value == "__create") {
 				let newJsonName = window.prompt("New json name");
-				if (newJsonName && !result.includes(newJsonName) && (newJsonName != "" || newJsonName != "__json" || newJsonName != "__create")) {
+				if (newJsonName && !result.includes(newJsonName) && (newJsonName != "" && newJsonName != "__json" && newJsonName != "__create" && newJsonName != "null")) {
 					result.push(newJsonName);
 					let resultJson = {};
 					resultJson['__jsons'] = result;
@@ -156,6 +156,7 @@
 				}
 				else {
 					errorElement.innerHTML += "Name already exists<br>";
+					e.selectedIndex = 0;
 				}
 			}
 			else {
