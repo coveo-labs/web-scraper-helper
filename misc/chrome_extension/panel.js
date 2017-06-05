@@ -20,6 +20,10 @@
 		document.getElementById('log').innerText += (s + '\n' + new Date() + '\n\n');
 	}
 
+	function logBackground(object) {
+		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, log: object });
+	}
+
 	//Sends the current JSON in the textarea to the parser
 	function fetch() {
 		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, json: document.getElementById("json-config").value });
@@ -82,8 +86,139 @@
 		document.getElementById('resultTable').innerHTML = "<tr><th>Field</th><th>Value(s)</th></tr>";
 	}
 
+	//Turn on the mouseover on the webpage
+	//When the user will click on something, it will return a xPath
 	function mouseAdd() {
 		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, mouse: "1" });
+	}
+
+	//Inits the storage menu
+	function initStorageSelect(callback) {
+		let select = document.getElementById("storage");
+		select.innerHTML = "<option selected disabled>Select a file to work on</option><option disabled>------------------------------</option>";
+		storageValues(function (results) {
+			logBackground(results);
+			results.forEach(function (element) {
+
+				select.innerHTML += "<option value='" + element + "'>" + element + "</option>";
+			}, this);
+			select.innerHTML += "<option value='__create'>Create new file...</option>";
+			if (callback) {
+				callback();
+			}
+		});
+	}
+
+	function storageValues(callback) {
+		chrome.storage.local.get("__jsons", function (result) {
+			if (!result.__jsons) {
+				result.__jsons = [];
+			}
+
+			callback(result.__jsons);
+
+		});
+
+		return [];
+	}
+
+	function storageValueExists(value, callback) {
+		if (value) {
+			storageValues(function (results) {
+				return results.includes(value);
+			});
+		}
+	}
+
+	function updateStorage() {
+		let e = document.getElementById('storage');
+		let errorElement = document.getElementById('storageError');
+		let value = e.options[e.selectedIndex].value;
+		errorElement.innerHTML = "";
+
+		storageValues(function (result) {
+
+			if (value == "__create") {
+				let newJsonName = window.prompt("New json name");
+				if (!result.includes(newJsonName) && (newJsonName != "" || newJsonName != "__json" || newJsonName != "__create")) {
+					result.push(newJsonName);
+					let resultJson = {};
+					resultJson['__jsons'] = result;
+					chrome.storage.local.set(resultJson, function () {
+						let newJson = {};
+						newJson[newJsonName] = json;
+						chrome.storage.local.set(newJson);
+						initStorageSelect(function () {
+							e.selectedIndex = e.options.length - 2;
+							storageLoad();
+						});
+					});
+				}
+				else {
+					errorElement.innerHTML += "Name already exists<br>";
+				}
+			}
+			else {
+				storageLoad();
+			}
+		});
+	}
+
+	function storageSelectedValue() {
+		let e = document.getElementById('storage');
+		return e.options[e.selectedIndex].value;
+	}
+
+	function storageLoad() {
+		let currentValue = storageSelectedValue();
+		let textArea = document.getElementById("json-config");
+		//If current value is present
+		if (storageValueExists(currentValue)) {
+			chrome.storage.local.get(currentValue, function (result) {
+				textArea.value = result[currentValue];
+			});
+		}
+		else{
+			textArea.value = "Create/Load a file...";
+		}
+	}
+
+	function storageSave() {
+		let currentValue = storageSelectedValue();
+		//If current value is present
+		if (storageValueExists(currentValue)) {
+			let textArea = document.getElementById("json-config");
+			let jsonToAdd = {};
+			jsonToAdd[currentValue] = textArea.value;
+			chrome.storage.local.set(jsonToAdd);
+		}
+	}
+
+	function storageDelete() {
+		let currentValue = storageSelectedValue();
+		//If current value is present
+		if (storageValueExists(currentValue)) {
+			storageValues(function (jsons) {
+				var index = jsons.indexOf(currentValue);
+				if (index > -1) {
+					jsons.splice(index, 1);
+				}
+				jsonToAdd = {}
+				jsonToAdd["__jsons"] = jsons;
+				chrome.storage.local.set(jsonToAdd, function () {
+					initStorageSelect();
+				});
+				chrome.storage.local.remove(currentValue, function(){
+					storageLoad();
+				});
+			});
+		}
+	}
+
+	function storageReset() {
+		chrome.storage.local.clear(function () {
+			initStorageSelect();
+		});
 	}
 
 	//The init function
@@ -94,7 +229,13 @@
 		document.getElementById('pretty').onclick = pretty;
 		document.getElementById('queryToAddButton').onclick = addToJson;
 		document.getElementById("queryToAddMeta").onchange = toggleField;
-		document.getElementById('mouseAdd').onclick = mouseAdd;
+		//document.getElementById('mouseAdd').onclick = mouseAdd;
+		document.getElementById('storage').onchange = updateStorage;
+		//document.getElementById('storage').onclick = storageSave;
+		document.getElementById('storageSave').onclick = storageSave;
+		document.getElementById('storageDelete').onclick = storageDelete;
+		document.getElementById('storageReset').onclick = storageReset;
+		initStorageSelect();
 
 		//Hides or shows the field by default
 		toggleField();
@@ -108,7 +249,7 @@
 		});
 
 		//Sets the textarea to the default json
-		document.getElementById('json-config').value = json;
+		document.getElementById('json-config').value = "Create/Load a file...";
 
 		//The onMessage function
 		backgroundPageConnection.onMessage.addListener(function (message, sender, sendResponse) {
@@ -147,7 +288,7 @@
 				}, this);
 			}
 
-			if(message.mouse){
+			if (message.mouse) {
 				document.getElementById('queryToAdd').value = message.mouse + ((document.getElementById("addText").checked) ? "/text()" : "");
 				document.getElementById('queryToAddType').selectedIndex = 0;
 			}
