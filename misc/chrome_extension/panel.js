@@ -208,20 +208,22 @@
 		//If current value is present
 		storageValueExists(currentValue, function (exists) {
 			if (exists) {
-				storageValues(function (jsons) {
-					var index = jsons.indexOf(currentValue);
-					if (index > -1) {
-						jsons.splice(index, 1);
-					}
-					jsonToAdd = {}
-					jsonToAdd["__jsons"] = jsons;
-					chrome.storage.local.set(jsonToAdd, function () {
-						initStorageSelect();
+				if (confirm('Are you sure you want to delete: '+currentValue)) {
+					storageValues(function (jsons) {
+						var index = jsons.indexOf(currentValue);
+						if (index > -1) {
+							jsons.splice(index, 1);
+						}
+						jsonToAdd = {}
+						jsonToAdd["__jsons"] = jsons;
+						chrome.storage.local.set(jsonToAdd, function () {
+							initStorageSelect();
+						});
+						chrome.storage.local.remove(currentValue, function () {
+							storageLoad();
+						});
 					});
-					chrome.storage.local.remove(currentValue, function () {
-						storageLoad();
-					});
-				});
+				}
 			}
 		});
 	}
