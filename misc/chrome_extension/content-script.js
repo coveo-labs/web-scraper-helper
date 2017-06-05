@@ -281,6 +281,8 @@ function getXPath(node) {
 
 }
 
+function clickHandler(e) {
+
 	if (!ableToClick) {
 		e.stopPropagation();
 		e.preventDefault();
