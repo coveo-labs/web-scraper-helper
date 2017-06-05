@@ -4,7 +4,8 @@
 	var connections = {}, theport = null;
 	chrome.runtime.onConnect.addListener(function (port) {
 		console.log('add listener');
-		var extensionListener = function (message, sender, sendResponse) {
+		// Listen to messages sent from the DevTools page
+		port.onMessage.addListener(function (message, sender, sendResponse) {
 			console.log('message: ', message);
 			// The original connection event doesn't include the tab ID of the
 			// DevTools page, so we need to send it explicitly.
@@ -12,10 +13,7 @@
 				theport = port;
 				return;
 			}
-		};
-
-		// Listen to messages sent from the DevTools page
-		port.onMessage.addListener(extensionListener);
+		});
 	});
 
 

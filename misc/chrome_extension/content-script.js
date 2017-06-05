@@ -140,4 +140,3 @@ chrome.runtime.onMessage.addListener(
 		}, 1);
 
 	});
-
