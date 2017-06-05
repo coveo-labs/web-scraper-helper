@@ -1,5 +1,7 @@
 (function () {
 
+	var successTimeout;
+
 	//TEST JSON VALUE
 	var json = [{
 		"for": {
@@ -196,6 +198,7 @@
 				let jsonToAdd = {};
 				jsonToAdd[currentValue] = textArea.value;
 				chrome.storage.local.set(jsonToAdd);
+				displaySuccess("Save successful");
 			}
 		});
 	}
@@ -229,6 +232,19 @@
 		});
 	}
 
+	function displaySuccess(value) {
+		let e = document.getElementById("storageSuccess");
+		e.innerHTML = value;
+		removeSuccess();
+	}
+
+	function removeSuccess() {
+		setTimeout(function () {
+			let e = document.getElementById("storageSuccess");
+			e.innerHTML = "";
+		}, 2000)
+	}
+
 	//The init function
 	function init() {
 
@@ -239,7 +255,7 @@
 		document.getElementById("queryToAddMeta").onchange = toggleField;
 		//document.getElementById('mouseAdd').onclick = mouseAdd;
 		document.getElementById('storage').onchange = updateStorage;
-		document.getElementById('storage').onclick = storageSave;
+		document.getElementById('storage').onfocus = storageSave;
 		document.getElementById('storageSave').onclick = storageSave;
 		document.getElementById('storageDelete').onclick = storageDelete;
 		document.getElementById('storageReset').onclick = storageReset;
