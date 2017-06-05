@@ -125,7 +125,7 @@
 	function storageValueExists(value, callback) {
 		if (value) {
 			storageValues(function (results) {
-				return results.includes(value);
+				callback(results.includes(value));
 			});
 		}
 	}
@@ -173,46 +173,53 @@
 		let currentValue = storageSelectedValue();
 		let textArea = document.getElementById("json-config");
 		//If current value is present
-		if (storageValueExists(currentValue)) {
-			chrome.storage.local.get(currentValue, function (result) {
-				textArea.value = result[currentValue];
-			});
-		}
-		else{
-			textArea.value = "Create/Load a file...";
-		}
+		storageValueExists(currentValue, function (exists) {
+			if (exists) {
+				chrome.storage.local.get(currentValue, function (result) {
+					textArea.value = result[currentValue];
+				});
+			}
+			else {
+				textArea.value = "Create/Load a file...";
+			}
+		});
 	}
 
 	function storageSave() {
 		let currentValue = storageSelectedValue();
 		//If current value is present
-		if (storageValueExists(currentValue)) {
-			let textArea = document.getElementById("json-config");
-			let jsonToAdd = {};
-			jsonToAdd[currentValue] = textArea.value;
-			chrome.storage.local.set(jsonToAdd);
-		}
+		storageValueExists(currentValue, function (exists) {
+			if (exists) {
+
+				let textArea = document.getElementById("json-config");
+				let jsonToAdd = {};
+				jsonToAdd[currentValue] = textArea.value;
+				chrome.storage.local.set(jsonToAdd);
+			}
+		});
 	}
 
 	function storageDelete() {
 		let currentValue = storageSelectedValue();
 		//If current value is present
-		if (storageValueExists(currentValue)) {
-			storageValues(function (jsons) {
-				var index = jsons.indexOf(currentValue);
-				if (index > -1) {
-					jsons.splice(index, 1);
-				}
-				jsonToAdd = {}
-				jsonToAdd["__jsons"] = jsons;
-				chrome.storage.local.set(jsonToAdd, function () {
-					initStorageSelect();
+		storageValueExists(currentValue, function (exists) {
+			if (exists) {
+				storageValues(function (jsons) {
+					var index = jsons.indexOf(currentValue);
+					if (index > -1) {
+						jsons.splice(index, 1);
+					}
+					jsonToAdd = {}
+					jsonToAdd["__jsons"] = jsons;
+					chrome.storage.local.set(jsonToAdd, function () {
+						initStorageSelect();
+					});
+					chrome.storage.local.remove(currentValue, function () {
+						storageLoad();
+					});
 				});
-				chrome.storage.local.remove(currentValue, function(){
-					storageLoad();
-				});
-			});
-		}
+			}
+		});
 	}
 
 	function storageReset() {
