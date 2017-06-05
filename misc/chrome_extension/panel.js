@@ -140,7 +140,7 @@
 
 			if (value == "__create") {
 				let newJsonName = window.prompt("New json name");
-				if (!result.includes(newJsonName) && (newJsonName != "" || newJsonName != "__json" || newJsonName != "__create")) {
+				if (newJsonName && !result.includes(newJsonName) && (newJsonName != "" || newJsonName != "__json" || newJsonName != "__create")) {
 					result.push(newJsonName);
 					let resultJson = {};
 					resultJson['__jsons'] = result;
@@ -238,7 +238,7 @@
 		document.getElementById("queryToAddMeta").onchange = toggleField;
 		//document.getElementById('mouseAdd').onclick = mouseAdd;
 		document.getElementById('storage').onchange = updateStorage;
-		//document.getElementById('storage').onclick = storageSave;
+		document.getElementById('storage').onclick = storageSave;
 		document.getElementById('storageSave').onclick = storageSave;
 		document.getElementById('storageDelete').onclick = storageDelete;
 		document.getElementById('storageReset').onclick = storageReset;
