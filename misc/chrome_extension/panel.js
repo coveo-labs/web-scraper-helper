@@ -96,18 +96,24 @@
 
 	//Inits the storage menu
 	function initStorageSelect(callback) {
-		let select = document.getElementById("storage");
-		select.innerHTML = "<option selected disabled>Select a file to work on</option><option disabled>------------------------------</option>";
-		storageValues(function (results) {
-			results.forEach(function (element) {
+		try {
+			let select = document.getElementById("storage");
+			select.innerHTML = "<option selected disabled>Select a file to work on</option><option disabled>------------------------------</option>";
+			storageValues(function (results) {
+				results.forEach(function (element) {
 
-				select.innerHTML += "<option value='" + element + "'>" + element + "</option>";
-			}, this);
-			select.innerHTML += "<option value='__create'>Create new file...</option>";
-			if (callback) {
-				callback();
-			}
-		});
+					select.innerHTML += "<option value='" + element + "'>" + element + "</option>";
+				}, this);
+				select.innerHTML += "<option value='__create'>Create new file...</option>";
+				if (callback) {
+					callback();
+				}
+			});
+
+		}
+		catch (err) {
+			alert(err);
+		}
 	}
 
 	function storageValues(callback) {
@@ -156,7 +162,7 @@
 					});
 				}
 				else {
-					errorElement.innerHTML += "Naming errorbr>";
+					errorElement.innerHTML += "Naming error<br>";
 					e.selectedIndex = 0;
 				}
 			}
@@ -179,10 +185,12 @@
 			if (exists) {
 				chrome.storage.local.get(currentValue, function (result) {
 					textArea.value = result[currentValue];
+					buildVisualFromText();
 				});
 			}
 			else {
 				textArea.value = "Create/Load a file...";
+				buildVisualFromText();
 			}
 		});
 	}
@@ -250,6 +258,14 @@
 		try {
 
 			let toShow = this.getAttribute("data-show");
+
+			if (document.getElementById(toShow).style.display != "block") {
+				//Tabs switching from text to visual editor
+				if (toShow == "editor") {
+					buildVisualFromText();
+				}
+			}
+
 			let tabs = [].slice.call(document.getElementsByClassName("tab"));
 			tabs.forEach(function (element) {
 				element.style.display = "none";
@@ -261,7 +277,7 @@
 		}
 	}
 
-	function addExclude(query) {
+	function addExclude(query, type, textToAdd) {
 		try {
 
 
@@ -276,11 +292,32 @@
 				queryToAdd = query;
 			}
 
+			let typeToAdd = 0;
+
+			if (typeof type == "string") {
+				if (type == "CSS") {
+					typeToAdd = 1;
+				}
+			}
+
 			queryElement.innerHTML = '<span><input type="text" placeholder="Query" value="' + queryToAdd + '"></span>';
 			queryElement.classList.add("exclude-query");
 			selectElement.innerHTML = '<select> <option value="XPATH">XPATH</option> <option value="CSS">CSS</option> </select>';
+			selectElement.childNodes[0].selectedIndex = typeToAdd;
 			deleteElement.innerHTML = '<button>-</button>';
-			deleteElement.onclick = function() { removeExclude(row.rowIndex); };
+			deleteElement.onclick = function () { removeExclude(row.rowIndex); };
+
+			if (textToAdd == undefined) {
+				let textAreaElement = document.getElementById('json-config');
+				let currentValue = textAreaElement.value;
+				let json = JSON.parse(currentValue);
+				let jsonToAdd = {}
+				jsonToAdd['type'] = (typeToAdd == 1) ? "CSS" : "XPATH";
+				jsonToAdd['path'] = (typeof query === "string") ? query : "";
+				json[0]['exclude'].push(jsonToAdd);
+				textAreaElement.value = JSON.stringify(json, null, 2);
+			}
+
 		}
 		catch (err) {
 			alert(err);
@@ -289,18 +326,23 @@
 
 	function removeExclude(row) {
 		let tableElement = document.getElementById("exclude-table");
+		let textAreaElement = document.getElementById('json-config');
 
-		if(typeof row === 'string'){
+		if (typeof row === 'string') {
 			row = parseInt(row);
 		}
 
 		if (typeof row === 'number') {
 			tableElement.deleteRow(row);
+			let currentValue = textAreaElement.value;
+			let json = JSON.parse(currentValue);
+			json[0]['exclude'].splice(row, 1);
+			textAreaElement.value = JSON.stringify(json, null, 2);
 		}
 
 	}
 
-	function addMetadata(field, query) {
+	function addMetadata(field, query, type, addToText) {
 		let tableElement = document.getElementById("metadata-table");
 		let row = tableElement.insertRow();
 		let fieldElement = row.insertCell(0);
@@ -318,111 +360,168 @@
 			fieldToAdd = field;
 		}
 
+		let typeToAdd = 0;
+
+		if (typeof type == "string") {
+			if (type == "CSS") {
+				typeToAdd = 1;
+			}
+		}
+
 		fieldElement.innerHTML = '<span><input type="text" placeholder="Field" value="' + fieldToAdd + '"></span>';
 		fieldElement.classList.add("metadata-query");
 		queryElement.innerHTML = '<span><input type="text" placeholder="Query" value="' + queryToAdd + '"></span>';
 		queryElement.classList.add("metadata-query");
 		selectElement.innerHTML = '<select> <option value="XPATH">XPATH</option> <option value="CSS">CSS</option> </select>';
+		selectElement.childNodes[0].selectedIndex = typeToAdd;
 		deleteElement.innerHTML = '<button>-</button>';
-		deleteElement.onclick = function() { removeMetadata(row.rowIndex); };
+		deleteElement.onclick = function () { removeMetadata(row.rowIndex, fieldToAdd); };
+
+		if (addToText == undefined) {
+			let textAreaElement = document.getElementById('json-config');
+			let currentValue = textAreaElement.value;
+			let json = JSON.parse(currentValue);
+			json[0]['metadata'][fieldToAdd] = {
+				type: (typeToAdd == 1) ? "CSS" : "XPATH",
+				path: (typeof query === "string") ? query : ""
+			};
+			textAreaElement.value = JSON.stringify(json, null, 2);
+		}
 	}
 
-	function removeMetadata(row) {
+	function removeMetadata(row, field) {
 		let tableElement = document.getElementById("metadata-table");
+		let textAreaElement = document.getElementById('json-config');
 
-		if(typeof row === 'string'){
+		if (typeof row === 'string') {
 			row = parseInt(row);
 		}
 
 		if (typeof row === 'number') {
 			tableElement.deleteRow(row);
+			let currentValue = textAreaElement.value;
+			let json = JSON.parse(currentValue);
+			delete json[0]['metadata'][field];
+			textAreaElement.value = JSON.stringify(json, null, 2);
 		}
 
 	}
 
+	function buildVisualFromText() {
+		let textAreaElement = document.getElementById('json-config');
+		let currentValue = textAreaElement.value;
+		let editorElement = document.getElementById('editor');
+
+		if (currentValue == "Create/Load a file...") {
+			editorElement.innerHTML = "Create/Load a file...";
+		}
+		else {
+			editorElement.innerHTML = '<p>Exclude</p> <table id="exclude-table"> </table> <button id="add-exclude">+</button> <p>Metadata</p> <table id="metadata-table"> </table> <button id="add-metadata">+</button>';
+			document.getElementById('add-exclude').onclick = addExclude;
+			document.getElementById('add-metadata').onclick = addMetadata;
+
+			let json = JSON.parse(currentValue);
+
+			let metadata = json[0]['metadata'];
+			let exclude = json[0]['exclude'];
+
+			for (let key in metadata) {
+				addMetadata(key, metadata[key]['path'], metadata[key]['type'], false);
+			}
+
+			exclude.forEach(function (element) {
+				addExclude(element['path'], element['type'], false);
+			}, this);
+		}
+	}
+
+
 	//The init function
 	function init() {
+		try {
 
-		//Adds the fetch function to the button
-		document.getElementById('fetch').onclick = fetch;
-		document.getElementById('pretty').onclick = pretty;
-		document.getElementById('queryToAddButton').onclick = addToJson;
-		document.getElementById("queryToAddMeta").onchange = toggleField;
-		//document.getElementById('mouseAdd').onclick = mouseAdd;
-		document.getElementById('storage').onchange = updateStorage;
-		document.getElementById('storage').onfocus = storageSave;
-		document.getElementById('storageSave').onclick = storageSave;
-		document.getElementById('storageDelete').onclick = storageDelete;
-		document.getElementById('storageReset').onclick = storageReset;
-		document.getElementById('editor-button').onclick = changeTab;
-		document.getElementById('text-editor-button').onclick = changeTab;
-		document.getElementById('add-exclude').onclick = addExclude;
-		document.getElementById('add-metadata').onclick = addMetadata;
-		initStorageSelect();
+			//Adds the fetch function to the button
+			document.getElementById('fetch').onclick = fetch;
+			document.getElementById('pretty').onclick = pretty;
+			document.getElementById('queryToAddButton').onclick = addToJson;
+			document.getElementById("queryToAddMeta").onchange = toggleField;
+			//document.getElementById('mouseAdd').onclick = mouseAdd;
+			document.getElementById('storage').onchange = updateStorage;
+			document.getElementById('storage').onfocus = storageSave;
+			document.getElementById('storageSave').onclick = storageSave;
+			document.getElementById('storageDelete').onclick = storageDelete;
+			document.getElementById('storageReset').onclick = storageReset;
+			document.getElementById('editor-button').onclick = changeTab;
+			document.getElementById('text-editor-button').onclick = changeTab;
+			initStorageSelect();
 
-		//Hides or shows the field by default
-		toggleField();
+			//Hides or shows the field by default
+			toggleField();
 
-		//Creates the value table
-		resetValueTable();
+			//Creates the value table
+			resetValueTable();
 
-		//Connects to the messeger
-		var backgroundPageConnection = chrome.runtime.connect({
-			name: 'panel'
-		});
+			//Connects to the messeger
+			var backgroundPageConnection = chrome.runtime.connect({
+				name: 'panel'
+			});
 
-		//Sets the textarea to the default json
-		document.getElementById('json-config').value = "Create/Load a file...";
+			//Sets the textarea to the default json
+			document.getElementById('json-config').value = "Create/Load a file...";
+			buildVisualFromText();
 
-		//The onMessage function
-		backgroundPageConnection.onMessage.addListener(function (message, sender, sendResponse) {
+			//The onMessage function
+			backgroundPageConnection.onMessage.addListener(function (message, sender, sendResponse) {
 
-			if (message.return) {
+				if (message.return) {
 
-				//Clear the past errors, logs and resets the field table
-				let errorElement = document.getElementById('error');
-				errorElement.innerHTML = "";
-				document.getElementById('log').innerText = "";
-				resetValueTable();
+					//Clear the past errors, logs and resets the field table
+					let errorElement = document.getElementById('error');
+					errorElement.innerHTML = "";
+					document.getElementById('log').innerText = "";
+					resetValueTable();
 
-				//Turns the message into readable JSON
-				message['return'] = JSON.parse(message['return']);
+					//Turns the message into readable JSON
+					message['return'] = JSON.parse(message['return']);
 
-				//Parses through all the received messages
-				message['return'].forEach(function (element) {
-					try {
-						console.log(element);
-						//If the message received was an error
-						if (element['type'] == "__error") {
-							errorElement.innerHTML += element['value'] + "<br>";
-						}
-						//Else it adds it to the field table
-						else if (element['type'] != "__error") {
-							//Convert to list if greater than one
-							if (element['value'].length > 1) {
-								element['value'] = "<ol><li>" + element['value'].join('</li><li>') + "</li></ol>";
+					//Parses through all the received messages
+					message['return'].forEach(function (element) {
+						try {
+							console.log(element);
+							//If the message received was an error
+							if (element['type'] == "__error") {
+								errorElement.innerHTML += element['value'] + "<br>";
 							}
-							document.getElementById("resultTable").innerHTML += "<tr><td>" + element['type'] + "</td><td>" + element['value'] + "</td></tr>";
+							//Else it adds it to the field table
+							else if (element['type'] != "__error") {
+								//Convert to list if greater than one
+								if (element['value'].length > 1) {
+									element['value'] = "<ol><li>" + element['value'].join('</li><li>') + "</li></ol>";
+								}
+								document.getElementById("resultTable").innerHTML += "<tr><td>" + element['type'] + "</td><td>" + element['value'] + "</td></tr>";
+							}
+						} catch (err) {
+							//If an error occurs, it goes in the log
+							log(err + "\n" + JSON.stringify(element, null, 2));
 						}
-					} catch (err) {
-						//If an error occurs, it goes in the log
-						log(err + "\n" + JSON.stringify(element, null, 2));
-					}
-				}, this);
-			}
+					}, this);
+				}
 
-			if (message.mouse) {
-				document.getElementById('queryToAdd').value = message.mouse + ((document.getElementById("addText").checked) ? "/text()" : "");
-				document.getElementById('queryToAddType').selectedIndex = 0;
-			}
+				if (message.mouse) {
+					document.getElementById('queryToAdd').value = message.mouse + ((document.getElementById("addText").checked) ? "/text()" : "");
+					document.getElementById('queryToAddType').selectedIndex = 0;
+				}
 
-		});
+			});
 
-		// Send a message to background page so that the background page can associate panel to the current host page
-		backgroundPageConnection.postMessage({
-			name: 'panel-init',
-			tabId: chrome.devtools.inspectedWindow.tabId
-		});
+			// Send a message to background page so that the background page can associate panel to the current host page
+			backgroundPageConnection.postMessage({
+				name: 'panel-init',
+				tabId: chrome.devtools.inspectedWindow.tabId
+			});
+		} catch (err) {
+			alert(err);
+		}
 	}
 
 	//Run the init function
