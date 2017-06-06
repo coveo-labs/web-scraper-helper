@@ -25,8 +25,18 @@
 		<p id="storageError"></p>
 	</div>
 
-	<div id="textarea-container">
-		<textarea id="json-config" cols="50" rows="30"></textarea>
+	<p id="editor-text">Editor</p>
+	<div id="editor-container">
+		<div id="tab-container">
+			<button data-show="editor" id="editor-button">Visual</button>
+			<button data-show="text-editor" id="text-editor-button">Text</button>
+		</div>
+		<div id="editor" class="tab">
+			<h1>Hello</h1>
+		</div>
+		<div id="text-editor" class="tab" style="display:none">
+			<textarea id="json-config"></textarea>
+		</div>
 	</div>
 	<button id="pretty">Make JSON pretty</button>
 
@@ -37,7 +47,7 @@
 	<br>
 
 	<div id="quickAddContainer">
-		<span id="quickAddText">Quick add</span>
+		<span>Quick add</span>
 		<div id="quickAddBorder">
 			<select id="queryToAddMeta">
     		<option value="exclude">Exclude</option>

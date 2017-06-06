@@ -31,7 +31,7 @@
 		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, json: document.getElementById("json-config").value });
 	}
 
-	//Formats the JSOn
+	//Formats the JSON
 	function pretty() {
 		let textArea = document.getElementById("json-config");
 		let uglyJson = JSON.parse(textArea.value);
@@ -99,7 +99,6 @@
 		let select = document.getElementById("storage");
 		select.innerHTML = "<option selected disabled>Select a file to work on</option><option disabled>------------------------------</option>";
 		storageValues(function (results) {
-			logBackground(results);
 			results.forEach(function (element) {
 
 				select.innerHTML += "<option value='" + element + "'>" + element + "</option>";
@@ -157,7 +156,7 @@
 					});
 				}
 				else {
-					errorElement.innerHTML += "Name already exists<br>";
+					errorElement.innerHTML += "Naming errorbr>";
 					e.selectedIndex = 0;
 				}
 			}
@@ -208,7 +207,7 @@
 		//If current value is present
 		storageValueExists(currentValue, function (exists) {
 			if (exists) {
-				if (confirm('Are you sure you want to delete: '+currentValue)) {
+				if (confirm('Are you sure you want to delete: ' + currentValue)) {
 					storageValues(function (jsons) {
 						var index = jsons.indexOf(currentValue);
 						if (index > -1) {
@@ -247,6 +246,21 @@
 		}, 2000)
 	}
 
+	function changeTab() {
+		try {
+
+			let toShow = this.getAttribute("data-show");
+			let tabs = [].slice.call(document.getElementsByClassName("tab"));
+			tabs.forEach(function (element) {
+				element.style.display = "none";
+			}, this);
+			document.getElementById(toShow).style.display = "block";
+		}
+		catch (err) {
+			alert(err);
+		}
+	}
+
 	//The init function
 	function init() {
 
@@ -261,6 +275,8 @@
 		document.getElementById('storageSave').onclick = storageSave;
 		document.getElementById('storageDelete').onclick = storageDelete;
 		document.getElementById('storageReset').onclick = storageReset;
+		document.getElementById('editor-button').onclick = changeTab;
+		document.getElementById('text-editor-button').onclick = changeTab;
 		initStorageSelect();
 
 		//Hides or shows the field by default
