@@ -261,6 +261,85 @@
 		}
 	}
 
+	function addExclude(query) {
+		try {
+
+
+			let tableElement = document.getElementById("exclude-table");
+			let row = tableElement.insertRow();
+			let queryElement = row.insertCell(0);
+			let selectElement = row.insertCell(1);
+			let deleteElement = row.insertCell(2);
+
+			let queryToAdd = "";
+			if (query && typeof query === "string") {
+				queryToAdd = query;
+			}
+
+			queryElement.innerHTML = '<span><input type="text" placeholder="Query" value="' + queryToAdd + '"></span>';
+			queryElement.classList.add("exclude-query");
+			selectElement.innerHTML = '<select> <option value="XPATH">XPATH</option> <option value="CSS">CSS</option> </select>';
+			deleteElement.innerHTML = '<button>-</button>';
+			deleteElement.onclick = function() { removeExclude(row.rowIndex); };
+		}
+		catch (err) {
+			alert(err);
+		}
+	}
+
+	function removeExclude(row) {
+		let tableElement = document.getElementById("exclude-table");
+
+		if(typeof row === 'string'){
+			row = parseInt(row);
+		}
+
+		if (typeof row === 'number') {
+			tableElement.deleteRow(row);
+		}
+
+	}
+
+	function addMetadata(field, query) {
+		let tableElement = document.getElementById("metadata-table");
+		let row = tableElement.insertRow();
+		let fieldElement = row.insertCell(0);
+		let queryElement = row.insertCell(1);
+		let selectElement = row.insertCell(2);
+		let deleteElement = row.insertCell(3);
+
+		let queryToAdd = "";
+		if (query && typeof query === "string") {
+			queryToAdd = query;
+		}
+
+		let fieldToAdd = "";
+		if (field && typeof field === "string") {
+			fieldToAdd = field;
+		}
+
+		fieldElement.innerHTML = '<span><input type="text" placeholder="Field" value="' + fieldToAdd + '"></span>';
+		fieldElement.classList.add("metadata-query");
+		queryElement.innerHTML = '<span><input type="text" placeholder="Query" value="' + queryToAdd + '"></span>';
+		queryElement.classList.add("metadata-query");
+		selectElement.innerHTML = '<select> <option value="XPATH">XPATH</option> <option value="CSS">CSS</option> </select>';
+		deleteElement.innerHTML = '<button>-</button>';
+		deleteElement.onclick = function() { removeMetadata(row.rowIndex); };
+	}
+
+	function removeMetadata(row) {
+		let tableElement = document.getElementById("metadata-table");
+
+		if(typeof row === 'string'){
+			row = parseInt(row);
+		}
+
+		if (typeof row === 'number') {
+			tableElement.deleteRow(row);
+		}
+
+	}
+
 	//The init function
 	function init() {
 
@@ -277,6 +356,8 @@
 		document.getElementById('storageReset').onclick = storageReset;
 		document.getElementById('editor-button').onclick = changeTab;
 		document.getElementById('text-editor-button').onclick = changeTab;
+		document.getElementById('add-exclude').onclick = addExclude;
+		document.getElementById('add-metadata').onclick = addMetadata;
 		initStorageSelect();
 
 		//Hides or shows the field by default

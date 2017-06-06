@@ -72,3 +72,28 @@ body{
 	margin: 0;
 	font-size: 20px;
 }
+
+.exclude-query{
+	width: 90%;
+}
+
+.exclude-query span input{
+	width: 99%;
+}
+
+.metadata-query:first-child{
+	width: 20%;
+	padding-right: 5px;
+}
+
+.metadata-query{
+	width: 100%;
+}
+
+.metadata-query span input{
+	width: 98%;
+}
+
+#editor > p{
+	margin-bottom: 0;
+}
