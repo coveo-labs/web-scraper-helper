@@ -211,11 +211,11 @@ window.onload = function () {
 			e.stopPropagation();
 			e.preventDefault();
 			e.stopImmediatePropagation();
-
+			ableToClick = true;
+			sendMouseElement();
+			return false;
 		}
-		sendMouseElement();
-
-		return false;
+		return true;
 	}
 
 
