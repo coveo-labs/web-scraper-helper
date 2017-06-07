@@ -3,7 +3,7 @@
 	var defaultTextEditorValue = 'Create/Load a file...';
 
 	//TEST JSON VALUE
-	var json = [{
+	var defaultJson = [{
 		"for": {
 			"urls": [
 				".*"
@@ -15,7 +15,7 @@
 		}
 	}]
 
-	json = JSON.stringify(json, null, 2);
+	defaultJson = JSON.stringify(defaultJson, null, 2);
 
 
 	/**
@@ -37,7 +37,11 @@
 	 * 
 	 */
 	function fetch() {
-		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, json: document.getElementById('json-config').value });
+		let valueToSend = document.getElementById('json-config').value;
+		if (valueToSend === defaultTextEditorValue) {
+			valueToSend = defaultJson;
+		}
+		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, json: valueToSend });
 	}
 
 	/**
@@ -206,7 +210,7 @@
 					resultJson['__jsons'] = result;
 					chrome.storage.local.set(resultJson, function () {
 						let newJson = {};
-						newJson[newJsonName] = json;
+						newJson[newJsonName] = defaultJson;
 						chrome.storage.local.set(newJson);
 						initStorageSelect(function () {
 							e.selectedIndex = e.options.length - 2;
@@ -551,7 +555,6 @@
 		let json = JSON.parse(currentValue);
 		delete json[0]['metadata'][oldField];
 		json[0]['metadata'][newField] = data;
-		logBackground(newField + " | " + oldField);
 		textAreaElement.value = JSON.stringify(json, null, 2);
 	}
 
@@ -605,8 +608,8 @@
 		let currentValue = textAreaElement.value;
 		let editorElement = document.getElementById('editor');
 
-		if (currentValue == 'Create/Load a file...') {
-			editorElement.innerHTML = 'Create/Load a file...';
+		if (currentValue == defaultTextEditorValue) {
+			editorElement.innerHTML = defaultTextEditorValue;
 		}
 		else {
 			editorElement.innerHTML = '<p>Exclude</p> <table id="exclude-table"> </table> <button id="add-exclude">+</button> <p>Metadata</p> <table id="metadata-table"> </table> <button id="add-metadata">+</button>';
@@ -695,7 +698,6 @@
 		try {
 			let field = this.value;
 			let currentField = this.parentNode.parentNode.parentNode.getAttribute('data-field');
-			logBackground(currentField);
 			modifyTextMetadata(field, currentField, getTextMetadata(currentField));
 			this.parentNode.parentNode.parentNode.setAttribute('data-field', field);
 		}
@@ -704,7 +706,7 @@
 		}
 	}
 
-	
+
 	/**
 	 * The init function
 	 * 
@@ -740,7 +742,7 @@
 			});
 
 			//Sets the textarea to the default json
-			document.getElementById('json-config').value = "Create/Load a file...";
+			document.getElementById('json-config').value = defaultTextEditorValue;
 			buildVisualFromText();
 
 			//The onMessage function
