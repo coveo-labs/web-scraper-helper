@@ -28,12 +28,12 @@
 
 	//Sends the current JSON in the textarea to the parser
 	function fetch() {
-		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, json: document.getElementById("json-config").value });
+		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, json: document.getElementById('json-config').value });
 	}
 
 	//Formats the JSON
 	function pretty() {
-		let textArea = document.getElementById("json-config");
+		let textArea = document.getElementById('json-config');
 		let uglyJson = JSON.parse(textArea.value);
 		let prettyJson = JSON.stringify(uglyJson, null, 2);
 		textArea.value = prettyJson;
@@ -42,15 +42,15 @@
 	//Adds the query to the JSON
 	function addToJson() {
 		//Get the vars from the page
-		let e = document.getElementById("queryToAddMeta");
+		let e = document.getElementById('queryToAddMeta');
 		let metaType = e.options[e.selectedIndex].value;
-		e = document.getElementById("queryToAddType");
+		e = document.getElementById('queryToAddType');
 		let queryType = e.options[e.selectedIndex].value;
-		let query = document.getElementById("queryToAdd").value;
-		let field = document.getElementById("fieldToAdd").value;
+		let query = document.getElementById('queryToAdd').value;
+		let field = document.getElementById('fieldToAdd').value;
 
 		//Get the current json
-		let textArea = document.getElementById("json-config");
+		let textArea = document.getElementById('json-config');
 		let currentJson = JSON.parse(textArea.value);
 
 		//json to add
@@ -59,23 +59,24 @@
 		toAdd['path'] = query;
 
 		//Add to current json
-		if (metaType == "exclude") {
-			currentJson[0]["exclude"].push(toAdd);
+		if (metaType == 'exclude') {
+			currentJson[0]['exclude'].push(toAdd);
 		}
-		else if (metaType == "metadata") {
+		else if (metaType == 'metadata') {
 			currentJson[0]['metadata'][field] = toAdd;
 		}
 
 		//Add back to page
 		currentJson = JSON.stringify(currentJson, null, 2);
 		textArea.value = currentJson;
+		buildVisualFromText();
 	}
 
 	//Hides or shows the field option
 	function toggleField() {
-		let e = document.getElementById("queryToAddMeta");
+		let e = document.getElementById('queryToAddMeta');
 		let fieldElement = document.getElementById('fieldToAdd');
-		if (e.value == "metadata") {
+		if (e.value == 'metadata') {
 			fieldElement.style.display = 'inline';
 		}
 		else {
@@ -85,26 +86,26 @@
 
 	//Resets the value table back to default
 	function resetValueTable() {
-		document.getElementById('resultTable').innerHTML = "<tr><th>Field</th><th>Value(s)</th></tr>";
+		document.getElementById('resultTable').innerHTML = '<tr><th>Field</th><th>Value(s)</th></tr>';
 	}
 
 	//Turn on the mouseover on the webpage
 	//When the user will click on something, it will return a xPath
 	function mouseAdd() {
-		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, mouse: "1" });
+		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, mouse: '1' });
 	}
 
 	//Inits the storage menu
 	function initStorageSelect(callback) {
 		try {
-			let select = document.getElementById("storage");
-			select.innerHTML = "<option selected disabled>Select a file to work on</option><option disabled>------------------------------</option>";
+			let select = document.getElementById('storage');
+			select.innerHTML = '<option selected disabled>Select a file to work on</option><option disabled>------------------------------</option>';
 			storageValues(function (results) {
 				results.forEach(function (element) {
 
-					select.innerHTML += "<option value='" + element + "'>" + element + "</option>";
+					select.innerHTML += '<option value="' + element + '">' + element + '</option>"';
 				}, this);
-				select.innerHTML += "<option value='__create'>Create new file...</option>";
+				select.innerHTML += '<option value="__create">Create new file...</option>';
 				if (callback) {
 					callback();
 				}
@@ -117,7 +118,7 @@
 	}
 
 	function storageValues(callback) {
-		chrome.storage.local.get("__jsons", function (result) {
+		chrome.storage.local.get('__jsons', function (result) {
 			if (!result.__jsons) {
 				result.__jsons = [];
 			}
@@ -141,13 +142,13 @@
 		let e = document.getElementById('storage');
 		let errorElement = document.getElementById('storageError');
 		let value = e.options[e.selectedIndex].value;
-		errorElement.innerHTML = "";
+		errorElement.innerHTML = '';
 
 		storageValues(function (result) {
 
-			if (value == "__create") {
-				let newJsonName = window.prompt("New json name");
-				if (newJsonName && !result.includes(newJsonName) && (newJsonName != "" && newJsonName != "__json" && newJsonName != "__create" && newJsonName != "null")) {
+			if (value == '__create') {
+				let newJsonName = window.prompt('New json name');
+				if (newJsonName && !result.includes(newJsonName) && (newJsonName != '' && newJsonName != '__json' && newJsonName != '__create' && newJsonName != 'null')) {
 					result.push(newJsonName);
 					let resultJson = {};
 					resultJson['__jsons'] = result;
@@ -162,7 +163,7 @@
 					});
 				}
 				else {
-					errorElement.innerHTML += "Naming error<br>";
+					errorElement.innerHTML += 'Naming error<br>';
 					e.selectedIndex = 0;
 				}
 			}
@@ -179,7 +180,7 @@
 
 	function storageLoad() {
 		let currentValue = storageSelectedValue();
-		let textArea = document.getElementById("json-config");
+		let textArea = document.getElementById('json-config');
 		//If current value is present
 		storageValueExists(currentValue, function (exists) {
 			if (exists) {
@@ -189,7 +190,7 @@
 				});
 			}
 			else {
-				textArea.value = "Create/Load a file...";
+				textArea.value = 'Create/Load a file...';
 				buildVisualFromText();
 			}
 		});
@@ -201,7 +202,7 @@
 		storageValueExists(currentValue, function (exists) {
 			if (exists) {
 
-				let textArea = document.getElementById("json-config");
+				let textArea = document.getElementById('json-config');
 				let jsonToAdd = {};
 				jsonToAdd[currentValue] = textArea.value;
 				chrome.storage.local.set(jsonToAdd);
@@ -222,7 +223,7 @@
 							jsons.splice(index, 1);
 						}
 						jsonToAdd = {}
-						jsonToAdd["__jsons"] = jsons;
+						jsonToAdd['__jsons'] = jsons;
 						chrome.storage.local.set(jsonToAdd, function () {
 							initStorageSelect();
 						});
@@ -242,35 +243,35 @@
 	}
 
 	function displaySuccess(value) {
-		let e = document.getElementById("storageSuccess");
+		let e = document.getElementById('storageSuccess');
 		e.innerHTML = value;
 		removeSuccess();
 	}
 
 	function removeSuccess() {
 		setTimeout(function () {
-			let e = document.getElementById("storageSuccess");
-			e.innerHTML = "";
+			let e = document.getElementById('storageSuccess');
+			e.innerHTML = '';
 		}, 2000)
 	}
 
 	function changeTab() {
 		try {
 
-			let toShow = this.getAttribute("data-show");
+			let toShow = this.getAttribute('data-show');
 
-			if (document.getElementById(toShow).style.display != "block") {
+			if (document.getElementById(toShow).style.display != 'block') {
 				//Tabs switching from text to visual editor
-				if (toShow == "editor") {
+				if (toShow == 'editor') {
 					buildVisualFromText();
 				}
 			}
 
-			let tabs = [].slice.call(document.getElementsByClassName("tab"));
+			let tabs = [].slice.call(document.getElementsByClassName('tab'));
 			tabs.forEach(function (element) {
-				element.style.display = "none";
+				element.style.display = 'none';
 			}, this);
-			document.getElementById(toShow).style.display = "block";
+			document.getElementById(toShow).style.display = 'block';
 		}
 		catch (err) {
 			alert(err);
@@ -281,41 +282,39 @@
 		try {
 
 
-			let tableElement = document.getElementById("exclude-table");
+			let tableElement = document.getElementById('exclude-table');
 			let row = tableElement.insertRow();
 			let queryElement = row.insertCell(0);
 			let selectElement = row.insertCell(1);
 			let deleteElement = row.insertCell(2);
 
-			let queryToAdd = "";
-			if (query && typeof query === "string") {
+			let queryToAdd = '';
+			if (query && typeof query === 'string') {
 				queryToAdd = query;
 			}
 
 			let typeToAdd = 0;
 
-			if (typeof type == "string") {
-				if (type == "CSS") {
+			if (typeof type == 'string') {
+				if (type == 'CSS') {
 					typeToAdd = 1;
 				}
 			}
 
-			queryElement.innerHTML = '<span><input type="text" placeholder="Query" value="' + queryToAdd + '"></span>';
-			queryElement.classList.add("exclude-query");
-			selectElement.innerHTML = '<select> <option value="XPATH">XPATH</option> <option value="CSS">CSS</option> </select>';
+			queryElement.innerHTML = '<span><input type="text" placeholder="Query" value="' + queryToAdd + '" data-row="' + row.rowIndex + '"></span>';
+			queryElement.classList.add('exclude-query');
+			queryElement.childNodes[0].childNodes[0].oninput = excludeQueryOninput;
+			selectElement.innerHTML = '<select data-row="' + row.rowIndex + '"> <option value="XPATH">XPATH</option> <option value="CSS">CSS</option> </select>';
 			selectElement.childNodes[0].selectedIndex = typeToAdd;
+			selectElement.childNodes[0].onchange = excludeTypeOnChange;
 			deleteElement.innerHTML = '<button>-</button>';
 			deleteElement.onclick = function () { removeExclude(row.rowIndex); };
 
 			if (textToAdd == undefined) {
-				let textAreaElement = document.getElementById('json-config');
-				let currentValue = textAreaElement.value;
-				let json = JSON.parse(currentValue);
 				let jsonToAdd = {}
-				jsonToAdd['type'] = (typeToAdd == 1) ? "CSS" : "XPATH";
-				jsonToAdd['path'] = (typeof query === "string") ? query : "";
-				json[0]['exclude'].push(jsonToAdd);
-				textAreaElement.value = JSON.stringify(json, null, 2);
+				jsonToAdd['type'] = (typeToAdd == 1) ? 'CSS' : 'XPATH';
+				jsonToAdd['path'] = (typeof query === 'string') ? query : '';
+				modifyExclude(true, jsonToAdd);
 			}
 
 		}
@@ -324,8 +323,21 @@
 		}
 	}
 
+	function modifyExclude(row, data) {
+		let textAreaElement = document.getElementById('json-config');
+		let currentValue = textAreaElement.value;
+		let json = JSON.parse(currentValue);
+		if (row === true) {
+			json[0]['exclude'].push(data);
+		}
+		else {
+			json[0]['exclude'][row] = data;
+		}
+		textAreaElement.value = JSON.stringify(json, null, 2);
+	}
+
 	function removeExclude(row) {
-		let tableElement = document.getElementById("exclude-table");
+		let tableElement = document.getElementById('exclude-table');
 		let textAreaElement = document.getElementById('json-config');
 
 		if (typeof row === 'string') {
@@ -342,60 +354,76 @@
 
 	}
 
+	function getExclude(row) {
+		let textAreaElement = document.getElementById('json-config');
+		let currentValue = textAreaElement.value;
+		let json = JSON.parse(currentValue);
+		return json[0]['exclude'][row];
+	}
+
 	function addMetadata(field, query, type, addToText) {
-		let tableElement = document.getElementById("metadata-table");
+		let tableElement = document.getElementById('metadata-table');
 		let row = tableElement.insertRow();
 		let fieldElement = row.insertCell(0);
 		let queryElement = row.insertCell(1);
 		let selectElement = row.insertCell(2);
 		let deleteElement = row.insertCell(3);
 
-		let queryToAdd = "";
-		if (query && typeof query === "string") {
+		let queryToAdd = '';
+		if (query && typeof query === 'string') {
 			queryToAdd = query;
 		}
 
-		let fieldToAdd = "";
-		if (field && typeof field === "string") {
+		let fieldToAdd = '';
+		if (field && typeof field === 'string') {
 			fieldToAdd = field;
 		}
 
 		let typeToAdd = 0;
 
-		if (typeof type == "string") {
-			if (type == "CSS") {
+		if (typeof type == 'string') {
+			if (type == 'CSS') {
 				typeToAdd = 1;
 			}
 		}
 
+		row.setAttribute("data-field", fieldToAdd);
 		fieldElement.innerHTML = '<span><input type="text" placeholder="Field" value="' + fieldToAdd + '"></span>';
 		fieldElement.classList.add("metadata-query");
+		fieldElement.childNodes[0].childNodes[0].oninput = metadataFieldOnInput;
 		queryElement.innerHTML = '<span><input type="text" placeholder="Query" value="' + queryToAdd + '"></span>';
 		queryElement.classList.add("metadata-query");
-		selectElement.innerHTML = '<select> <option value="XPATH">XPATH</option> <option value="CSS">CSS</option> </select>';
+		queryElement.childNodes[0].childNodes[0].oninput = metadataQueryOnInput;
+		selectElement.innerHTML = '<select data-field="' + fieldToAdd + '"> <option value="XPATH">XPATH</option> <option value="CSS">CSS</option> </select>';
 		selectElement.childNodes[0].selectedIndex = typeToAdd;
+		selectElement.childNodes[0].onchange = metadataTypeOnChange;
 		deleteElement.innerHTML = '<button>-</button>';
 		deleteElement.onclick = function () { removeMetadata(row.rowIndex, fieldToAdd); };
 
 		if (addToText == undefined) {
-			let textAreaElement = document.getElementById('json-config');
-			let currentValue = textAreaElement.value;
-			let json = JSON.parse(currentValue);
-			json[0]['metadata'][fieldToAdd] = {
-				type: (typeToAdd == 1) ? "CSS" : "XPATH",
-				path: (typeof query === "string") ? query : ""
+			let data = {
+				type: (typeToAdd == 1) ? 'CSS' : 'XPATH',
+				path: (typeof query === 'string') ? query : ''
 			};
-			textAreaElement.value = JSON.stringify(json, null, 2);
+			modifyMetaData(fieldToAdd, fieldToAdd, data);
 		}
 	}
 
+	function modifyMetaData(field, oldField, data) {
+		let textAreaElement = document.getElementById('json-config');
+		let currentValue = textAreaElement.value;
+		let json = JSON.parse(currentValue);
+		delete json[0]['metadata'][oldField];
+		json[0]['metadata'][field] = data;
+		logBackground(field + " | " + oldField);
+		textAreaElement.value = JSON.stringify(json, null, 2);
+	}
+
 	function removeMetadata(row, field) {
-		let tableElement = document.getElementById("metadata-table");
+		let tableElement = document.getElementById('metadata-table');
 		let textAreaElement = document.getElementById('json-config');
 
-		if (typeof row === 'string') {
-			row = parseInt(row);
-		}
+		row = parseInt(row);
 
 		if (typeof row === 'number') {
 			tableElement.deleteRow(row);
@@ -407,13 +435,23 @@
 
 	}
 
+	function getMetadata(field) {
+		if(field == null){
+			field = '';
+		}
+		let textAreaElement = document.getElementById('json-config');
+		let currentValue = textAreaElement.value;
+		let json = JSON.parse(currentValue);
+		return json[0]['metadata'][field];
+	}
+
 	function buildVisualFromText() {
 		let textAreaElement = document.getElementById('json-config');
 		let currentValue = textAreaElement.value;
 		let editorElement = document.getElementById('editor');
 
-		if (currentValue == "Create/Load a file...") {
-			editorElement.innerHTML = "Create/Load a file...";
+		if (currentValue == 'Create/Load a file...') {
+			editorElement.innerHTML = 'Create/Load a file...';
 		}
 		else {
 			editorElement.innerHTML = '<p>Exclude</p> <table id="exclude-table"> </table> <button id="add-exclude">+</button> <p>Metadata</p> <table id="metadata-table"> </table> <button id="add-metadata">+</button>';
@@ -435,6 +473,56 @@
 		}
 	}
 
+	function excludeTypeOnChange() {
+		let row = this.getAttribute('data-row');
+		let jsonToMod = {
+			type: this.options[this.selectedIndex].value,
+			path: getExclude(row)['path']
+		};
+		modifyExclude(row, jsonToMod);
+	}
+
+	function excludeQueryOninput() {
+		let query = this.value;
+		let row = this.getAttribute('data-row');
+		let jsonToMod = {
+			type: getExclude(row)['type'],
+			path: query
+		};
+		modifyExclude(row, jsonToMod);
+	}
+
+	function metadataTypeOnChange() {
+		let currentField = this.parentNode.parentNode.getAttribute('data-field');
+		let jsonToMod = {
+			type: this.options[this.selectedIndex].value,
+			path: getMetadata(currentField)['path']
+		}
+		modifyMetaData(currentField, currentField, jsonToMod);
+	}
+
+	function metadataQueryOnInput() {
+		let query = this.value;
+		let currentField = this.parentNode.parentNode.parentNode.getAttribute('data-field');
+		let jsonToMod = {
+			type: getMetadata(currentField)['type'],
+			path: query
+		};
+		modifyMetaData(currentField, currentField, jsonToMod);
+	}
+
+	function metadataFieldOnInput() {
+		try {
+			let field = this.value;
+			let currentField = this.parentNode.parentNode.parentNode.getAttribute('data-field');
+			logBackground(currentField);
+			modifyMetaData(field, currentField, getMetadata(currentField));
+			this.parentNode.parentNode.parentNode.setAttribute('data-field', field);
+		}
+		catch (err) {
+			alert(err);
+		}
+	}
 
 	//The init function
 	function init() {
@@ -444,7 +532,7 @@
 			document.getElementById('fetch').onclick = fetch;
 			document.getElementById('pretty').onclick = pretty;
 			document.getElementById('queryToAddButton').onclick = addToJson;
-			document.getElementById("queryToAddMeta").onchange = toggleField;
+			document.getElementById('queryToAddMeta').onchange = toggleField;
 			//document.getElementById('mouseAdd').onclick = mouseAdd;
 			document.getElementById('storage').onchange = updateStorage;
 			document.getElementById('storage').onfocus = storageSave;
