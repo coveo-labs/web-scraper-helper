@@ -145,24 +145,6 @@ window.onload = function () {
 		}, 1);
 	}
 
-	chrome.runtime.onMessage.addListener(
-		function (request, sender, sendResponse) {
-
-			if (request.json) {
-				parseJsonConfig(request.json);
-			}
-
-			if (request.mouse) {
-				ableToClick = false;
-				ableToMouseOver = true;
-			}
-
-			if(request.log){
-				console.log(request.log);
-			}
-
-		});
-
 	function mouseoverHandler(event) {
 
 		if (!ableToMouseOver) {
@@ -287,96 +269,22 @@ window.onload = function () {
 
 	}
 
-	function clickHandler(e) {
+	chrome.runtime.onMessage.addListener(
+		function (request, sender, sendResponse) {
 
-		if (!ableToClick) {
-			e.stopPropagation();
-			e.preventDefault();
-			e.stopImmediatePropagation();
-
-			sendMouseElement();
-
-			return false;
-		}
-
-	}
-
-	function sendMouseElement() {
-		ableToClick = true;
-		ableToMouseOver = false;
-
-		let jsonToSend = {}
-		jsonToSend['mouse'] = getXPath(prev);
-
-		try {
-			if (prev) {
-				prev.className = prev.className.replace(/\bhighlight\b/, '');
-				prev = undefined;
+			if (request.json) {
+				parseJsonConfig(request.json);
 			}
-		}
-		catch (err) {
-			prev = undefined;
-			jsonToSend['return']['__error'] = err;
-		}
 
-		setTimeout(function () {
-			chrome.runtime.sendMessage(jsonToSend);
-		}, 1);
-	}
-
-	//https://stackoverflow.com/questions/9197884/how-do-i-get-the-xpath-of-an-element-in-an-x-html-file
-	function getXPath(node) {
-		var comp, comps = [];
-		var parent = null;
-		var xpath = '';
-		var getPos = function (node) {
-			var position = 1, curNode;
-			if (node.nodeType == Node.ATTRIBUTE_NODE) {
-				return null;
+			if (request.mouse) {
+				ableToClick = false;
+				ableToMouseOver = true;
 			}
-			for (curNode = node.previousSibling; curNode; curNode = curNode.previousSibling) {
-				if (curNode.nodeName == node.nodeName) {
-					++position;
-				}
+
+			if(request.log){
+				console.log(request.log);
 			}
-			return position;
-		}
 
-		if (node instanceof Document) {
-			return '/';
-		}
+		});
 
-		for (; node && !(node instanceof Document); node = node.nodeType == Node.ATTRIBUTE_NODE ? node.ownerElement : node.parentNode) {
-			comp = comps[comps.length] = {};
-			switch (node.nodeType) {
-				case Node.TEXT_NODE:
-					comp.name = 'text()';
-					break;
-				case Node.ATTRIBUTE_NODE:
-					comp.name = '@' + node.nodeName;
-					break;
-				case Node.PROCESSING_INSTRUCTION_NODE:
-					comp.name = 'processing-instruction()';
-					break;
-				case Node.COMMENT_NODE:
-					comp.name = 'comment()';
-					break;
-				case Node.ELEMENT_NODE:
-					comp.name = node.nodeName;
-					break;
-			}
-			comp.position = getPos(node);
-		}
-
-		for (var i = comps.length - 1; i >= 0; i--) {
-			comp = comps[i];
-			xpath += '/' + comp.name;
-			if (comp.position != null && comp.position > 1) {
-				xpath += '[' + comp.position + ']';
-			}
-		}
-
-		return xpath.toLowerCase();
-
-	}
 };
