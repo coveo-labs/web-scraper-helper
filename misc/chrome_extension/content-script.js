@@ -11,27 +11,29 @@ window.onload = function () {
 	document.body.onmouseover = mouseoverHandler;
 	document.body.onclick = clickHandler;
 
-	//Parses the XPath
-	//
-	//sample return
-	//{type:"title", value:[element, element]}
-	//
-	//title: The string for the type
-	//xpathString: the xpath to parse
-	//getTrue: BOOL, if the value return is the text instead of the element
-	var parseXPath = function (title, xpathString, getText) {
+
+	/**
+	 * Parses the XPath
+	 * sample return
+	 * {type:'title', value:[element, element]}
+	 * 
+	 * @param {string} title - the name of the metadata field
+	 * @param {string} xpathString - the xpath to use to find the element in the page
+	 * @param {boolean} shouldReturnText - set to true if you want the text value of the element found with xpath. (optional)
+	 * @returns {object} returns the title and the elements in an array
+	 */
+	var parseXPath = function (title, xpathString, shouldReturnText) {
 		try {
 			let nodes = document.evaluate(xpathString, document);
 			let e, elements = [];
 
 			if (nodes.resultType === XPathResult.UNORDERED_NODE_ITERATOR_TYPE || nodes.resultType === XPathResult.ORDERED_NODE_ITERATOR_TYPE) {
 				while (e = nodes.iterateNext()) {
-					if (getText) {
-						elements.push(e.nodeValue);
+					let value = e;
+					if (shouldReturnText) {
+						value = e.nodeValue;
 					}
-					else {
-						elements.push(e);
-					}
+					elements.push(value);
 				}
 			}
 			else if (nodes.resultType === XPathResult.NUMBER_TYPE) {
@@ -47,52 +49,61 @@ window.onload = function () {
 			return { type: title, value: elements };
 		}
 		catch (err) {
-			return { type: "__error", value: "Failed to parse XPath \'" + xpathString + "\'<br>" + err };
+			return { type: '__error', value: 'Failed to parse XPath \'' + xpathString + '\'<br>' + err };
 		}
 	}
 
-	//Parses the CSS selector
-	//
-	//sample return
-	//{type:"title", value:[element, element]}
-	//
-	//title: The string for the type
-	//xpathString: the css selector to parse
-	//getTrue: BOOL, if the value return is the text instead of the element
-	var parseCss = function (title, cssSelector, getText) {
+	/**
+	 * Parses the CSS selector
+	 * sample return
+	 * {type:'title', value:[element, element]}
+	 * 
+	 * @param {string} title - The string for the type
+	 * @param {string} cssSelector - the css selector to parse
+	 * @param {boolean} shouldReturnText - if the value return is the text instead of the element
+	 * @returns {object} returns the title and the elements in an array
+	 */
+	var parseCss = function (title, cssSelector, shouldReturnText) {
 		try {
 			let nodes = document.body.querySelectorAll(cssSelector);
 			let e, elements = [];
 			nodes.forEach(function (e) {
-				if (getText) {
-					elements.push(e.textContent);
+				let value = e;
+				if (shouldReturnText) {
+					value  = e.textContent;
 				}
-				else {
-					elements.push(e);
-				}
+				elements.push(value);
 			}, this);
 			return { type: title, value: elements };
 		}
 		catch (err) {
-			return { type: "__error", value: "Failed to parse CSS \'" + cssSelector + "\'<br>" + err };
+			return { type: '__error', value: 'Failed to parse CSS \'' + cssSelector + '\'<br>' + err };
 		}
 	}
 
+
+	/**
+	 * Parses the jsonData
+	 * Hides the elements on the webpage
+	 * Sends back to the panel all the parses xpath and css selectors
+	 * 
+	 * @param {object} jsonData - The json to parse
+	 */
 	function parseJsonConfig(jsonData) {
 		//Parses the current json from the request
 		//This is the same json as the textarea
 		let json = JSON.parse(jsonData);
 		//Create the elements list to send back
-		let elements = [];
+		let elementsToReturn = [];
 		//Get the metadata field and exclude field from the json
 		let metadata = json[0]['metadata'];
 		let exclude = json[0]['exclude'];
 
 		//Show elements that were previously hidden from the elementsToHide global
 		if (elementsToHide.length > 0) {
-			elementsToHide.forEach(function (elementArray) {
-				if (elementArray['type'] != "__error") {
-					elementArray['value'].forEach(function (element) {
+			elementsToHide.forEach(function (elementObject) {
+				if (elementObject['type'] != '__error') {
+					elementObject['value'].forEach(function (element) {
 						element.style.opacity = 1;
 					}, this);
 				}
@@ -106,45 +117,54 @@ window.onload = function () {
 		//Gets the nodeValue for XPATH
 		//Gets the textContent for CSS
 		for (let key in metadata) {
-			if (metadata[key]['type'] == "CSS") {
-				elements.push(parseCss(key, metadata[key]['path'], true));
+			let currentExcludeObject = metadata[key];
+			if (currentExcludeObject['type'] === 'CSS') {
+				elementsToReturn.push(parseCss(key, currentExcludeObject['path'], true));
 			}
-			else if (metadata[key]['type'] == "XPATH") {
-				elements.push(parseXPath(key, metadata[key]['path'], true));
+			else if (currentExcludeObject['type'] === 'XPATH') {
+				elementsToReturn.push(parseXPath(key, currentExcludeObject['path'], true));
 			}
 		}
 
 		//Adds the elements to exclude in the elementsToHide
 		for (let key in exclude) {
-			if (exclude[key]['type'] == "CSS") {
-				elementsToHide.push(parseCss(key, exclude[key]['path'], false));
+			let currentMetadataObject = exclude[key];
+			if (currentMetadataObject['type'] === 'CSS') {
+				elementsToHide.push(parseCss(key, currentMetadataObject['path'], false));
 			}
-			else if (exclude[key]['type'] == "XPATH") {
-				elementsToHide.push(parseXPath(key, exclude[key]['path'], false));
+			else if (currentMetadataObject['type'] === 'XPATH') {
+				elementsToHide.push(parseXPath(key, currentMetadataObject['path'], false));
 			}
 		}
 
 		//Reduces opacity of elements in elementsToHide
 		//If an error is found, adds it in elements to send back
-		elementsToHide.forEach(function (elementArray) {
-			if (elementArray['type'] != "__error") {
-				elementArray['value'].forEach(function (element) {
+		elementsToHide.forEach(function (elementObject) {
+			if (elementObject['type'] != '__error') {
+				elementObject['value'].forEach(function (element) {
 					element.style.opacity = 0.1;
 				}, this);
 			}
 			else {
-				elements.push(elementArray);
+				elementsToReturn.push(elementObject);
 			}
 		}, this);
 
 		//Send back the values found
 		setTimeout(function () {
 			chrome.runtime.sendMessage({
-				return: JSON.stringify(elements)
+				return: JSON.stringify(elementsToReturn)
 			});
 		}, 1);
 	}
 
+
+	/**
+	 * Adds the __highlight class to the object at the currently being moused over
+	 * 
+	 * @param {event} event 
+	 * @returns nothing
+	 */
 	function mouseoverHandler(event) {
 
 		if (!ableToMouseOver) {
@@ -158,7 +178,7 @@ window.onload = function () {
 
 		try {
 			if (prev) {
-				prev.className = prev.className.replace(/\bhighlight\b/, '');
+				prev.className = prev.className.replace(/\b__highlight\b/, '');
 				prev = undefined;
 			}
 		}
@@ -169,7 +189,7 @@ window.onload = function () {
 		try {
 			if (event.target) {
 				prev = event.target;
-				prev.className += " highlight";
+				prev.className += ' highlight';
 			}
 		}
 		catch (err) {
@@ -177,6 +197,14 @@ window.onload = function () {
 		}
 	}
 
+
+	/**
+	 * Stops the mouse click and instead sends the element being moused over to the panel
+	 * Then turns itself off
+	 * 
+	 * @param {event} e - The mouse click event
+	 * @returns {boolean} false
+	 */
 	function clickHandler(e) {
 
 		if (!ableToClick) {
@@ -190,6 +218,11 @@ window.onload = function () {
 		return false;
 	}
 
+
+	/**
+	 * Sends the xpath of the element that was moused over to the panel
+	 * 
+	 */
 	function sendMouseElement() {
 		ableToClick = true;
 		ableToMouseOver = false;
@@ -213,7 +246,13 @@ window.onload = function () {
 		}, 1);
 	}
 
-	//https://stackoverflow.com/questions/9197884/how-do-i-get-the-xpath-of-an-element-in-an-x-html-file
+	/**
+	 * Gets a xpath string from a node
+	 * https://stackoverflow.com/questions/9197884/how-do-i-get-the-xpath-of-an-element-in-an-x-html-file
+	 * 
+	 * @param {element} node 
+	 * @returns {string} the xpath string
+	 */
 	function getXPath(node) {
 		var comp, comps = [];
 		var parent = null;
@@ -269,6 +308,10 @@ window.onload = function () {
 
 	}
 
+	/**
+	 * Adds a listener to the received messages
+	 * 
+	 */
 	chrome.runtime.onMessage.addListener(
 		function (request, sender, sendResponse) {
 
@@ -281,7 +324,7 @@ window.onload = function () {
 				ableToMouseOver = true;
 			}
 
-			if(request.log){
+			if (request.log) {
 				console.log(request.log);
 			}
 
