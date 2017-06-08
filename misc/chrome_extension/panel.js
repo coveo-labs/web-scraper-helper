@@ -413,7 +413,7 @@
 			selectElement.innerHTML = '<select data-row="' + row.rowIndex + '"> <option value="XPATH">XPATH</option> <option value="CSS">CSS</option> </select>';
 			selectElement.childNodes[0].selectedIndex = typeToAdd;
 			selectElement.childNodes[0].onchange = excludeTypeOnChange;
-			deleteElement.innerHTML = '<button>-</button>';
+			deleteElement.innerHTML = '<button class="sub-button">-</button>';
 			deleteElement.onclick = function () { removeJsonExclude(row.rowIndex); };
 
 			if (addToTextEditor == undefined || addToTextEditor == true) {
@@ -529,7 +529,7 @@
 		selectElement.innerHTML = '<select data-field="' + fieldToAdd + '"> <option value="XPATH">XPATH</option> <option value="CSS">CSS</option> </select>';
 		selectElement.childNodes[0].selectedIndex = typeToAdd;
 		selectElement.childNodes[0].onchange = metadataTypeOnChange;
-		deleteElement.innerHTML = '<button>-</button>';
+		deleteElement.innerHTML = '<button class="sub-button">-</button>';
 		deleteElement.onclick = function () { removeTextMetadata(row.rowIndex, fieldToAdd); };
 
 		if (addToTextEditor == undefined || addToTextEditor == true) {
@@ -612,7 +612,20 @@
 			editorElement.innerHTML = defaultTextEditorValue;
 		}
 		else {
-			editorElement.innerHTML = '<p>Exclude</p> <table id="exclude-table"> </table> <button id="add-exclude">+</button> <p>Metadata</p> <table id="metadata-table"> </table> <button id="add-metadata">+</button>';
+			editorElement.innerHTML = `
+			<p>Exclude</p> 
+			<table id="exclude-table"> 
+			</table> 
+			<div class="center-button">
+				<button id="add-exclude" class="add-button">Add +</button> 
+			</div>
+			<p>Metadata</p> 
+			<table id="metadata-table"> 
+			</table> 
+			<div class="center-button">
+				<button id="add-metadata" class="add-button">Add +</button>
+			</div>
+			`;
 			document.getElementById('add-exclude').onclick = addExcludeVisual;
 			document.getElementById('add-metadata').onclick = addMetadataVisual;
 

@@ -67,6 +67,10 @@ body{
 	overflow:scroll;
 }
 
+#editor-container::-webkit-scrollbar { 
+    display: none; 
+}
+
 #editor-text{
 	padding: 0;
 	margin: 0;
@@ -96,4 +100,37 @@ body{
 
 #editor > p{
 	margin-bottom: 0;
+}
+
+.button{
+	background-color: #263E55;
+	color: white;
+	padding: 10px;
+	border: none;
+	cursor: pointer;
+	text-decoration: none;
+	border-radius: 2px;
+}
+
+.add-button{
+	background-color: green;
+	color: white;
+	border: none;
+	cursor: pointer;
+	text-decoration: none;
+	border-radius: 2px;
+}
+
+.sub-button{
+	background-color: red;
+	color: white;
+	border: none;
+	cursor: pointer;
+	text-decoration: none;
+	border-radius: 2px;
+}
+
+.center-button{
+	margin-top: 5px;
+	text-align: center;
 }
