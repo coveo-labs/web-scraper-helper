@@ -3,7 +3,7 @@
 // @namespace    http://coveo.github.io/
 // @version      0.2
 // @description  Web scraper helper tool for Coveo
-// @author       Jerome Devost
+// @author       Jerome Devost (jdevost@coveo.com)
 // @grant        GM_addStyle
 //
 // @match        http://blog.coveo.com/*
