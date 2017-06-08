@@ -33,6 +33,16 @@
 
 
 	/**
+	 * Returns XPATH or CSS depending on the check
+	 * 
+	 * @param {boolean} checked - if checked
+	 * @returns {string} The return string
+	 */
+	function getTypebyCheck(checked) {
+		return checked ? "CSS" : "XPATH";
+	}
+
+	/**
 	 * Sends the current JSON in the textarea to the parser
 	 * 
 	 */
@@ -395,9 +405,7 @@
 		try {
 			let tableElement = document.getElementById('exclude-table');
 			let row = tableElement.insertRow();
-			let queryElement = row.insertCell(0);
-			let selectElement = row.insertCell(1);
-			let deleteElement = row.insertCell(2);
+			let ruleElement = row.insertCell(0);
 
 			let queryToAdd = '';
 			if (query && typeof query === 'string') {
@@ -412,14 +420,20 @@
 				}
 			}
 
-			queryElement.innerHTML = '<span><input type="text" placeholder="Query" value="' + queryToAdd + '" data-row="' + row.rowIndex + '"></span>';
-			queryElement.classList.add('exclude-query');
-			queryElement.childNodes[0].childNodes[0].oninput = excludeQueryOninput;
-			selectElement.innerHTML = '<select data-row="' + row.rowIndex + '"> <option value="XPATH">XPATH</option> <option value="CSS">CSS</option> </select>';
-			selectElement.childNodes[0].selectedIndex = typeToAdd;
-			selectElement.childNodes[0].onchange = excludeTypeOnChange;
-			deleteElement.innerHTML = '<button class="sub-button">-</button>';
-			deleteElement.onclick = function () { removeJsonExclude(row.rowIndex); };
+			ruleElement.innerHTML = `
+			<div class="rule">
+				<input class="toggle" type="checkbox">
+				<input type="text" placeholder="Query">
+				<span class="glyphicon glyphicon-remove"></span>
+   			</div>
+			`;
+
+			ruleElement.childNodes[1].setAttribute('data-row', row.rowIndex);
+			ruleElement.childNodes[1].childNodes[1].onchange = excludeTypeOnChange;
+			ruleElement.childNodes[1].childNodes[1].checked = typeToAdd;
+			ruleElement.childNodes[1].childNodes[3].oninput = excludeQueryOninput;
+			ruleElement.childNodes[1].childNodes[3].value = queryToAdd;
+			ruleElement.childNodes[1].childNodes[5].onclick = function () { removeJsonExclude(row.rowIndex); };
 
 			if (addToTextEditor == undefined || addToTextEditor == true) {
 				let jsonToAdd = {}
@@ -438,7 +452,7 @@
 	/**
 	 * Modifies the index of the exclude
 	 * 
-	 * @param {number} index - The index
+	 * @param {number} index - The index, if true, push at the end
 	 * @param {object} data - The data {type:"", path:""}
 	 */
 	function modifyJsonExclude(index, data) {
@@ -501,22 +515,22 @@
 	function addMetadataVisual(field, query, type, addToTextEditor) {
 		let tableElement = document.getElementById('metadata-table');
 
+		//Checks if an empty field already exists
+		//if it does, then dont create a new one
 		let shouldAdd = true;
-		[].slice.call(tableElement.rows).forEach(function (element) {
-			if (element.getAttribute('data-field') === "") {
+		
+		for (var i = 0; i < tableElement.rows.length; i++) {
+			if (tableElement.rows[i].childNodes[0].childNodes[1].getAttribute('data-field') === "") {
 				shouldAdd = false;
 			}
-		}, this);
+		}
 
-		if(!shouldAdd){
+		if (!shouldAdd) {
 			return;
 		}
 
 		let row = tableElement.insertRow();
-		let fieldElement = row.insertCell(0);
-		let queryElement = row.insertCell(1);
-		let selectElement = row.insertCell(2);
-		let deleteElement = row.insertCell(3);
+		let ruleElement = row.insertCell(0);
 
 		let queryToAdd = '';
 		if (query && typeof query === 'string') {
@@ -536,18 +550,23 @@
 			}
 		}
 
-		row.setAttribute("data-field", fieldToAdd);
-		fieldElement.innerHTML = '<span><input type="text" placeholder="Field" value="' + fieldToAdd + '"></span>';
-		fieldElement.classList.add("metadata-query");
-		fieldElement.childNodes[0].childNodes[0].oninput = metadataFieldOnInput;
-		queryElement.innerHTML = '<span><input type="text" placeholder="Query" value="' + queryToAdd + '"></span>';
-		queryElement.classList.add("metadata-query");
-		queryElement.childNodes[0].childNodes[0].oninput = metadataQueryOnInput;
-		selectElement.innerHTML = '<select data-field="' + fieldToAdd + '"> <option value="XPATH">XPATH</option> <option value="CSS">CSS</option> </select>';
-		selectElement.childNodes[0].selectedIndex = typeToAdd;
-		selectElement.childNodes[0].onchange = metadataTypeOnChange;
-		deleteElement.innerHTML = '<button class="sub-button">-</button>';
-		deleteElement.onclick = function () { removeTextMetadata(row.rowIndex); };
+		ruleElement.innerHTML = `
+			<div class="rule">
+				<input class="toggle" type="checkbox">
+				<input type="text" placeholder="Field">
+				<input type="text" placeholder="Query">
+				<span class="glyphicon glyphicon-remove"></span>
+   			</div>
+		`;
+
+		ruleElement.childNodes[1].setAttribute('data-field', fieldToAdd);
+		ruleElement.childNodes[1].childNodes[1].checked = typeToAdd;
+		ruleElement.childNodes[1].childNodes[1].onchange = metadataTypeOnChange;
+		ruleElement.childNodes[1].childNodes[3].value = fieldToAdd;
+		ruleElement.childNodes[1].childNodes[3].oninput = metadataFieldOnInput;
+		ruleElement.childNodes[1].childNodes[5].value = queryToAdd;
+		ruleElement.childNodes[1].childNodes[5].oninput = metadataQueryOnInput;
+		ruleElement.childNodes[1].childNodes[7].onclick = function () { removeTextMetadata(row.rowIndex); };
 
 		if (addToTextEditor == undefined || addToTextEditor == true) {
 			let data = {
@@ -584,7 +603,7 @@
 	function removeTextMetadata(row) {
 		let tableElement = document.getElementById('metadata-table');
 		let textAreaElement = document.getElementById('json-config');
-		let field = tableElement.rows[row].getAttribute('data-field');
+		let field = tableElement.rows[row].childNodes[0].childNodes[1].getAttribute('data-field');
 
 		row = parseInt(row);
 
@@ -667,9 +686,9 @@
 	 * 
 	 */
 	function excludeTypeOnChange() {
-		let row = this.getAttribute('data-row');
+		let row = this.parentNode.getAttribute('data-row');
 		let jsonToMod = {
-			type: this.options[this.selectedIndex].value,
+			type: getTypebyCheck(this.checked),
 			path: getJsonExclude(row)['path']
 		};
 		modifyJsonExclude(row, jsonToMod);
@@ -682,7 +701,7 @@
 	 */
 	function excludeQueryOninput() {
 		let query = this.value;
-		let row = this.getAttribute('data-row');
+		let row = this.parentNode.getAttribute('data-row');
 		let jsonToMod = {
 			type: getJsonExclude(row)['type'],
 			path: query
@@ -696,9 +715,9 @@
 	 * 
 	 */
 	function metadataTypeOnChange() {
-		let currentField = this.parentNode.parentNode.getAttribute('data-field');
+		let currentField = this.parentNode.getAttribute('data-field');
 		let jsonToMod = {
-			type: this.options[this.selectedIndex].value,
+			type: getTypebyCheck(this.checked),
 			path: getTextMetadata(currentField)['path']
 		}
 		modifyTextMetadata(currentField, currentField, jsonToMod);
@@ -711,7 +730,7 @@
 	 */
 	function metadataQueryOnInput() {
 		let query = this.value;
-		let currentField = this.parentNode.parentNode.parentNode.getAttribute('data-field');
+		let currentField = this.parentNode.getAttribute('data-field');
 		let jsonToMod = {
 			type: getTextMetadata(currentField)['type'],
 			path: query
@@ -727,9 +746,9 @@
 	function metadataFieldOnInput() {
 		try {
 			let field = this.value;
-			let currentField = this.parentNode.parentNode.parentNode.getAttribute('data-field');
+			let currentField = this.parentNode.getAttribute('data-field');
 			modifyTextMetadata(field, currentField, getTextMetadata(currentField));
-			this.parentNode.parentNode.parentNode.setAttribute('data-field', field);
+			this.parentNode.setAttribute('data-field', field);
 		}
 		catch (err) {
 			alert(err);

@@ -7,7 +7,7 @@ body{
 
 #json-config{
 	width: 99%;
-	height: 420px;
+	height: 410px;
 }
 /*
 #editor-container{
@@ -85,25 +85,6 @@ body{
 	font-size: 20px;
 }
 
-.exclude-query{
-	width: 100%;
-}
-
-.metadata-query:first-child{
-	width: 20%;
-	border-right: thin solid #c8c8c8;
-	padding-left: 0; 
-}
-
-.metadata-query{
-	width: 100%;
-	padding-left: 1px;
-}
-
-.metadata-query span input{
-	width: 100%;
-}
-
 #editor > p{
 	margin-bottom: 0;
 }
@@ -149,7 +130,7 @@ body{
 }
 
 /*Visual editor CSS*/
-#editor table{
+/*#editor table{
 	width:100%;
 	border-spacing: 0 2px;
 }
@@ -168,9 +149,96 @@ body{
 	width: 100%;
 	border: 0;
 }
+
+.exclude-query{
+	width: 100%;
+}
+
+.metadata-query:first-child{
+	width: 20%;
+	border-right: thin solid #c8c8c8;
+	padding-left: 0; 
+}
+
+.metadata-query{
+	width: 100%;
+	padding-left: 1px;
+}
+
+.metadata-query span input{
+	width: 100%;
+}*/
 /******************/
 
 #fetch{
 	padding-left: 50px;
 	padding-right: 50px;
 }
+
+#exclude-table{
+	width: 100%;
+}
+
+#metadata-table{
+	width: 100%;
+}
+
+/*New visuals*/
+
+.rule {
+    border: 1px solid silver;
+    display: flex;
+    overflow: hidden;
+    margin-bottom: 5px;
+	width: 100%;
+	background-color: white;
+}
+
+.rule > *, .toggle::after {
+    line-height: 30px;
+    margin: 0;
+}
+
+.rule input[type=checkbox] {
+    margin: 0;
+}
+
+.rule input[type=text] {
+    border: 0;
+    flex: 1;
+    padding-left: 10px;
+    outline: none;
+	width: 100%;
+}
+
+.rule input[type=text]:nth-child(3) {
+	width: 100%;
+}
+
+.glyphicon-remove {
+    color: #CE3F00;
+    margin-right: -20px;
+    transition: margin 0.25s;
+    cursor: pointer;
+}
+
+.rule:hover .glyphicon-remove {
+    margin-right: 10px;
+}
+
+.toggle {
+    -webkit-appearance: inherit;
+    min-width: 60px;
+    text-align: center;
+    padding: 5px;
+    cursor: pointer;
+    border-right: 1px solid silver;
+}
+.toggle::after {
+    content: "XPATH";
+}
+.toggle:checked::after {
+    content: "CSS"
+}
+
+/*************/
