@@ -14,62 +14,82 @@
 
 <body>
 
-	<div>
-		<select id="storage">
+	<div class="body-wrapper">
+
+		<div>
+			<select id="storage">
 			
-		</select>
-		<button id="storageSave" class="button">Save</button>
-		<button id="storageDelete" class="button">Delete</button>
-		<button id="storageReset" class="button">Reset</button>
-		<p id="storageSuccess"></p>
-		<p id="storageError"></p>
-	</div>
-
-	<p id="editor-text">Editor</p>
-	<div id="editor-container">
-		<div id="tab-container">
-			<button data-show="editor" id="editor-button">Visual</button>
-			<button data-show="text-editor" id="text-editor-button">Text</button>
+			</select>
+			<button id="storageSave" class="button">Save</button>
+			<button id="storageDelete" class="button">Delete</button>
+			<button id="storageReset" class="button">Reset</button>
+			<p id="storageSuccess"></p>
+			<p id="storageError"></p>
 		</div>
-		<div id="editor" class="tab">
-			
+
+		<p id="editor-text">Editor</p>
+		<div id="editor-container">
+			<div id="tab-container">
+				<button data-show="editor" id="editor-button">Visual</button>
+				<button data-show="text-editor" id="text-editor-button">Text</button>
+			</div>
+			<div id="editor" class="tab">
+
+			</div>
+			<div id="text-editor" class="tab" style="display:none">
+				<textarea id="json-config">[
+  {
+    "for": {
+      "urls": [
+        ".*"
+      ]
+    },
+    "exclude": [
+      {
+        "type": "XPATH",
+        "path": ""
+      }
+    ],
+    "metadata": {}
+  }
+]</textarea>
+			</div>
 		</div>
-		<div id="text-editor" class="tab" style="display:none">
-			<textarea id="json-config"></textarea>
-		</div>
-	</div>
-	<button id="pretty" class="button">Make JSON pretty</button>
+		<button id="pretty" class="button">Make JSON pretty</button>
 
-	<br>
+		<br>
 
-	<button id="fetch" class="button">Run</button>
+		<button id="fetch" class="button">Run</button>
 
-	<br>
+		<br>
 
-	<div id="quickAddContainer">
-		<span>Quick add</span>
-		<div id="quickAddBorder">
-			<select id="queryToAddMeta">
+		<div id="quickAddContainer">
+			<span>Quick add</span>
+			<div id="quickAddBorder">
+				<select id="queryToAddMeta">
     		<option value="exclude">Exclude</option>
     		<option value="metadata">Metadata</option>
   		</select>
-			<input type="text" id="fieldToAdd" placeholder="Field">
-			<input type="text" id="queryToAdd" placeholder="Query">
-			<select id="queryToAddType">
+				<input type="text" id="fieldToAdd" placeholder="Field">
+				<input type="text" id="queryToAdd" placeholder="Query">
+				<select id="queryToAddType">
     		<option value="XPATH">XPATH</option>
     		<option value="CSS">CSS</option>
   		</select>
-			<button id="queryToAddButton">Add</button>
-			<!--<button id="mouseAdd">Mouse</button>
+				<button id="queryToAddButton">Add</button>
+				<!--<button id="mouseAdd">Mouse</button>
 			<input type="checkbox" id="addText">Add text-->
+			</div>
 		</div>
+
+		<p id="error"></p>
+
+		<table id="resultTable" border="1"></table>
+
+		<pre id="log"></pre>
+
 	</div>
 
-	<p id="error"></p>
-
-	<table id="resultTable" border="1"></table>
-
-	<pre id="log"></pre>
 </body>
 
 </html>

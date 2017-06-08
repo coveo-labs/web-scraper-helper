@@ -1,3 +1,8 @@
+body{
+	margin: 0;
+	font-size: 12px;
+}
+
 #json-config{
 	width: 99%;
 	height: 450px;
@@ -62,9 +67,10 @@ body{
 #editor-container{
 	border:1px solid black;
 	padding: 5px;
-	width: 98%;
+	width: 100%;
 	height: 500px;
 	overflow:scroll;
+	box-sizing: border-box;
 }
 
 #editor-container::-webkit-scrollbar { 
@@ -78,24 +84,22 @@ body{
 }
 
 .exclude-query{
-	width: 90%;
-}
-
-.exclude-query span input{
-	width: 99%;
+	width: 100%;
 }
 
 .metadata-query:first-child{
 	width: 20%;
-	padding-right: 5px;
+	border-right: thin solid #c8c8c8;
+	padding-left: 0; 
 }
 
 .metadata-query{
 	width: 100%;
+	padding-left: 1px;
 }
 
 .metadata-query span input{
-	width: 98%;
+	width: 100%;
 }
 
 #editor > p{
@@ -119,6 +123,7 @@ body{
 	cursor: pointer;
 	text-decoration: none;
 	border-radius: 2px;
+	margin-top: 5px;
 }
 
 .sub-button{
@@ -127,10 +132,36 @@ body{
 	border: none;
 	cursor: pointer;
 	text-decoration: none;
-	border-radius: 2px;
 }
 
 .center-button{
-	margin-top: 5px;
 	text-align: center;
+}
+
+.body-wrapper{
+	padding:10px;
+}
+
+#tab-container{
+	width: 100%;
+}
+
+#editor table{
+	width:100%;
+	border-spacing: 0 2px;
+}
+
+#editor td{
+	padding: 0;
+}
+
+#editor select{
+	border: 0;
+	padding-top: 1px;
+	padding-bottom: 1px;
+}
+
+#editor span input{
+	width: 100%;
+	border: 0;
 }
