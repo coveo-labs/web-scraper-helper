@@ -10,6 +10,7 @@
 	<title>Getting Started Extension's PANEL</title>
 	<script src="panel.js"></script>
 	<link rel="stylesheet" href="css/style.css">
+	<link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
 </head>
 
 <body>
@@ -37,29 +38,33 @@
 
 			</div>
 			<div id="text-editor" class="tab" style="display:none">
-				<textarea id="json-config">[
-  {
-    "for": {
-      "urls": [
-        ".*"
-      ]
-    },
-    "exclude": [
-      {
-        "type": "XPATH",
-        "path": ""
-      }
-    ],
-    "metadata": {}
-  }
-]</textarea>
+				<textarea id="json-config">
+					[
+						{
+							"for": {
+							"urls": [
+								".*"
+							]
+							},
+							"exclude": [
+							{
+								"type": "XPATH",
+								"path": ""
+							}
+							],
+							"metadata": {}
+						}
+					]
+				</textarea>
+				<button id="pretty" class="button">Make JSON pretty</button>
 			</div>
 		</div>
-		<button id="pretty" class="button">Make JSON pretty</button>
 
 		<br>
 
-		<button id="fetch" class="button">Run</button>
+		<div class="center-button">
+			<button id="fetch" class="button">Run</button>
+		</div>
 
 		<br>
 

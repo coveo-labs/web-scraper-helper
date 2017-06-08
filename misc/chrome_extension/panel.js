@@ -37,11 +37,16 @@
 	 * 
 	 */
 	function fetch() {
-		let valueToSend = document.getElementById('json-config').value;
-		if (valueToSend === defaultTextEditorValue) {
-			valueToSend = defaultJson;
+		try {
+			let valueToSend = document.getElementById('json-config').value;
+			if (valueToSend === defaultTextEditorValue) {
+				valueToSend = defaultJson;
+			}
+			chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, json: valueToSend });
 		}
-		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, json: valueToSend });
+		catch (err) {
+			document.getElementById('error').innerHTML = "Failed to parse JSON<br>" + err;
+		}
 	}
 
 	/**
@@ -495,6 +500,18 @@
 	 */
 	function addMetadataVisual(field, query, type, addToTextEditor) {
 		let tableElement = document.getElementById('metadata-table');
+
+		let shouldAdd = true;
+		[].slice.call(tableElement.rows).forEach(function (element) {
+			if (element.getAttribute('data-field') === "") {
+				shouldAdd = false;
+			}
+		}, this);
+
+		if(!shouldAdd){
+			return;
+		}
+
 		let row = tableElement.insertRow();
 		let fieldElement = row.insertCell(0);
 		let queryElement = row.insertCell(1);
@@ -530,7 +547,7 @@
 		selectElement.childNodes[0].selectedIndex = typeToAdd;
 		selectElement.childNodes[0].onchange = metadataTypeOnChange;
 		deleteElement.innerHTML = '<button class="sub-button">-</button>';
-		deleteElement.onclick = function () { removeTextMetadata(row.rowIndex, fieldToAdd); };
+		deleteElement.onclick = function () { removeTextMetadata(row.rowIndex); };
 
 		if (addToTextEditor == undefined || addToTextEditor == true) {
 			let data = {
@@ -563,11 +580,11 @@
 	 * Removes the row from the visual editor and the field of the text editor
 	 * 
 	 * @param {number} row - The row of the visual editor to remove
-	 * @param {string} field - The field to remove in the text editor
 	 */
-	function removeTextMetadata(row, field) {
+	function removeTextMetadata(row) {
 		let tableElement = document.getElementById('metadata-table');
 		let textAreaElement = document.getElementById('json-config');
+		let field = tableElement.rows[row].getAttribute('data-field');
 
 		row = parseInt(row);
 

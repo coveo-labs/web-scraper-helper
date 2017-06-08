@@ -1,11 +1,13 @@
 body{
 	margin: 0;
-	font-size: 12px;
+	font-size: 16px;
+	font-family: 'Lato', sans-serif;
+	color: #313A45;
 }
 
 #json-config{
 	width: 99%;
-	height: 450px;
+	height: 420px;
 }
 /*
 #editor-container{
@@ -146,6 +148,7 @@ body{
 	width: 100%;
 }
 
+/*Visual editor CSS*/
 #editor table{
 	width:100%;
 	border-spacing: 0 2px;
@@ -164,4 +167,10 @@ body{
 #editor span input{
 	width: 100%;
 	border: 0;
+}
+/******************/
+
+#fetch{
+	padding-left: 50px;
+	padding-right: 50px;
 }
