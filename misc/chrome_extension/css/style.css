@@ -9,10 +9,6 @@ body{
 	width: 99%;
 	height: 410px;
 }
-/*
-#editor-container{
-	padding-right: 7.5px;
-}*/
 
 #error{
 	color:red;
@@ -30,6 +26,7 @@ body{
 	background-color: #F1F1E1;
 }
 
+/*Result Table*/
 #resultTable{
 	background-color: #FAFAFA;
 }
@@ -51,6 +48,7 @@ body{
 	padding-left: 1em;
 	margin: 0;
 }
+/**************/
 
 #quickAddBorder{
 	border:1px solid black;
@@ -109,14 +107,6 @@ body{
 	margin-top: 5px;
 }
 
-.sub-button{
-	background-color: red;
-	color: white;
-	border: none;
-	cursor: pointer;
-	text-decoration: none;
-}
-
 .center-button{
 	text-align: center;
 }
@@ -128,47 +118,6 @@ body{
 #tab-container{
 	width: 100%;
 }
-
-/*Visual editor CSS*/
-/*#editor table{
-	width:100%;
-	border-spacing: 0 2px;
-}
-
-#editor td{
-	padding: 0;
-}
-
-#editor select{
-	border: 0;
-	padding-top: 1px;
-	padding-bottom: 1px;
-}
-
-#editor span input{
-	width: 100%;
-	border: 0;
-}
-
-.exclude-query{
-	width: 100%;
-}
-
-.metadata-query:first-child{
-	width: 20%;
-	border-right: thin solid #c8c8c8;
-	padding-left: 0; 
-}
-
-.metadata-query{
-	width: 100%;
-	padding-left: 1px;
-}
-
-.metadata-query span input{
-	width: 100%;
-}*/
-/******************/
 
 #fetch{
 	padding-left: 50px;
@@ -205,25 +154,22 @@ body{
 
 .rule input[type=text] {
     border: 0;
-    flex: 1;
+    /*flex: 1;*/
     padding-left: 10px;
     outline: none;
 	width: 100%;
-}
-
-.rule input[type=text]:nth-child(3) {
-	width: 100%;
+	text-overflow: ellipsis;
 }
 
 .glyphicon-remove {
     color: #CE3F00;
-    margin-right: -20px;
+    visibility: hidden;
     transition: margin 0.25s;
     cursor: pointer;
 }
 
 .rule:hover .glyphicon-remove {
-    margin-right: 10px;
+    visibility: visible;
 }
 
 .toggle {
@@ -242,3 +188,12 @@ body{
 }
 
 /*************/
+
+.field-input{
+	width: 20% !important;
+	border-right: 1px solid silver !important;
+}
+
+#storage{
+	padding: 10px;
+}

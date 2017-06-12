@@ -49,7 +49,7 @@ window.onload = function () {
 			return { type: title, value: elements };
 		}
 		catch (err) {
-			return { type: '__error', value: 'Failed to parse XPath \'' + xpathString + '\'<br>' + err };
+			return { type: '__error', value: 'Failed to parse XPath "' + xpathString + '"<br>' + err };
 		}
 	}
 
@@ -70,14 +70,14 @@ window.onload = function () {
 			nodes.forEach(function (e) {
 				let value = e;
 				if (shouldReturnText) {
-					value  = e.textContent;
+					value = e.textContent;
 				}
 				elements.push(value);
 			}, this);
 			return { type: title, value: elements };
 		}
 		catch (err) {
-			return { type: '__error', value: 'Failed to parse CSS \'' + cssSelector + '\'<br>' + err };
+			return { type: '__error', value: 'Failed to parse CSS "' + cssSelector + '"<br>' + err };
 		}
 	}
 
@@ -308,6 +308,76 @@ window.onload = function () {
 
 	}
 
+	function validateJson(jsonToValidate) {
+		let jsonToSend = {
+			validate:
+			{
+				metadata: {},
+				exclude: [],
+				errors: []
+			}
+		}
+
+		jsonToValidate = JSON.parse(jsonToValidate);
+
+		let exludeData = jsonToValidate[0]['exclude'];
+		let metadataData = jsonToValidate[0]['metadata'];
+
+		exludeData.forEach(function (element) {
+			let type = element['type'];
+			let value;
+			if (type === 'CSS') {
+				value = parseCss('exclude', element['path']);
+			}
+			else {
+				value = parseXPath('exclude', element['path']);
+			}
+
+			if (value['type'] === '__error') {
+				jsonToSend['validate']['exclude'].push('bg-danger');
+				jsonToSend['validate']['errors'].push(value);
+			}
+			else {
+				if (value['value'].length > 0) {
+					jsonToSend['validate']['exclude'].push('bg-success');
+				}
+				else {
+					jsonToSend['validate']['exclude'].push('bg-warning');
+				}
+			}
+
+		}, this);
+
+		for (let key in metadataData) {
+			let element = metadataData[key];
+			let type = element['type'];
+			let value;
+			if (type === 'CSS') {
+				value = parseCss('metadata', element['path']);
+			}
+			else {
+				value = parseXPath('metadata', element['path']);
+			}
+
+			if (value['type'] === '__error') {
+				jsonToSend['validate']['metadata'][key] = 'bg-danger';
+				jsonToSend['validate']['errors'].push(value);
+			}
+			else {
+				if (value['value'].length > 0) {
+					jsonToSend['validate']['metadata'][key] = 'bg-success';
+				}
+				else {
+					jsonToSend['validate']['metadata'][key] = 'bg-warning';
+				}
+			}
+		}
+
+		setTimeout(function () {
+			chrome.runtime.sendMessage(jsonToSend);
+		}, 1);
+	}
+
 	/**
 	 * Adds a listener to the received messages
 	 * 
@@ -326,6 +396,10 @@ window.onload = function () {
 
 			if (request.log) {
 				console.log(request.log);
+			}
+
+			if (request.validate) {
+				validateJson(request.validate);
 			}
 
 		});

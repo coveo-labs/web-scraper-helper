@@ -1,6 +1,7 @@
 (function () {
 
 	var defaultTextEditorValue = 'Create/Load a file...';
+	var autoValidateTimeout;
 
 	//TEST JSON VALUE
 	var defaultJson = [{
@@ -57,6 +58,31 @@
 		catch (err) {
 			document.getElementById('error').innerHTML = "Failed to parse JSON<br>" + err;
 		}
+	}
+
+	/**
+	 * Validates the current JSON values by adding colors to the visual editor
+	 * 
+	 */
+	function validateJson() {
+		try {
+			let valueToSend = document.getElementById('json-config').value;
+			if (valueToSend === defaultTextEditorValue) {
+				valueToSend = defaultJson;
+			}
+			chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, validate: valueToSend });
+			fetch();
+		}
+		catch (err) {
+			document.getElementById('error').innerHTML = "Failed to parse JSON<br>" + err;
+		}
+	}
+
+	function autoValidate() {
+		if (autoValidateTimeout) {
+			clearTimeout(autoValidateTimeout);
+		}
+		autoValidateTimeout = setTimeout(validateJson, 100);
 	}
 
 	/**
@@ -139,6 +165,20 @@
 	 */
 	function mouseAdd() {
 		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, mouse: '1' });
+	}
+
+
+	/**
+	 * Checks if the key exists in the metadata of the json
+	 * 
+	 * @param {string} key - The key
+	 * @returns {boolean} True if the key exists
+	 */
+	function DoesKeyExist(key) {
+		let textAreaElement = document.getElementById('json-config');
+		let currentValue = textAreaElement.value;
+		let json = JSON.parse(currentValue);
+		return json[0]['metadata'][key] !== undefined
 	}
 
 
@@ -428,7 +468,6 @@
    			</div>
 			`;
 
-			ruleElement.childNodes[1].setAttribute('data-row', row.rowIndex);
 			ruleElement.childNodes[1].childNodes[1].onchange = excludeTypeOnChange;
 			ruleElement.childNodes[1].childNodes[1].checked = typeToAdd;
 			ruleElement.childNodes[1].childNodes[3].oninput = excludeQueryOninput;
@@ -485,6 +524,7 @@
 			let json = JSON.parse(currentValue);
 			json[0]['exclude'].splice(index, 1);
 			textAreaElement.value = JSON.stringify(json, null, 2);
+			autoValidate();
 		}
 
 	}
@@ -518,7 +558,7 @@
 		//Checks if an empty field already exists
 		//if it does, then dont create a new one
 		let shouldAdd = true;
-		
+
 		for (var i = 0; i < tableElement.rows.length; i++) {
 			if (tableElement.rows[i].childNodes[0].childNodes[1].getAttribute('data-field') === "") {
 				shouldAdd = false;
@@ -613,6 +653,7 @@
 			let json = JSON.parse(currentValue);
 			delete json[0]['metadata'][field];
 			textAreaElement.value = JSON.stringify(json, null, 2);
+			autoValidate();
 		}
 
 	}
@@ -678,6 +719,8 @@
 				addExcludeVisual(element['path'], element['type'], false);
 			}, this);
 		}
+
+		validateJson();
 	}
 
 
@@ -686,12 +729,13 @@
 	 * 
 	 */
 	function excludeTypeOnChange() {
-		let row = this.parentNode.getAttribute('data-row');
+		let row = this.parentNode.parentNode.parentNode.rowIndex;
 		let jsonToMod = {
 			type: getTypebyCheck(this.checked),
 			path: getJsonExclude(row)['path']
 		};
 		modifyJsonExclude(row, jsonToMod);
+		autoValidate();
 	}
 
 
@@ -701,12 +745,13 @@
 	 */
 	function excludeQueryOninput() {
 		let query = this.value;
-		let row = this.parentNode.getAttribute('data-row');
+		let row = this.parentNode.parentNode.parentNode.rowIndex;
 		let jsonToMod = {
 			type: getJsonExclude(row)['type'],
 			path: query
 		};
 		modifyJsonExclude(row, jsonToMod);
+		autoValidate();
 	}
 
 
@@ -721,6 +766,7 @@
 			path: getTextMetadata(currentField)['path']
 		}
 		modifyTextMetadata(currentField, currentField, jsonToMod);
+		autoValidate();
 	}
 
 
@@ -736,6 +782,7 @@
 			path: query
 		};
 		modifyTextMetadata(currentField, currentField, jsonToMod);
+		autoValidate();
 	}
 
 
@@ -746,9 +793,16 @@
 	function metadataFieldOnInput() {
 		try {
 			let field = this.value;
-			let currentField = this.parentNode.getAttribute('data-field');
-			modifyTextMetadata(field, currentField, getTextMetadata(currentField));
-			this.parentNode.setAttribute('data-field', field);
+			if (DoesKeyExist(field)) {
+				this.setAttribute("class", "field-input bg-danger");
+			}
+			else {
+				this.setAttribute("class", "field-input");
+				let currentField = this.parentNode.getAttribute('data-field');
+				modifyTextMetadata(field, currentField, getTextMetadata(currentField));
+				this.parentNode.setAttribute('data-field', field);
+				autoValidate();
+			}
 		}
 		catch (err) {
 			alert(err);
@@ -777,6 +831,7 @@
 			document.getElementById('storageReset').onclick = resetStorage;
 			document.getElementById('editor-button').onclick = changeEditorTab;
 			document.getElementById('text-editor-button').onclick = changeEditorTab;
+			document.getElementById('validate').onclick = validateJson;
 			initStorageSelect();
 
 			//Hides or shows the field by default
@@ -835,6 +890,36 @@
 				if (message.mouse) {
 					document.getElementById('queryToAdd').value = message.mouse + ((document.getElementById("addText").checked) ? "/text()" : "");
 					document.getElementById('queryToAddType').selectedIndex = 0;
+				}
+
+				if (message.validate) {
+					let errorElement = document.getElementById('error');
+					errorElement.innerHTML = "";
+					message.validate.errors.forEach(function (element) {
+						errorElement.innerHTML += element['value'] + "<br>";
+					}, this);
+
+					let excludeTable = document.getElementById("exclude-table");
+					let metadataTable = document.getElementById("metadata-table");
+
+					if (excludeTable && excludeTable.rows) {
+						for (let i = 0; i < excludeTable.rows.length; i++) {
+							//The toggle
+							let element = excludeTable.rows[i].childNodes[0].childNodes[1].childNodes[1];
+							element.removeAttribute("class");
+							element.setAttribute("class", "toggle " + message.validate.exclude[i]);
+						}
+					}
+
+					if (metadataTable && metadataTable.rows) {
+						for (let i = 0; i < metadataTable.rows.length; i++) {
+							//The toggle
+							let element = metadataTable.rows[i].childNodes[0].childNodes[1].childNodes[1];
+							let key = metadataTable.rows[i].childNodes[0].childNodes[1].getAttribute('data-field');
+							element.removeAttribute("class");
+							element.setAttribute("class", "toggle " + message.validate.metadata[key]);
+						}
+					}
 				}
 
 			});
