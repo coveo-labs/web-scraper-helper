@@ -78,6 +78,11 @@
 		}
 	}
 
+
+	/**
+	 * Launches the a timeout to validate the visual editor after 100ms
+	 * 
+	 */
 	function autoValidate() {
 		if (autoValidateTimeout) {
 			clearTimeout(autoValidateTimeout);
@@ -415,9 +420,20 @@
 
 			let toShow = this.getAttribute('data-show');
 
-			if (document.getElementById(toShow).style.display != 'block') {
+			let liElements = this.parentNode.parentNode.childNodes;
+
+			liElements.forEach(function (element) {
+
+				if (element.tagName === 'LI') {
+					element.removeAttribute('class');
+				}
+			}, this);
+
+			this.parentNode.setAttribute('class', 'active');
+
+			if (document.getElementById(toShow).style.display !== 'block') {
 				//Tabs switching from text to visual editor
-				if (toShow == 'editor') {
+				if (toShow === 'editor') {
 					buildVisualFromText();
 				}
 			}
@@ -920,6 +936,10 @@
 							element.setAttribute("class", "toggle " + message.validate.metadata[key]);
 						}
 					}
+				}
+
+				if (message.reload) {
+					autoValidate();
 				}
 
 			});

@@ -23,7 +23,6 @@ body{
 }
 
 body{
-	background-color: #F1F1E1;
 }
 
 /*Result Table*/
@@ -69,12 +68,9 @@ body{
 	padding: 5px;
 	width: 100%;
 	height: 500px;
-	overflow:scroll;
+	overflow-y: scroll;
+	overflow-x: hidden;
 	box-sizing: border-box;
-}
-
-#editor-container::-webkit-scrollbar { 
-    display: none; 
 }
 
 #editor-text{

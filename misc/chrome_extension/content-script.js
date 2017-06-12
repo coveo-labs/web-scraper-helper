@@ -2,6 +2,12 @@
 window.onload = function () {
 	// your code 
 
+	setTimeout(function () {
+		let jsonToSend = {};
+		jsonToSend.reload = 1;
+		chrome.runtime.sendMessage(jsonToSend);
+	}, 1);
+
 	var port = chrome.runtime.connect();
 	//global since it needs to persist beyond the function scope
 	var elementsToHide = [];
@@ -10,7 +16,6 @@ window.onload = function () {
 	var ableToClick = true;
 	document.body.onmouseover = mouseoverHandler;
 	document.body.onclick = clickHandler;
-
 
 	/**
 	 * Parses the XPath
