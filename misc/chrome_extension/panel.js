@@ -553,7 +553,7 @@
 		ruleElement.innerHTML = `
 			<div class="rule">
 				<input class="toggle" type="checkbox">
-				<input type="text" placeholder="Field">
+				<input type="text" placeholder="Field" class="field-input">
 				<input type="text" placeholder="Query">
 				<span class="glyphicon glyphicon-remove"></span>
    			</div>
@@ -849,7 +849,6 @@
 		}
 	}
 
-	//Run the init function
-	setTimeout(init, 1);
+	setTimeout(init, 100);
 
 })();
