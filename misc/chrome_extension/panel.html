@@ -7,97 +7,45 @@
 <html>
 
 <head>
-	<title>Getting Started Extension's PANEL</title>
-	<script src="panel.js"></script>
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
-	 crossorigin="anonymous">
-	<link rel="stylesheet" href="css/style.css">
-	<link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+  <title>Getting Started Extension's PANEL</title>
+  <script src="panel.js"></script>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-	<div class="body-wrapper">
+  <div id="textarea-container">
+    <textarea id="json-config" cols="50" rows="30"></textarea>
+  </div>
+  <button id="pretty">Make JSON pretty</button>
 
-		<div>
-			<select id="storage">
-			
-			</select>
-			<button id="storageSave" class="button">Save</button>
-			<button id="storageDelete" class="button">Delete</button>
-			<button id="storageReset" class="button">Reset</button>
-			<p id="storageSuccess"></p>
-			<p id="storageError"></p>
-		</div>
+  <br>
 
-		<p id="editor-text">Editor</p>
-		<div id="editor-container">
-			<ul class="nav nav-tabs">
-				<li class="active"><a href="#" data-show="editor" id="editor-button">Visual</a></li>
-				<li><a href="#" data-show="text-editor" id="text-editor-button">Text</a></li>
-			</ul>
-			<div id="editor" class="tab">
+  <button id="fetch">Run</button>
 
-			</div>
-			<div id="text-editor" class="tab" style="display:none">
-				<textarea id="json-config">
-					[
-						{
-							"for": {
-							"urls": [
-								".*"
-							]
-							},
-							"exclude": [
-							{
-								"type": "XPATH",
-								"path": ""
-							}
-							],
-							"metadata": {}
-						}
-					]
-				</textarea>
-				<button id="pretty" class="button">Make JSON pretty</button>
-			</div>
-		</div>
+  <br>
 
-		<br>
+  <select id="queryToAddMeta">
+    <option value="exclude">Exclude</option>
+    <option value="metadata">Metadata</option>
+  </select>
+  <input type="text" id="fieldToAdd" placeholder="Field">
+  <input type="text" id="queryToAdd" placeholder="Query">
+  <select id="queryToAddType">
+    <option value="XPATH">XPATH</option>
+    <option value="CSS">CSS</option>
+  </select>
+  <button id="queryToAddButton">Add</button>
 
-		<div class="center-button">
-			<button id="fetch" class="button">Run</button>
-			<button id="validate" class="button">Validate</button>
-		</div>
+  <br>
 
-		<br>
+  <p id="error"></p>
 
-		<div id="quickAddContainer">
-			<span>Quick add</span>
-			<div id="quickAddBorder">
-				<select id="queryToAddMeta">
-    		<option value="exclude">Exclude</option>
-    		<option value="metadata">Metadata</option>
-  		</select>
-				<input type="text" id="fieldToAdd" placeholder="Field">
-				<input type="text" id="queryToAdd" placeholder="Query">
-				<select id="queryToAddType">
-    		<option value="XPATH">XPATH</option>
-    		<option value="CSS">CSS</option>
-  		</select>
-				<button id="queryToAddButton">Add</button>
-				<!--<button id="mouseAdd">Mouse</button>
-			<input type="checkbox" id="addText">Add text-->
-			</div>
-		</div>
+  <br>
 
-		<p id="error"></p>
+  <table id="resultTable" border="1"></table>
 
-		<table id="resultTable" border="1"></table>
-
-		<pre id="log"></pre>
-
-	</div>
-
+  <pre id="log"></pre>
 </body>
 
 </html>
