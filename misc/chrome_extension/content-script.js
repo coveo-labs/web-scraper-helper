@@ -11,7 +11,7 @@ window.onload = function () {
 	var __port = chrome.runtime.connect();
 	//global since it needs to persist beyond the function scope
 	var __elementsToHide = [];
-	var __previousSelecetedElement;
+	var __previousSelectedElement;
 	var __ableToMouseOver = false;
 	var __ableToClick = true;
 	document.body.onmouseover = mouseoverHandler;
@@ -177,30 +177,27 @@ window.onload = function () {
 		}
 
 		if (event.target === document.body ||
-			(__previousSelecetedElement && __previousSelecetedElement === event.target)) {
+			(__previousSelectedElement && __previousSelectedElement === event.target)) {
 			return;
 		}
 
 		//Removes the __highlight class from the last element
 		try {
-			if (__previousSelecetedElement) {
-				__previousSelecetedElement.className = __previousSelecetedElement.className.replace(/\b__highlight\b/, '');
-				__previousSelecetedElement = null;
+			if (__previousSelectedElement) {
+				__previousSelectedElement.className = __previousSelectedElement.className.replace(/\b__highlight\b/, '');
 			}
-		}
-		catch (err) {
-			__previousSelecetedElement = null;
-		}
+		} catch (err) { }
+		__previousSelectedElement = null;
 
 		//Adds the __highlight class to the new element
 		try {
 			if (event.target) {
-				__previousSelecetedElement = event.target;
-				__previousSelecetedElement.className += ' __highlight';
+				__previousSelectedElement = event.target;
+				__previousSelectedElement.className += ' __highlight';
 			}
 		}
 		catch (err) {
-			__previousSelecetedElement = null;
+			__previousSelectedElement = null;
 		}
 	}
 
@@ -235,17 +232,17 @@ window.onload = function () {
 		__ableToMouseOver = false;
 
 		let jsonToSend = {
-			mouse: getXPath(__previousSelecetedElement)
+			mouse: getXPath(__previousSelectedElement)
 		};
 
 		try {
-			if (__previousSelecetedElement) {
-				__previousSelecetedElement.className = __previousSelecetedElement.className.replace(/\bhighlight\b/, '');
-				__previousSelecetedElement = null;
+			if (__previousSelectedElement) {
+				__previousSelectedElement.className = __previousSelectedElement.className.replace(/\b__highlight\b/, '');
+				__previousSelectedElement = null;
 			}
 		}
 		catch (err) {
-			__previousSelecetedElement = null;
+			__previousSelectedElement = null;
 			jsonToSend['return']['__error'] = err;
 		}
 

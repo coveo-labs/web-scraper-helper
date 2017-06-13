@@ -204,13 +204,13 @@
 	function initStorageSelect(callback) {
 		try {
 			let select = document.getElementById('storage');
-			select.innerHTML = '<option selected disabled>Select a file to work on</option><option disabled>------------------------------</option>';
+			let optionsHtml = ['<option selected disabled>Select a file to work on</option><option disabled>------------------------------</option>'];
 			getStorageValues(function (results) {
 				results.forEach(function (element) {
-
-					select.innerHTML += `<option value="${element}">${element}</option>`;
+					optionsHtml.push(`<option value="${element}">${element}</option>`);
 				}, this);
-				select.innerHTML += '<option value="__create">Create new file...</option>';
+				optionsHtml.push('<option value="__create">Create new file...</option>');
+				select.innerHTML = optionsHtml.join('');
 				if (callback) {
 					callback();
 				}
@@ -274,8 +274,8 @@
 			if (value == '__create') {
 				let newJsonFileName = window.prompt('New json config file name');
 				if (newJsonFileName) {
-					if (!result.includes(newJsonFileName)){
-						if (newJsonFileName != '' && newJsonFileName != '__json' && newJsonFileName != '__create' && newJsonFileName != 'null'){
+					if (!result.includes(newJsonFileName)) {
+						if (newJsonFileName != '' && newJsonFileName != '__json' && newJsonFileName != '__create' && newJsonFileName != 'null') {
 
 							result.push(newJsonFileName);
 							let resultJson = {};
@@ -403,7 +403,7 @@
 	 * 
 	 */
 	function resetStorage() {
-		if (confirm("THIS WILL DELETE EVERY FILE IN STORAGE\nARE YOU SURE?")) {
+		if (confirm("This will delete every file in storage.\nYou cannot recover them after this.\nAre you sure?")) {
 			chrome.storage.local.clear(function () {
 				initStorageSelect();
 			});
