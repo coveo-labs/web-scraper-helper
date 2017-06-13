@@ -96,11 +96,13 @@ body{
 
 .add-button{
 	background-color: green;
+	height: 28px;
+    width: 28px;
 	color: white;
 	border: none;
 	cursor: pointer;
 	text-decoration: none;
-	border-radius: 2px;
+	border-radius: 28px;
 	margin-top: 5px;
 }
 

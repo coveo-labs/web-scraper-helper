@@ -721,13 +721,13 @@
 			<table id="exclude-table"> 
 			</table> 
 			<div class="center-button">
-				<button id="add-exclude" class="add-button">Add +</button> 
+				<button id="add-exclude" class="add-button"><span class="glyphicon glyphicon-plus"></span></button> 
 			</div>
 			<p>Metadata</p> 
 			<table id="metadata-table"> 
 			</table> 
 			<div class="center-button">
-				<button id="add-metadata" class="add-button">Add +</button>
+				<button id="add-metadata" class="add-button"><span class="glyphicon glyphicon-plus"></span></button>
 			</div>
 			`;
 			document.getElementById('add-exclude').onclick = addExcludeVisual;
