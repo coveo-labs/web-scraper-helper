@@ -60,6 +60,15 @@
 		}
 	}
 
+
+	/**
+	 * Clears the webpage CSS and results table
+	 * 
+	 */
+	function clearPage(){
+		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, json: defaultJson });
+	}
+
 	/**
 	 * Validates the current JSON values by adding colors to the visual editor
 	 * 
@@ -380,9 +389,11 @@
 	 * 
 	 */
 	function resetStorage() {
-		chrome.storage.local.clear(function () {
-			initStorageSelect();
-		});
+		if(confirm("THIS WILL DELETE EVERY FILE IN STORAGE\nARE YOU SURE?")){
+			chrome.storage.local.clear(function () {
+				initStorageSelect();
+			});
+		}
 	}
 
 
@@ -848,6 +859,7 @@
 			document.getElementById('editor-button').onclick = changeEditorTab;
 			document.getElementById('text-editor-button').onclick = changeEditorTab;
 			document.getElementById('validate').onclick = validateJson;
+			document.getElementById('clear').onclick = clearPage;
 			initStorageSelect();
 
 			//Hides or shows the field by default
