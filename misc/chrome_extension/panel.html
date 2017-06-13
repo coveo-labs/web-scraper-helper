@@ -7,7 +7,7 @@
 <html>
 
 <head>
-	<title>Getting Started Extension's PANEL</title>
+	<title>Coveo webscraper helper</title>
 	<script src="panel.js"></script>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
 	 crossorigin="anonymous">
@@ -30,12 +30,11 @@
 			<p id="storageError"></p>
 		</div>
 
-		<p id="editor-text">Editor</p>
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="#" data-show="editor" id="editor-button">Visual</a></li>
+			<li><a href="#" data-show="text-editor" id="text-editor-button">Text</a></li>
+		</ul>
 		<div id="editor-container">
-			<ul class="nav nav-tabs">
-				<li class="active"><a href="#" data-show="editor" id="editor-button">Visual</a></li>
-				<li><a href="#" data-show="text-editor" id="text-editor-button">Text</a></li>
-			</ul>
 			<div id="editor" class="tab">
 
 			</div>
@@ -67,6 +66,7 @@
 		<div class="center-button">
 			<button id="fetch" class="button">Run</button>
 			<button id="validate" class="button">Validate</button>
+			<button id="clear" class="button">Clear</button>
 		</div>
 
 		<br>
