@@ -65,7 +65,7 @@
 	 * Clears the webpage CSS and results table
 	 * 
 	 */
-	function clearPage(){
+	function clearPage() {
 		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, json: defaultJson });
 	}
 
@@ -188,11 +188,11 @@
 	 * @param {string} key - The key
 	 * @returns {boolean} True if the key exists
 	 */
-	function DoesKeyExist(key) {
+	function doesKeyExist(key) {
 		let textAreaElement = document.getElementById('json-config');
 		let currentValue = textAreaElement.value;
 		let json = JSON.parse(currentValue);
-		return json[0]['metadata'][key] !== undefined
+		return json[0]['metadata'][key] !== undefined;
 	}
 
 
@@ -208,7 +208,7 @@
 			getStorageValues(function (results) {
 				results.forEach(function (element) {
 
-					select.innerHTML += '<option value="' + element + '">' + element + '</option>"';
+					select.innerHTML += `<option value="${element}">${element}</option>`;
 				}, this);
 				select.innerHTML += '<option value="__create">Create new file...</option>';
 				if (callback) {
@@ -272,23 +272,37 @@
 		getStorageValues(function (result) {
 
 			if (value == '__create') {
-				let newJsonName = window.prompt('New json name');
-				if (newJsonName && !result.includes(newJsonName) && (newJsonName != '' && newJsonName != '__json' && newJsonName != '__create' && newJsonName != 'null')) {
-					result.push(newJsonName);
-					let resultJson = {};
-					resultJson['__jsons'] = result;
-					chrome.storage.local.set(resultJson, function () {
-						let newJson = {};
-						newJson[newJsonName] = defaultJson;
-						chrome.storage.local.set(newJson);
-						initStorageSelect(function () {
-							e.selectedIndex = e.options.length - 2;
-							loadTextEditor();
-						});
-					});
+				let newJsonFileName = window.prompt('New json config file name');
+				if (newJsonFileName) {
+					if (!result.includes(newJsonFileName)){
+						if (newJsonFileName != '' && newJsonFileName != '__json' && newJsonFileName != '__create' && newJsonFileName != 'null'){
+
+							result.push(newJsonFileName);
+							let resultJson = {};
+							resultJson['__jsons'] = result;
+							chrome.storage.local.set(resultJson, function () {
+								let newJson = {};
+								newJson[newJsonFileName] = defaultJson;
+								chrome.storage.local.set(newJson);
+								initStorageSelect(function () {
+									e.selectedIndex = e.options.length - 2;
+									loadTextEditor();
+								});
+							});
+
+						}
+						else {
+							errorElement.innerHTML += 'Name is a keyword<br>';
+							e.selectedIndex = 0;
+						}
+					}
+					else {
+						errorElement.innerHTML += 'Name already taken<br>';
+						e.selectedIndex = 0;
+					}
 				}
 				else {
-					errorElement.innerHTML += 'Naming error<br>';
+					errorElement.innerHTML += 'No name entered<br>';
 					e.selectedIndex = 0;
 				}
 			}
@@ -389,7 +403,7 @@
 	 * 
 	 */
 	function resetStorage() {
-		if(confirm("THIS WILL DELETE EVERY FILE IN STORAGE\nARE YOU SURE?")){
+		if (confirm("THIS WILL DELETE EVERY FILE IN STORAGE\nARE YOU SURE?")) {
 			chrome.storage.local.clear(function () {
 				initStorageSelect();
 			});
@@ -820,7 +834,7 @@
 	function metadataFieldOnInput() {
 		try {
 			let field = this.value;
-			if (DoesKeyExist(field)) {
+			if (doesKeyExist(field)) {
 				this.setAttribute("class", "field-input bg-danger");
 			}
 			else {
