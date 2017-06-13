@@ -1,8 +1,8 @@
 {
 	"manifest_version": 2,
 	"name": "Coveo Web Crawler",
-	"description": "This extension shows a Google Image search result for the current page",
-	"version": "1.0",
+	"description": "Quick web crawler config creator",
+	"version": "0.1",
 	"background": {
 		"scripts": [
 			"background.js"
@@ -20,10 +20,13 @@
 		"js": [
 			"content-script.js"
 		],
+		"css":[
+			"css/inject.css"
+		],
 		"all_frames": false
 	}],
 
 	"permissions": [
-		"tabs", "http://*/*", "https://*/*"
+		"tabs", "http://*/*", "https://*/*", "storage"
 	]
 }
