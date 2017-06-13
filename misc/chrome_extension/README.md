@@ -1,4 +1,4 @@
-#Chrome Extention
+#Chrome Extension
 The chrome extension part
 
 ## Description
@@ -11,7 +11,7 @@ This started out as a tampermonkey script turned into a chrome extension. The go
 - Find the "chrome_extension" folder in the repo
 
 ## How to run
-On any webpage, just open the developer tools (Control+Shift+I) and navigate to the "Web Scraping"
+On any webpage, just open the developer tools (Control+Shift+I) and navigate to the "Web Scraping" tab
 
 ## Dependencies
 Google Chrome or Chromium
