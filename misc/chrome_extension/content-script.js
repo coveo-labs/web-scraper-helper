@@ -8,12 +8,12 @@ window.onload = function () {
 		chrome.runtime.sendMessage(jsonToSend);
 	}, 1);
 
-	var port = chrome.runtime.connect();
+	var __port = chrome.runtime.connect();
 	//global since it needs to persist beyond the function scope
-	var elementsToHide = [];
-	var prev;
-	var ableToMouseOver = false;
-	var ableToClick = true;
+	var __elementsToHide = [];
+	var __previousSelectedElement;
+	var __ableToMouseOver = false;
+	var __ableToClick = true;
 	document.body.onmouseover = mouseoverHandler;
 	document.body.onclick = clickHandler;
 
@@ -105,8 +105,8 @@ window.onload = function () {
 		let exclude = json[0]['exclude'];
 
 		//Show elements that were previously hidden from the elementsToHide global
-		if (elementsToHide.length > 0) {
-			elementsToHide.forEach(function (elementObject) {
+		if (__elementsToHide.length > 0) {
+			__elementsToHide.forEach(function (elementObject) {
 				if (elementObject['type'] != '__error') {
 					elementObject['value'].forEach(function (element) {
 						element.style.opacity = 1;
@@ -116,7 +116,7 @@ window.onload = function () {
 		}
 
 		//Reset the elementsToHide after everything is back to normal
-		elementsToHide = []
+		__elementsToHide = []
 
 		//Grab all the metadata specified in the json
 		//Gets the nodeValue for XPATH
@@ -135,16 +135,16 @@ window.onload = function () {
 		for (let key in exclude) {
 			let currentMetadataObject = exclude[key];
 			if (currentMetadataObject['type'] === 'CSS') {
-				elementsToHide.push(parseCss(key, currentMetadataObject['path'], false));
+				__elementsToHide.push(parseCss(key, currentMetadataObject['path'], false));
 			}
 			else if (currentMetadataObject['type'] === 'XPATH') {
-				elementsToHide.push(parseXPath(key, currentMetadataObject['path'], false));
+				__elementsToHide.push(parseXPath(key, currentMetadataObject['path'], false));
 			}
 		}
 
 		//Reduces opacity of elements in elementsToHide
 		//If an error is found, adds it in elements to send back
-		elementsToHide.forEach(function (elementObject) {
+		__elementsToHide.forEach(function (elementObject) {
 			if (elementObject['type'] != '__error') {
 				elementObject['value'].forEach(function (element) {
 					element.style.opacity = 0.1;
@@ -172,33 +172,32 @@ window.onload = function () {
 	 */
 	function mouseoverHandler(event) {
 
-		if (!ableToMouseOver) {
+		if (!__ableToMouseOver) {
 			return;
 		}
 
 		if (event.target === document.body ||
-			(prev && prev === event.target)) {
+			(__previousSelectedElement && __previousSelectedElement === event.target)) {
 			return;
 		}
 
+		//Removes the __highlight class from the last element
 		try {
-			if (prev) {
-				prev.className = prev.className.replace(/\b__highlight\b/, '');
-				prev = undefined;
+			if (__previousSelectedElement) {
+				__previousSelectedElement.className = __previousSelectedElement.className.replace(/\b__highlight\b/, '');
 			}
-		}
-		catch (err) {
-			prev = undefined;
-		}
+		} catch (err) { }
+		__previousSelectedElement = null;
 
+		//Adds the __highlight class to the new element
 		try {
 			if (event.target) {
-				prev = event.target;
-				prev.className += ' highlight';
+				__previousSelectedElement = event.target;
+				__previousSelectedElement.className += ' __highlight';
 			}
 		}
 		catch (err) {
-			prev = undefined;
+			__previousSelectedElement = null;
 		}
 	}
 
@@ -212,11 +211,11 @@ window.onload = function () {
 	 */
 	function clickHandler(e) {
 
-		if (!ableToClick) {
+		if (!__ableToClick) {
 			e.stopPropagation();
 			e.preventDefault();
 			e.stopImmediatePropagation();
-			ableToClick = true;
+			__ableToClick = true;
 			sendMouseElement();
 			return false;
 		}
@@ -229,20 +228,21 @@ window.onload = function () {
 	 * 
 	 */
 	function sendMouseElement() {
-		ableToClick = true;
-		ableToMouseOver = false;
+		__ableToClick = true;
+		__ableToMouseOver = false;
 
-		let jsonToSend = {}
-		jsonToSend['mouse'] = getXPath(prev);
+		let jsonToSend = {
+			mouse: getXPath(__previousSelectedElement)
+		};
 
 		try {
-			if (prev) {
-				prev.className = prev.className.replace(/\bhighlight\b/, '');
-				prev = undefined;
+			if (__previousSelectedElement) {
+				__previousSelectedElement.className = __previousSelectedElement.className.replace(/\b__highlight\b/, '');
+				__previousSelectedElement = null;
 			}
 		}
 		catch (err) {
-			prev = undefined;
+			__previousSelectedElement = null;
 			jsonToSend['return']['__error'] = err;
 		}
 
@@ -395,8 +395,8 @@ window.onload = function () {
 			}
 
 			if (request.mouse) {
-				ableToClick = false;
-				ableToMouseOver = true;
+				__ableToClick = false;
+				__ableToMouseOver = true;
 			}
 
 			if (request.log) {

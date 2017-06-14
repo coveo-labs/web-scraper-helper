@@ -60,6 +60,15 @@
 		}
 	}
 
+
+	/**
+	 * Clears the webpage CSS and results table
+	 * 
+	 */
+	function clearPage() {
+		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, json: defaultJson });
+	}
+
 	/**
 	 * Validates the current JSON values by adding colors to the visual editor
 	 * 
@@ -179,11 +188,11 @@
 	 * @param {string} key - The key
 	 * @returns {boolean} True if the key exists
 	 */
-	function DoesKeyExist(key) {
+	function doesKeyExist(key) {
 		let textAreaElement = document.getElementById('json-config');
 		let currentValue = textAreaElement.value;
 		let json = JSON.parse(currentValue);
-		return json[0]['metadata'][key] !== undefined
+		return json[0]['metadata'][key] !== undefined;
 	}
 
 
@@ -195,13 +204,13 @@
 	function initStorageSelect(callback) {
 		try {
 			let select = document.getElementById('storage');
-			select.innerHTML = '<option selected disabled>Select a file to work on</option><option disabled>------------------------------</option>';
+			let optionsHtml = ['<option selected disabled>Select a file to work on</option><option disabled>------------------------------</option>'];
 			getStorageValues(function (results) {
 				results.forEach(function (element) {
-
-					select.innerHTML += '<option value="' + element + '">' + element + '</option>"';
+					optionsHtml.push(`<option value="${element}">${element}</option>`);
 				}, this);
-				select.innerHTML += '<option value="__create">Create new file...</option>';
+				optionsHtml.push('<option value="__create">Create new file...</option>');
+				select.innerHTML = optionsHtml.join('');
 				if (callback) {
 					callback();
 				}
@@ -263,23 +272,37 @@
 		getStorageValues(function (result) {
 
 			if (value == '__create') {
-				let newJsonName = window.prompt('New json name');
-				if (newJsonName && !result.includes(newJsonName) && (newJsonName != '' && newJsonName != '__json' && newJsonName != '__create' && newJsonName != 'null')) {
-					result.push(newJsonName);
-					let resultJson = {};
-					resultJson['__jsons'] = result;
-					chrome.storage.local.set(resultJson, function () {
-						let newJson = {};
-						newJson[newJsonName] = defaultJson;
-						chrome.storage.local.set(newJson);
-						initStorageSelect(function () {
-							e.selectedIndex = e.options.length - 2;
-							loadTextEditor();
-						});
-					});
+				let newJsonFileName = window.prompt('New json config file name');
+				if (newJsonFileName) {
+					if (!result.includes(newJsonFileName)) {
+						if (newJsonFileName != '' && newJsonFileName != '__json' && newJsonFileName != '__create' && newJsonFileName != 'null') {
+
+							result.push(newJsonFileName);
+							let resultJson = {};
+							resultJson['__jsons'] = result;
+							chrome.storage.local.set(resultJson, function () {
+								let newJson = {};
+								newJson[newJsonFileName] = defaultJson;
+								chrome.storage.local.set(newJson);
+								initStorageSelect(function () {
+									e.selectedIndex = e.options.length - 2;
+									loadTextEditor();
+								});
+							});
+
+						}
+						else {
+							errorElement.innerHTML += 'Name is a keyword<br>';
+							e.selectedIndex = 0;
+						}
+					}
+					else {
+						errorElement.innerHTML += 'Name already taken<br>';
+						e.selectedIndex = 0;
+					}
 				}
 				else {
-					errorElement.innerHTML += 'Naming error<br>';
+					errorElement.innerHTML += 'No name entered<br>';
 					e.selectedIndex = 0;
 				}
 			}
@@ -380,9 +403,11 @@
 	 * 
 	 */
 	function resetStorage() {
-		chrome.storage.local.clear(function () {
-			initStorageSelect();
-		});
+		if (confirm("This will delete every file in storage.\nYou cannot recover them after this.\nAre you sure?")) {
+			chrome.storage.local.clear(function () {
+				initStorageSelect();
+			});
+		}
 	}
 
 
@@ -710,13 +735,13 @@
 			<table id="exclude-table"> 
 			</table> 
 			<div class="center-button">
-				<button id="add-exclude" class="add-button">Add +</button> 
+				<button id="add-exclude" class="add-button"><span class="glyphicon glyphicon-plus"></span></button> 
 			</div>
 			<p>Metadata</p> 
 			<table id="metadata-table"> 
 			</table> 
 			<div class="center-button">
-				<button id="add-metadata" class="add-button">Add +</button>
+				<button id="add-metadata" class="add-button"><span class="glyphicon glyphicon-plus"></span></button>
 			</div>
 			`;
 			document.getElementById('add-exclude').onclick = addExcludeVisual;
@@ -809,7 +834,7 @@
 	function metadataFieldOnInput() {
 		try {
 			let field = this.value;
-			if (DoesKeyExist(field)) {
+			if (doesKeyExist(field)) {
 				this.setAttribute("class", "field-input bg-danger");
 			}
 			else {
@@ -848,6 +873,7 @@
 			document.getElementById('editor-button').onclick = changeEditorTab;
 			document.getElementById('text-editor-button').onclick = changeEditorTab;
 			document.getElementById('validate').onclick = validateJson;
+			document.getElementById('clear').onclick = clearPage;
 			initStorageSelect();
 
 			//Hides or shows the field by default
