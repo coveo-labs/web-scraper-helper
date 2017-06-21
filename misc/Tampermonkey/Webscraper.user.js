@@ -20,7 +20,7 @@
 //
 let jsonRules = [{
   "for": {
-      "urls":[".*"]
+    "urls":[".*"]
   },
   "exclude": [{
     "type": "CSS", "path": "body > header, iframe"
@@ -86,13 +86,13 @@ let jsonRules = [{
 	let sidebarContainer = document.createElement('div');
 	sidebarContainer.id = 'webscraping-container';
 	sidebarContainer.innerHTML = `<i>Web scraper options:</i><textarea id="webscraping-config" placeholder="JSON goes here." style="display:none;">${jsonRules}</textarea>
-	<div style="padding: 5px;">
-		<label><input type="checkbox" id="webscraping-hide-cb"> Hide/Remove</label>
-		<button id="webscraping-encode-button" title="Useful when using Sitemap sources">Encode</button>
-		<button id="webscraping-copy-button">Copy Rules to Clipboard</button>
-	</div>
-	<i>Fields:</i>
-	<div id="webscraping-fields"></div>`;
+		<div style="padding: 5px;">
+			<label><input type="checkbox" id="webscraping-hide-cb"> Hide/Remove</label>
+			<button id="webscraping-encode-button" title="Useful when using Sitemap sources">Encode</button>
+			<button id="webscraping-copy-button">Copy Rules to Clipboard</button>
+		</div>
+		<i>Fields:</i>
+		<div id="webscraping-fields"></div>`;
 
 	document.documentElement.appendChild(sidebarContainer);
 
@@ -186,28 +186,37 @@ let jsonRules = [{
 	 * Get the fields matching the metadata in the Web Scraper rules and show them in the sidebar.
 	 */
 	let getFields = meta => {
-		let aFields = [];
-		for (var field in meta) {
-			let v = getNodes(meta[field]);
-			if (v && v.map) {
-				v = v.map(v => ((v && v.textContent) || v));
+			let aFields = [];
+			for (var field in meta) {
+					let v = getNodes(meta[field]);
+					if (v && v.map) {
+							v = v.map(v => ((v && v.outerHTML) || (v && v.textContent) || v));
+					}
+					if (v || /boolean|number|string/g.test(typeof v)) {
+							aFields.push({
+									f: field,
+									v: (v && v.textContent) || v
+							});
+					}
 			}
-			if (v || /boolean|number|string/g.test(typeof v)) {
-				aFields.push({
-					f: field,
-					v: (v && v.textContent) || v
-				});
-			}
-		}
-		// generate html code for all metadata fields.
-		let html = aFields.map(obj => {
-			let v = obj.v;
-			if (obj.v && obj.v.join && obj.v.length > 1) {
-				v = `<ol><li>${obj.v.join('</li><li>')}</li></ol>`;
-			}
-			return `<div class="webscraping-metadata-field">${obj.f}: <b>${v}</b></div>`;
-		});
-		document.getElementById('webscraping-fields').innerHTML = `${html.join('\n')}`;
+			// generate html code for all metadata fields.
+			let html = aFields.map(obj => {
+					let v = obj.v;
+					if (obj.v && obj.v.map) {
+							obj.v = obj.v.map( v=>{
+									// encode html characters to highlight when we get DOM nodes instead of text.
+									return v.replace(/</g, '&lt;');
+							});
+					}
+					// encode html characters to highlight when we get DOM nodes instead of text.
+					v = (''+v).replace(/</g, '&lt;');
+
+					if (obj.v && obj.v.join && obj.v.length > 1) {
+							v = `<ol><li>${obj.v.join('</li><li>')}</li></ol>`;
+					}
+					return `<div class="webscraping-metadata-field">${obj.f}: <b>${v}</b></div>`;
+			});
+			document.getElementById('webscraping-fields').innerHTML = `${html.join('\n')}`;
 	};
 
 	/**
