@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Web Scraper Helper
 // @namespace    http://coveo.github.io/
-// @version      0.2
+// @version      0.3
 // @description  Web scraper helper tool for Coveo
 // @author       Jerome Devost (jdevost@coveo.com)
 // @grant        GM_addStyle
