@@ -19,6 +19,24 @@
 	defaultJson = JSON.stringify(defaultJson, null, 2);
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+	/*
+	 * HELPER FUNCTIONS 
+	 *
+	 */
+
+
 	/**
 	 * Add the string to the log
 	 * 
@@ -112,59 +130,6 @@
 
 
 	/**
-	 * Adds the query to the JSON
-	 * 
-	 */
-	function addToJson() {
-		//Get the vars from the page
-		let e = document.getElementById('queryToAddMeta');
-		let metaType = e.options[e.selectedIndex].value;
-		e = document.getElementById('queryToAddType');
-		let queryType = e.options[e.selectedIndex].value;
-		let query = document.getElementById('queryToAdd').value;
-		let field = document.getElementById('fieldToAdd').value;
-
-		//Get the current json
-		let textAreaElement = document.getElementById('json-config');
-		let currentJson = JSON.parse(textAreaElement.value);
-
-		//json to add
-		let toAdd = {};
-		toAdd['type'] = queryType;
-		toAdd['path'] = query;
-
-		//Add to current json
-		if (metaType == 'exclude') {
-			currentJson[0]['exclude'].push(toAdd);
-		}
-		else if (metaType == 'metadata') {
-			currentJson[0]['metadata'][field] = toAdd;
-		}
-
-		//Add back to page
-		currentJson = JSON.stringify(currentJson, null, 2);
-		textAreaElement.value = currentJson;
-		buildVisualFromText();
-	}
-
-
-	/**
-	 * Hides or shows the field input
-	 * 
-	 */
-	function toggleQuickAddFieldInput() {
-		let queryTypeElement = document.getElementById('queryToAddMeta');
-		let fieldInputElement = document.getElementById('fieldToAdd');
-		if (queryTypeElement.value == 'metadata') {
-			fieldInputElement.style.display = 'inline';
-		}
-		else {
-			fieldInputElement.style.display = 'none';
-		}
-	}
-
-
-	/**
 	 * Resets the value table back to default
 	 * 
 	 */
@@ -193,6 +158,50 @@
 		let currentValue = textAreaElement.value;
 		let json = JSON.parse(currentValue);
 		return json[0]['metadata'][key] !== undefined;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/*
+	 * STORAGE FUNCTIONS 
+	 *
+	 */
+
+
+	/**
+	 * Displays the string next to the storage in green
+	 * 
+	 * @param {string} value - The string to display
+	 */
+	function displayStorageSuccess(value) {
+		let e = document.getElementById('storageSuccess');
+		e.innerHTML = value;
+		removeStorageSuccess();
+	}
+
+
+	/**
+	 * Removes the success string after 2 seconds
+	 * 
+	 */
+	function removeStorageSuccess() {
+		setTimeout(function () {
+			let e = document.getElementById('storageSuccess');
+			e.innerHTML = '';
+		}, 2000)
 	}
 
 
@@ -286,7 +295,7 @@
 								chrome.storage.local.set(newJson);
 								initStorageSelect(function () {
 									e.selectedIndex = e.options.length - 2;
-									loadTextEditor();
+									loadTextEditorWithStorageFile();
 								});
 							});
 
@@ -307,7 +316,7 @@
 				}
 			}
 			else {
-				loadTextEditor();
+				loadTextEditorWithStorageFile();
 			}
 		});
 	}
@@ -329,7 +338,7 @@
 	 * Also updates the visual editor
 	 * 
 	 */
-	function loadTextEditor() {
+	function loadTextEditorWithStorageFile() {
 		let currentValue = getCurrentStorageValue();
 		let textArea = document.getElementById('json-config');
 		//If current value is present
@@ -361,7 +370,7 @@
 				let jsonToAdd = {};
 				jsonToAdd[currentValue] = textArea.value;
 				chrome.storage.local.set(jsonToAdd);
-				displaySuccess("Save successful");
+				displayStorageSuccess("Save successful");
 			}
 		});
 	}
@@ -388,50 +397,12 @@
 							initStorageSelect();
 						});
 						chrome.storage.local.remove(currentValue, function () {
-							loadTextEditor();
+							loadTextEditorWithStorageFile();
 						});
 					});
 				}
 			}
 		});
-	}
-
-
-	/**
-	 * Clears all storage
-	 * Debug feature 
-	 * 
-	 */
-	function resetStorage() {
-		if (confirm("This will delete every file in storage.\nYou cannot recover them after this.\nAre you sure?")) {
-			chrome.storage.local.clear(function () {
-				initStorageSelect();
-			});
-		}
-	}
-
-
-	/**
-	 * Displays the string next to the storage in green
-	 * 
-	 * @param {string} value - The string to display
-	 */
-	function displaySuccess(value) {
-		let e = document.getElementById('storageSuccess');
-		e.innerHTML = value;
-		removeSuccess();
-	}
-
-
-	/**
-	 * Removes the success string after 2 seconds
-	 * 
-	 */
-	function removeSuccess() {
-		setTimeout(function () {
-			let e = document.getElementById('storageSuccess');
-			e.innerHTML = '';
-		}, 2000)
 	}
 
 
@@ -475,6 +446,26 @@
 	}
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/*
+	 * VISUAL EDITOR FUNCTIONS 
+	 *
+	 */
+
+
 	/**
 	 * Adds an exclude query to the visual editor
 	 * 
@@ -514,6 +505,8 @@
 			ruleElement.childNodes[1].childNodes[3].oninput = excludeQueryOninput;
 			ruleElement.childNodes[1].childNodes[3].value = queryToAdd;
 			ruleElement.childNodes[1].childNodes[5].onclick = function () { removeJsonExclude(row.rowIndex); };
+
+			ruleElement.childNodes[1].childNodes[3].focus();
 
 			if (addToTextEditor == undefined || addToTextEditor == true) {
 				let jsonToAdd = {}
@@ -648,6 +641,8 @@
 		ruleElement.childNodes[1].childNodes[5].value = queryToAdd;
 		ruleElement.childNodes[1].childNodes[5].oninput = metadataQueryOnInput;
 		ruleElement.childNodes[1].childNodes[7].onclick = function () { removeTextMetadata(row.rowIndex); };
+		
+		ruleElement.childNodes[1].childNodes[3].focus();
 
 		if (addToTextEditor == undefined || addToTextEditor == true) {
 			let data = {
@@ -735,13 +730,13 @@
 			<table id="exclude-table"> 
 			</table> 
 			<div class="center-button">
-				<button id="add-exclude" class="add-button"><span class="glyphicon glyphicon-plus"></span></button> 
+				<div id="add-exclude" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span> </div>
 			</div>
 			<p>Metadata</p> 
 			<table id="metadata-table"> 
 			</table> 
 			<div class="center-button">
-				<button id="add-metadata" class="add-button"><span class="glyphicon glyphicon-plus"></span></button>
+				<div id="add-metadata" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span> </div>
 			</div>
 			`;
 			document.getElementById('add-exclude').onclick = addExcludeVisual;
@@ -851,6 +846,26 @@
 	}
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/*
+	 * MAIN FUNCTION 
+	 *
+	 */
+
+
 	/**
 	 * The init function
 	 * 
@@ -861,23 +876,17 @@
 			//Adds the fetch function to the button
 			document.getElementById('fetch').onclick = fetch;
 			document.getElementById('pretty').onclick = pretty;
-			document.getElementById('queryToAddButton').onclick = addToJson;
-			document.getElementById('queryToAddMeta').onchange = toggleQuickAddFieldInput;
 			//Disabled for now
 			//document.getElementById('mouseAdd').onclick = mouseAdd;
 			document.getElementById('storage').onchange = storageOnChange;
 			document.getElementById('storage').onfocus = saveTextToStorage;
 			document.getElementById('storageSave').onclick = saveTextToStorage;
 			document.getElementById('storageDelete').onclick = deleteStorageFile;
-			document.getElementById('storageReset').onclick = resetStorage;
 			document.getElementById('editor-button').onclick = changeEditorTab;
 			document.getElementById('text-editor-button').onclick = changeEditorTab;
 			document.getElementById('validate').onclick = validateJson;
 			document.getElementById('clear').onclick = clearPage;
 			initStorageSelect();
-
-			//Hides or shows the field by default
-			toggleQuickAddFieldInput();
 
 			//Creates the value table
 			resetResultTable();

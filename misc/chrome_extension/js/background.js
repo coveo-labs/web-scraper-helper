@@ -3,10 +3,8 @@
 
 	var connections = {}, theport = null;
 	chrome.runtime.onConnect.addListener(function (port) {
-		console.log('add listener');
 		// Listen to messages sent from the DevTools page
 		port.onMessage.addListener(function (message, sender, sendResponse) {
-			console.log('message: ', message);
 			// The original connection event doesn't include the tab ID of the
 			// DevTools page, so we need to send it explicitly.
 			if (message.name === "panel-init") {
@@ -20,17 +18,17 @@
 	// All the communication
 	chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
-		if (message && message.tabId) {
-			console.log("Message sent to " + message.tabId + "\nContent: ");
-			console.log(message);
+		if (message && message.tabId && theport != null) {
 			chrome.tabs.sendMessage(message.tabId, message);
 		}
 		else {
-			console.log("Content: ");
-			console.log(message);
-			theport.postMessage(message);
+			try{
+				theport.postMessage(message);
+			}
+			catch(err){
+				//I don't know why it keeps giving an error
+				//Error in event handler for runtime.onMessage: TypeError: Cannot read property 'postMessage' of null
+			}
 		}
 	});
-
-	console.log('background-init');
 })();

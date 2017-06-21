@@ -5,10 +5,10 @@
 	"version": "0.1",
 	"background": {
 		"scripts": [
-			"background.js"
+			"/js/background.js"
 		]
 	},
-	"devtools_page": "devtools.html",
+	"devtools_page": "/html/devtools.html",
 	"content_scripts": [
 		{
 			"run_at": "document_end",
@@ -17,10 +17,10 @@
 				"https://*/*"
 			],
 			"js": [
-				"content-script.js"
+				"/js/content-script.js"
 			],
 			"css": [
-				"css/inject.css"
+				"/css/inject.css"
 			],
 			"all_frames": false
 		}
