@@ -1,0 +1,92 @@
+<!doctype html>
+<!--
+ This page is shown when the extension button is clicked, because the
+ "browser_action" field in manifest.json contains the "default_popup" key with
+ value "popup.html".
+ -->
+<html>
+
+<head>
+	<title>Coveo webscraper helper</title>
+	<script src="/js/panel.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+	 crossorigin="anonymous">
+	<link rel="stylesheet" href="/css/style.css">
+	<link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+</head>
+
+<body>
+
+	<div class="body-wrapper">
+
+		<div class="col-md-6">
+
+			<div>
+				<select id="storage">
+			
+			</select>
+				<button id="storageSave" class="button">Save</button>
+				<button id="storageDelete" class="button">Delete</button>
+				<p id="storageSuccess"></p>
+				<p id="storageError"></p>
+			</div>
+
+			<ul class="nav nav-tabs">
+				<li class="active"><a href="#" data-show="editor" id="editor-button">Visual</a></li>
+				<li><a href="#" data-show="text-editor" id="text-editor-button">Text</a></li>
+			</ul>
+			<div id="editor-container">
+				<div id="editor" class="tab">
+
+				</div>
+				<div id="text-editor" class="tab" style="display:none">
+					<textarea id="json-config">
+					[
+						{
+							"for": {
+							"urls": [
+								".*"
+							]
+							},
+							"exclude": [
+							{
+								"type": "XPATH",
+								"path": ""
+							}
+							],
+							"metadata": {}
+						}
+					]
+				</textarea>
+					<button id="pretty" class="button">Make JSON pretty</button>
+					<button id="encode" class="button">Encode</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-6">
+
+			<br>
+
+			<div class="center-button">
+				<button id="fetch" class="button">Run</button>
+				<button id="validate" class="button">Validate</button>
+				<button id="clear" class="button">Clear</button>
+			</div>
+
+			<br>
+
+			<p id="error"></p>
+
+			<table id="resultTable" class="table table-condensed table-bordered"></table>
+
+			<pre id="log"></pre>
+
+		</div>
+
+
+	</div>
+
+</body>
+
+</html>

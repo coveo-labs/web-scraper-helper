@@ -7,7 +7,7 @@ body{
 
 #json-config{
 	width: 99%;
-	height: 410px;
+	height: 440px;
 }
 
 #error{
@@ -192,4 +192,14 @@ body{
 
 #storage{
 	padding: 10px;
+}
+
+.btn-circle-sm {
+  width: 35px;
+  height: 35px;
+  text-align: center;
+  padding: 2px 0;
+  font-size: 20px;
+  line-height: 1.65;
+  border-radius: 30px;
 }

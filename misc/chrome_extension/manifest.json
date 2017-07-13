@@ -5,28 +5,30 @@
 	"version": "0.1",
 	"background": {
 		"scripts": [
-			"background.js"
+			"/js/background.js"
 		]
 	},
-
-	"devtools_page": "devtools.html",
-
-	"content_scripts": [{
-		"run_at": "document_end",
-		"matches": [
-			"http://*/*",
-			"https://*/*"
-		],
-		"js": [
-			"content-script.js"
-		],
-		"css":[
-			"css/inject.css"
-		],
-		"all_frames": false
-	}],
-
+	"devtools_page": "/html/devtools.html",
+	"content_scripts": [
+		{
+			"run_at": "document_end",
+			"matches": [
+				"http://*/*",
+				"https://*/*"
+			],
+			"js": [
+				"/js/content-script.js"
+			],
+			"css": [
+				"/css/inject.css"
+			],
+			"all_frames": false
+		}
+	],
 	"permissions": [
-		"tabs", "http://*/*", "https://*/*", "storage"
+		"tabs",
+		"http://*/*",
+		"https://*/*",
+		"storage"
 	]
 }
