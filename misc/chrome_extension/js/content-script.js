@@ -105,11 +105,17 @@ window.onload = function () {
 		let exclude = json[0]['exclude'];
 
 		//Show elements that were previously hidden from the elementsToHide global
+
 		if (__elementsToHide.length > 0) {
 			__elementsToHide.forEach(function (elementObject) {
 				if (elementObject['type'] != '__error') {
 					elementObject['value'].forEach(function (element) {
-						element.style.opacity = 1;
+						try {
+							element.style.opacity = 1;
+						}
+						catch (err) {
+
+						}
 					}, this);
 				}
 			}, this);
@@ -147,7 +153,12 @@ window.onload = function () {
 		__elementsToHide.forEach(function (elementObject) {
 			if (elementObject['type'] != '__error') {
 				elementObject['value'].forEach(function (element) {
-					element.style.opacity = 0.1;
+					try {
+						element.style.opacity = 0.1;
+					}
+					catch (err) {
+
+					}
 				}, this);
 			}
 			else {
