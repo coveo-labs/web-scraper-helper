@@ -450,6 +450,11 @@
 		}
 	}
 
+	
+	/**
+	 * Enables the save and delete button once the user has selected a file
+	 * 
+	 */
 	function enableButtons() {
 		document.getElementById('storageSave').removeAttribute('disabled');
 		document.getElementById('storageDelete').removeAttribute('disabled');
@@ -854,6 +859,11 @@
 		}
 	}
 
+	
+	/**
+	 * Encodes or decodes the current json config depending on it's current state
+	 * 
+	 */
 	function changeEncodeOnClick(){
 		let encodeButtonElement = document.getElementById('encode');
 		let textArea = document.getElementById('json-config');
