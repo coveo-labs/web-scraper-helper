@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
-	"name": "Coveo Web Crawler",
-	"description": "Quick web crawler config creator",
+	"name": "Coveo Cloud Source Web Scraper",
+	"description": "Quick helper to create web scraping configurations for Coveo Cloud V2 sources.",
 	"version": "0.1",
 	"background": {
 		"scripts": [
