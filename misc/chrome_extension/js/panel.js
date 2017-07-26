@@ -2,6 +2,7 @@
 
 	var defaultTextEditorValue = 'Create/Load a file...';
 	var autoValidateTimeout;
+	var isTextEncoded = false;
 
 	//TEST JSON VALUE
 	var defaultJson = [{
@@ -346,6 +347,7 @@
 			if (exists) {
 				chrome.storage.local.get(currentValue, function (result) {
 					textArea.value = result[currentValue];
+					enableButtons();
 					buildVisualFromText();
 				});
 			}
@@ -430,6 +432,9 @@
 			if (document.getElementById(toShow).style.display !== 'block') {
 				//Tabs switching from text to visual editor
 				if (toShow === 'editor') {
+					if(isTextEncoded){
+						changeEncodeOnClick();
+					}
 					buildVisualFromText();
 				}
 			}
@@ -445,6 +450,10 @@
 		}
 	}
 
+	function enableButtons() {
+		document.getElementById('storageSave').removeAttribute('disabled');
+		document.getElementById('storageDelete').removeAttribute('disabled');
+	}
 
 
 
@@ -641,7 +650,7 @@
 		ruleElement.childNodes[1].childNodes[5].value = queryToAdd;
 		ruleElement.childNodes[1].childNodes[5].oninput = metadataQueryOnInput;
 		ruleElement.childNodes[1].childNodes[7].onclick = function () { removeTextMetadata(row.rowIndex); };
-		
+
 		ruleElement.childNodes[1].childNodes[3].focus();
 
 		if (addToTextEditor == undefined || addToTextEditor == true) {
@@ -845,6 +854,28 @@
 		}
 	}
 
+	function changeEncodeOnClick(){
+		let encodeButtonElement = document.getElementById('encode');
+		let textArea = document.getElementById('json-config');
+
+		if(isTextEncoded){
+			try{
+				textArea.value = JSON.parse(textArea.value)
+				pretty();
+			}
+			catch(err){
+				alert(err);
+			}
+			encodeButtonElement.innerHTML = "Encode";
+		}
+		else{
+			textArea.value = JSON.stringify(textArea.value, null, 0)
+			encodeButtonElement.innerHTML = "Decode";
+		}
+
+		isTextEncoded = !isTextEncoded;
+	}
+
 
 
 
@@ -884,8 +915,8 @@
 			document.getElementById('storageDelete').onclick = deleteStorageFile;
 			document.getElementById('editor-button').onclick = changeEditorTab;
 			document.getElementById('text-editor-button').onclick = changeEditorTab;
-			document.getElementById('validate').onclick = validateJson;
 			document.getElementById('clear').onclick = clearPage;
+			document.getElementById('encode').onclick = changeEncodeOnClick;
 			initStorageSelect();
 
 			//Creates the value table
