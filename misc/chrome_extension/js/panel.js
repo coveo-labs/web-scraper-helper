@@ -957,7 +957,7 @@
 							else if (element['type'] != "__error") {
 								//Convert to list if greater than one
 								if (element['value'].length > 1) {
-									element['value'] = "<ol><li>" + element['value'].join('</li><li>') + "</li></ol>";
+									element['value'] = element['value'].join('<br>');
 								}
 								document.getElementById("resultTable").innerHTML += "<tr><td>" + element['type'] + "</td><td>" + element['value'] + "</td></tr>";
 							}

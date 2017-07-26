@@ -70,12 +70,32 @@ window.onload = function () {
 	 */
 	var parseCss = function (title, cssSelector, shouldReturnText) {
 		try {
+			let textSub = "::text";
+			let attrSub = "::attr";
+			let shouldReturnAttr = false;
+			let attrToGet = "";
+
+			if(cssSelector.includes(textSub)){
+				shouldReturnText = true;
+				cssSelector = cssSelector.split(textSub)[0];
+			}
+
+			if(cssSelector.includes(attrSub)){
+				shouldReturnAttr = true;
+				attrToGet = cssSelector.split(attrSub)[1].slice(1,-1);
+				cssSelector = cssSelector.split(attrSub)[0];
+			}
+
 			let nodes = document.body.querySelectorAll(cssSelector);
 			let e, elements = [];
 			nodes.forEach(function (e) {
 				let value = e;
 				if (shouldReturnText) {
 					value = e.textContent;
+				}
+				
+				if(shouldReturnAttr){
+					value = e.getAttribute(attrToGet);
 				}
 				elements.push(value);
 			}, this);
