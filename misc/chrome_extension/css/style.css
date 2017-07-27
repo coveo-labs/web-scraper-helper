@@ -203,3 +203,8 @@ body{
   line-height: 1.65;
   border-radius: 30px;
 }
+
+button:disabled{
+	background-color: #ddd;
+	cursor: not-allowed;
+}

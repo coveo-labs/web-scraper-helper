@@ -1,10 +1,11 @@
 (function () {
 
-	var defaultTextEditorValue = 'Create/Load a file...';
-	var autoValidateTimeout;
+	let defaultTextEditorValue = 'Create/Load a file...';
+	let autoValidateTimeout;
+	let isTextEncoded = false;
 
 	//TEST JSON VALUE
-	var defaultJson = [{
+	let defaultJson = [{
 		"for": {
 			"urls": [
 				".*"
@@ -346,6 +347,7 @@
 			if (exists) {
 				chrome.storage.local.get(currentValue, function (result) {
 					textArea.value = result[currentValue];
+					enableButtons();
 					buildVisualFromText();
 				});
 			}
@@ -387,7 +389,7 @@
 			if (exists) {
 				if (confirm('Are you sure you want to delete: ' + currentValue)) {
 					getStorageValues(function (jsons) {
-						var index = jsons.indexOf(currentValue);
+						let index = jsons.indexOf(currentValue);
 						if (index > -1) {
 							jsons.splice(index, 1);
 						}
@@ -430,6 +432,9 @@
 			if (document.getElementById(toShow).style.display !== 'block') {
 				//Tabs switching from text to visual editor
 				if (toShow === 'editor') {
+					if(isTextEncoded){
+						changeEncodeOnClick();
+					}
 					buildVisualFromText();
 				}
 			}
@@ -445,6 +450,15 @@
 		}
 	}
 
+	
+	/**
+	 * Enables the save and delete button once the user has selected a file
+	 * 
+	 */
+	function enableButtons() {
+		document.getElementById('storageSave').removeAttribute('disabled');
+		document.getElementById('storageDelete').removeAttribute('disabled');
+	}
 
 
 
@@ -500,11 +514,12 @@
    			</div>
 			`;
 
-			ruleElement.childNodes[1].childNodes[1].onchange = excludeTypeOnChange;
-			ruleElement.childNodes[1].childNodes[1].checked = typeToAdd;
-			ruleElement.childNodes[1].childNodes[3].oninput = excludeQueryOninput;
-			ruleElement.childNodes[1].childNodes[3].value = queryToAdd;
-			ruleElement.childNodes[1].childNodes[5].onclick = function () { removeJsonExclude(row.rowIndex); };
+			let ruleDivElement = ruleElement.childNodes[1];
+			ruleDivElement.childNodes[1].onchange = excludeTypeOnChange;
+			ruleDivElement.childNodes[1].checked = typeToAdd;
+			ruleDivElement.childNodes[3].oninput = excludeQueryOninput;
+			ruleDivElement.childNodes[3].value = queryToAdd;
+			ruleDivElement.childNodes[5].onclick = function () { removeJsonExclude(row.rowIndex); };
 
 			ruleElement.childNodes[1].childNodes[3].focus();
 
@@ -593,7 +608,7 @@
 		//if it does, then dont create a new one
 		let shouldAdd = true;
 
-		for (var i = 0; i < tableElement.rows.length; i++) {
+		for (let i = 0; i < tableElement.rows.length; i++) {
 			if (tableElement.rows[i].childNodes[0].childNodes[1].getAttribute('data-field') === "") {
 				shouldAdd = false;
 			}
@@ -633,15 +648,16 @@
    			</div>
 		`;
 
-		ruleElement.childNodes[1].setAttribute('data-field', fieldToAdd);
-		ruleElement.childNodes[1].childNodes[1].checked = typeToAdd;
-		ruleElement.childNodes[1].childNodes[1].onchange = metadataTypeOnChange;
-		ruleElement.childNodes[1].childNodes[3].value = fieldToAdd;
-		ruleElement.childNodes[1].childNodes[3].oninput = metadataFieldOnInput;
-		ruleElement.childNodes[1].childNodes[5].value = queryToAdd;
-		ruleElement.childNodes[1].childNodes[5].oninput = metadataQueryOnInput;
-		ruleElement.childNodes[1].childNodes[7].onclick = function () { removeTextMetadata(row.rowIndex); };
-		
+		let ruleDivElement = ruleElement.childNodes[1];
+		ruleDivElement.setAttribute('data-field', fieldToAdd);
+		ruleDivElement.childNodes[1].checked = typeToAdd;
+		ruleDivElement.childNodes[1].onchange = metadataTypeOnChange;
+		ruleDivElement.childNodes[3].value = fieldToAdd;
+		ruleDivElement.childNodes[3].oninput = metadataFieldOnInput;
+		ruleDivElement.childNodes[5].value = queryToAdd;
+		ruleDivElement.childNodes[5].oninput = metadataQueryOnInput;
+		ruleDivElement.childNodes[7].onclick = function () { removeTextMetadata(row.rowIndex); };
+
 		ruleElement.childNodes[1].childNodes[3].focus();
 
 		if (addToTextEditor == undefined || addToTextEditor == true) {
@@ -845,6 +861,33 @@
 		}
 	}
 
+	
+	/**
+	 * Encodes or decodes the current json config depending on it's current state
+	 * 
+	 */
+	function changeEncodeOnClick(){
+		let encodeButtonElement = document.getElementById('encode');
+		let textArea = document.getElementById('json-config');
+
+		if(isTextEncoded){
+			try{
+				textArea.value = JSON.parse(textArea.value)
+				pretty();
+			}
+			catch(err){
+				alert(err);
+			}
+			encodeButtonElement.innerHTML = "Encode";
+		}
+		else{
+			textArea.value = JSON.stringify(textArea.value, null, 0)
+			encodeButtonElement.innerHTML = "Decode";
+		}
+
+		isTextEncoded = !isTextEncoded;
+	}
+
 
 
 
@@ -884,15 +927,15 @@
 			document.getElementById('storageDelete').onclick = deleteStorageFile;
 			document.getElementById('editor-button').onclick = changeEditorTab;
 			document.getElementById('text-editor-button').onclick = changeEditorTab;
-			document.getElementById('validate').onclick = validateJson;
 			document.getElementById('clear').onclick = clearPage;
+			document.getElementById('encode').onclick = changeEncodeOnClick;
 			initStorageSelect();
 
 			//Creates the value table
 			resetResultTable();
 
 			//Connects to the messeger
-			var backgroundPageConnection = chrome.runtime.connect({
+			let backgroundPageConnection = chrome.runtime.connect({
 				name: 'panel'
 			});
 
@@ -926,7 +969,7 @@
 							else if (element['type'] != "__error") {
 								//Convert to list if greater than one
 								if (element['value'].length > 1) {
-									element['value'] = "<ol><li>" + element['value'].join('</li><li>') + "</li></ol>";
+									element['value'] = element['value'].join('<br>');
 								}
 								document.getElementById("resultTable").innerHTML += "<tr><td>" + element['type'] + "</td><td>" + element['value'] + "</td></tr>";
 							}

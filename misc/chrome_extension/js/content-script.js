@@ -70,12 +70,32 @@ window.onload = function () {
 	 */
 	var parseCss = function (title, cssSelector, shouldReturnText) {
 		try {
+			let textSub = "::text";
+			let attrSub = "::attr";
+			let shouldReturnAttr = false;
+			let attrToGet = "";
+
+			if(cssSelector.includes(textSub)){
+				shouldReturnText = true;
+				cssSelector = cssSelector.split(textSub)[0];
+			}
+
+			if(cssSelector.includes(attrSub)){
+				shouldReturnAttr = true;
+				attrToGet = cssSelector.split(attrSub)[1].slice(1,-1);
+				cssSelector = cssSelector.split(attrSub)[0];
+			}
+
 			let nodes = document.body.querySelectorAll(cssSelector);
 			let e, elements = [];
 			nodes.forEach(function (e) {
 				let value = e;
 				if (shouldReturnText) {
 					value = e.textContent;
+				}
+				
+				if(shouldReturnAttr){
+					value = e.getAttribute(attrToGet);
 				}
 				elements.push(value);
 			}, this);
@@ -105,11 +125,17 @@ window.onload = function () {
 		let exclude = json[0]['exclude'];
 
 		//Show elements that were previously hidden from the elementsToHide global
+
 		if (__elementsToHide.length > 0) {
 			__elementsToHide.forEach(function (elementObject) {
 				if (elementObject['type'] != '__error') {
 					elementObject['value'].forEach(function (element) {
-						element.style.opacity = 1;
+						try {
+							element.style.opacity = 1;
+						}
+						catch (err) {
+
+						}
 					}, this);
 				}
 			}, this);
@@ -147,7 +173,12 @@ window.onload = function () {
 		__elementsToHide.forEach(function (elementObject) {
 			if (elementObject['type'] != '__error') {
 				elementObject['value'].forEach(function (element) {
-					element.style.opacity = 0.1;
+					try {
+						element.style.opacity = 0.1;
+					}
+					catch (err) {
+
+					}
 				}, this);
 			}
 			else {
