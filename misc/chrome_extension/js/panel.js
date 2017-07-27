@@ -1,11 +1,11 @@
 (function () {
 
-	var defaultTextEditorValue = 'Create/Load a file...';
-	var autoValidateTimeout;
-	var isTextEncoded = false;
+	let defaultTextEditorValue = 'Create/Load a file...';
+	let autoValidateTimeout;
+	let isTextEncoded = false;
 
 	//TEST JSON VALUE
-	var defaultJson = [{
+	let defaultJson = [{
 		"for": {
 			"urls": [
 				".*"
@@ -389,7 +389,7 @@
 			if (exists) {
 				if (confirm('Are you sure you want to delete: ' + currentValue)) {
 					getStorageValues(function (jsons) {
-						var index = jsons.indexOf(currentValue);
+						let index = jsons.indexOf(currentValue);
 						if (index > -1) {
 							jsons.splice(index, 1);
 						}
@@ -514,11 +514,12 @@
    			</div>
 			`;
 
-			ruleElement.childNodes[1].childNodes[1].onchange = excludeTypeOnChange;
-			ruleElement.childNodes[1].childNodes[1].checked = typeToAdd;
-			ruleElement.childNodes[1].childNodes[3].oninput = excludeQueryOninput;
-			ruleElement.childNodes[1].childNodes[3].value = queryToAdd;
-			ruleElement.childNodes[1].childNodes[5].onclick = function () { removeJsonExclude(row.rowIndex); };
+			let ruleDivElement = ruleElement.childNodes[1];
+			ruleDivElement.childNodes[1].onchange = excludeTypeOnChange;
+			ruleDivElement.childNodes[1].checked = typeToAdd;
+			ruleDivElement.childNodes[3].oninput = excludeQueryOninput;
+			ruleDivElement.childNodes[3].value = queryToAdd;
+			ruleDivElement.childNodes[5].onclick = function () { removeJsonExclude(row.rowIndex); };
 
 			ruleElement.childNodes[1].childNodes[3].focus();
 
@@ -607,7 +608,7 @@
 		//if it does, then dont create a new one
 		let shouldAdd = true;
 
-		for (var i = 0; i < tableElement.rows.length; i++) {
+		for (let i = 0; i < tableElement.rows.length; i++) {
 			if (tableElement.rows[i].childNodes[0].childNodes[1].getAttribute('data-field') === "") {
 				shouldAdd = false;
 			}
@@ -647,14 +648,15 @@
    			</div>
 		`;
 
-		ruleElement.childNodes[1].setAttribute('data-field', fieldToAdd);
-		ruleElement.childNodes[1].childNodes[1].checked = typeToAdd;
-		ruleElement.childNodes[1].childNodes[1].onchange = metadataTypeOnChange;
-		ruleElement.childNodes[1].childNodes[3].value = fieldToAdd;
-		ruleElement.childNodes[1].childNodes[3].oninput = metadataFieldOnInput;
-		ruleElement.childNodes[1].childNodes[5].value = queryToAdd;
-		ruleElement.childNodes[1].childNodes[5].oninput = metadataQueryOnInput;
-		ruleElement.childNodes[1].childNodes[7].onclick = function () { removeTextMetadata(row.rowIndex); };
+		let ruleDivElement = ruleElement.childNodes[1];
+		ruleDivElement.setAttribute('data-field', fieldToAdd);
+		ruleDivElement.childNodes[1].checked = typeToAdd;
+		ruleDivElement.childNodes[1].onchange = metadataTypeOnChange;
+		ruleDivElement.childNodes[3].value = fieldToAdd;
+		ruleDivElement.childNodes[3].oninput = metadataFieldOnInput;
+		ruleDivElement.childNodes[5].value = queryToAdd;
+		ruleDivElement.childNodes[5].oninput = metadataQueryOnInput;
+		ruleDivElement.childNodes[7].onclick = function () { removeTextMetadata(row.rowIndex); };
 
 		ruleElement.childNodes[1].childNodes[3].focus();
 
@@ -933,7 +935,7 @@
 			resetResultTable();
 
 			//Connects to the messeger
-			var backgroundPageConnection = chrome.runtime.connect({
+			let backgroundPageConnection = chrome.runtime.connect({
 				name: 'panel'
 			});
 
