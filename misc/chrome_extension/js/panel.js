@@ -161,6 +161,25 @@
 		return json[0]['metadata'][key] !== undefined;
 	}
 
+	/**
+	 * Copies the text content to the clipboard
+	 * 
+	 */
+	function copyToClipboard(){
+		document.getElementById('text-editor-button').click();
+		let textAreaElement = document.getElementById('json-config');
+		textAreaElement.focus();
+		textAreaElement.select();
+		try {
+			let successful = document.execCommand('copy');
+			if(successful){
+				displayStorageSuccess('Copied!');
+			}
+		} catch (err) {
+			alert('Failed to copy')
+		}
+	}
+
 
 
 
@@ -929,6 +948,7 @@
 			document.getElementById('text-editor-button').onclick = changeEditorTab;
 			document.getElementById('clear').onclick = clearPage;
 			document.getElementById('encode').onclick = changeEncodeOnClick;
+			document.getElementById('copy').onclick = copyToClipboard
 			initStorageSelect();
 
 			//Creates the value table
