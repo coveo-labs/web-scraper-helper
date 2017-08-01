@@ -208,3 +208,7 @@ button:disabled{
 	background-color: #ddd;
 	cursor: not-allowed;
 }
+
+#copy{
+	margin-top: 3px;
+}
