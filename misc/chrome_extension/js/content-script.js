@@ -65,15 +65,16 @@ window.onload = function () {
 	 * 
 	 * @param {string} title - The string for the type
 	 * @param {string} cssSelector - the css selector to parse
-	 * @param {boolean} shouldReturnText - if the value return is the text instead of the element
+	 * @param {Boolen} is_metadata - Is its metadata or not
 	 * @returns {object} returns the title and the elements in an array
 	 */
-	var parseCss = function (title, cssSelector, shouldReturnText) {
+	var parseCss = function (title, cssSelector, is_metadata) {
 		try {
 			let textSub = "::text";
 			let attrSub = "::attr";
 			let shouldReturnAttr = false;
 			let attrToGet = "";
+			let shouldReturnText = false;
 
 			if(cssSelector.includes(textSub)){
 				shouldReturnText = true;
@@ -97,6 +98,10 @@ window.onload = function () {
 				if(shouldReturnAttr){
 					value = e.getAttribute(attrToGet);
 				}
+				if(is_metadata && value === e){
+					value = ""
+				}
+
 				elements.push(value);
 			}, this);
 			return { type: title, value: elements };
@@ -363,7 +368,7 @@ window.onload = function () {
 			let type = element['type'];
 			let value;
 			if (type === 'CSS') {
-				value = parseCss('exclude', element['path']);
+				value = parseCss('exclude', element['path'], false);
 			}
 			else {
 				value = parseXPath('exclude', element['path']);
@@ -389,7 +394,7 @@ window.onload = function () {
 			let type = element['type'];
 			let value;
 			if (type === 'CSS') {
-				value = parseCss('metadata', element['path']);
+				value = parseCss('metadata', element['path'], true);
 			}
 			else {
 				value = parseXPath('metadata', element['path']);
