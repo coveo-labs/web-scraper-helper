@@ -65,10 +65,10 @@ window.onload = function () {
 	 * 
 	 * @param {string} title - The string for the type
 	 * @param {string} cssSelector - the css selector to parse
-	 * @param {Boolen} is_metadata - Is its metadata or not
+	 * @param {Boolen} isMetadata - If its metadata or not
 	 * @returns {object} returns the title and the elements in an array
 	 */
-	var parseCss = function (title, cssSelector, is_metadata) {
+	var parseCss = function (title, cssSelector, isMetadata) {
 		try {
 			let textSub = "::text";
 			let attrSub = "::attr";
@@ -98,7 +98,7 @@ window.onload = function () {
 				if(shouldReturnAttr){
 					value = e.getAttribute(attrToGet);
 				}
-				if(is_metadata && value === e){
+				if(isMetadata && value === e){
 					value = ""
 				}
 
