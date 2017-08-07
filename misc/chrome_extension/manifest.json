@@ -3,6 +3,11 @@
 	"name": "Coveo Cloud Source Web Scraper",
 	"description": "Quick helper to create web scraping configurations for Coveo Cloud V2 sources.",
 	"version": "0.1",
+	"icons": {
+		"16": "images/16.png",
+		"48": "images/48.png",
+		"128": "images/128.png"
+	},
 	"background": {
 		"scripts": [
 			"/js/background.js"
