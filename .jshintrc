@@ -20,7 +20,7 @@
 	"node": true,
 	"noempty": true,
 	"nonew": true,
-	"quotmark": "single",
+	"quotmark": true,
 	"sub": true,
 	"trailing": true,
 	"undef": true,

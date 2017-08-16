@@ -1,10 +1,11 @@
 // background.js
+/*global chrome*/
 (function () {
 
-	var connections = {}, theport = null;
+	let theport = null;
 	chrome.runtime.onConnect.addListener(function (port) {
 		// Listen to messages sent from the DevTools page
-		port.onMessage.addListener(function (message, sender, sendResponse) {
+		port.onMessage.addListener(function (message/*, sender, sendResponse*/) {
 			// The original connection event doesn't include the tab ID of the
 			// DevTools page, so we need to send it explicitly.
 			if (message.name === "panel-init") {
@@ -16,9 +17,9 @@
 
 
 	// All the communication
-	chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+	chrome.runtime.onMessage.addListener(function (message/*, sender, sendResponse*/) {
 
-		if (message && message.tabId && theport != null) {
+		if (message && message.tabId && theport !== null) {
 			chrome.tabs.sendMessage(message.tabId, message);
 		}
 		else {

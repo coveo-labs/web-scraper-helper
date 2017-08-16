@@ -1,19 +1,24 @@
 {
 	"manifest_version": 2,
-	"name": "Coveo Cloud Source Web Scraper",
-	"description": "Quick helper to create web scraping configurations for Coveo Cloud V2 sources.",
-	"version": "0.1",
+	"name": "Web Scraper Helper for Coveo Web Sources",
+	"short_name": "Web Scraper Helper",
+	"version": "0.3",
+
+	"description": "Helper to quickly create and test web scraping configurations for Coveo Cloud V2 sources.",
 	"icons": {
 		"16": "images/16.png",
 		"48": "images/48.png",
 		"128": "images/128.png"
 	},
+
 	"background": {
 		"scripts": [
 			"/js/background.js"
 		]
 	},
+
 	"devtools_page": "/html/devtools.html",
+
 	"content_scripts": [
 		{
 			"run_at": "document_end",
@@ -30,6 +35,7 @@
 			"all_frames": false
 		}
 	],
+
 	"permissions": [
 		"tabs",
 		"http://*/*",

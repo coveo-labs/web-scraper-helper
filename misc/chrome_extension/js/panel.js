@@ -1,3 +1,6 @@
+// jshint -W110, -W003
+/*global chrome*/
+
 (function () {
 
 	let defaultTextEditorValue = 'Create/Load a file...';
@@ -15,7 +18,7 @@
 		],
 		"metadata": {
 		}
-	}]
+	}];
 
 	defaultJson = JSON.stringify(defaultJson, null, 2);
 
@@ -33,14 +36,14 @@
 
 
 	/*
-	 * HELPER FUNCTIONS 
+	 * HELPER FUNCTIONS
 	 *
 	 */
 
 
 	/**
 	 * Add the string to the log
-	 * 
+	 *
 	 * @param {string} s - The string to add to the log
 	 */
 	function log(s) {
@@ -54,7 +57,7 @@
 
 	/**
 	 * Returns XPATH or CSS depending on the check
-	 * 
+	 *
 	 * @param {boolean} checked - if checked
 	 * @returns {string} The return string
 	 */
@@ -64,7 +67,7 @@
 
 	/**
 	 * Sends the current JSON in the textarea to the parser
-	 * 
+	 *
 	 */
 	function fetch() {
 		try {
@@ -82,7 +85,7 @@
 
 	/**
 	 * Clears the webpage CSS and results table
-	 * 
+	 *
 	 */
 	function clearPage() {
 		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, json: defaultJson });
@@ -90,7 +93,7 @@
 
 	/**
 	 * Validates the current JSON values by adding colors to the visual editor
-	 * 
+	 *
 	 */
 	function validateJson() {
 		try {
@@ -109,7 +112,7 @@
 
 	/**
 	 * Launches the a timeout to validate the visual editor after 100ms
-	 * 
+	 *
 	 */
 	function autoValidate() {
 		if (autoValidateTimeout) {
@@ -120,7 +123,7 @@
 
 	/**
 	 * Formats the JSON
-	 * 
+	 *
 	 */
 	function pretty() {
 		let textAreaElement = document.getElementById('json-config');
@@ -132,7 +135,7 @@
 
 	/**
 	 * Resets the value table back to default
-	 * 
+	 *
 	 */
 	function resetResultTable() {
 		document.getElementById('resultTable').innerHTML = '<tr><th>Field</th><th>Value(s)</th></tr>';
@@ -141,7 +144,7 @@
 	/**
 	 * Turn on the mouseover on the webpage
 	 * Deactivated for now
-	 * 
+	 *
 	 */
 	function mouseAdd() {
 		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, mouse: '1' });
@@ -150,7 +153,7 @@
 
 	/**
 	 * Checks if the key exists in the metadata of the json
-	 * 
+	 *
 	 * @param {string} key - The key
 	 * @returns {boolean} True if the key exists
 	 */
@@ -163,7 +166,7 @@
 
 	/**
 	 * Copies the text content to the clipboard
-	 * 
+	 *
 	 */
 	function copyToClipboard(){
 		document.getElementById('text-editor-button').click();
@@ -176,7 +179,7 @@
 				displayStorageSuccess('Copied!');
 			}
 		} catch (err) {
-			alert('Failed to copy')
+			alert('Failed to copy');
 		}
 	}
 
@@ -196,14 +199,14 @@
 
 
 	/*
-	 * STORAGE FUNCTIONS 
+	 * STORAGE FUNCTIONS
 	 *
 	 */
 
 
 	/**
 	 * Displays the string next to the storage in green
-	 * 
+	 *
 	 * @param {string} value - The string to display
 	 */
 	function displayStorageSuccess(value) {
@@ -215,19 +218,19 @@
 
 	/**
 	 * Removes the success string after 2 seconds
-	 * 
+	 *
 	 */
 	function removeStorageSuccess() {
 		setTimeout(function () {
 			let e = document.getElementById('storageSuccess');
 			e.innerHTML = '';
-		}, 2000)
+		}, 2000);
 	}
 
 
 	/**
 	 * Creates the storage file select
-	 * 
+	 *
 	 * @param {requestCallback} [callback] - After the select is created and ready to be used
 	 */
 	function initStorageSelect(callback) {
@@ -254,7 +257,7 @@
 
 	/**
 	 * Gets all the name of the files stored in the storage
-	 * 
+	 *
 	 * @param {requestCallback} callback - Passes the Object list to the callback
 	 * @returns {Object} An empty object if the callback isn't there
 	 */
@@ -274,8 +277,8 @@
 
 	/**
 	 * Determines wheter a file exists in storage
-	 * 
-	 * @param {string} value - The file to check 
+	 *
+	 * @param {string} value - The file to check
 	 * @param {requestCallback} callback - Calls this with a {boolean}
 	 */
 	function storageValueExists(value, callback) {
@@ -290,7 +293,7 @@
 	/**
 	 * Called onchange of the storage select
 	 * Creates a new file when the create option is selected
-	 * 
+	 *
 	 */
 	function storageOnChange() {
 		let e = document.getElementById('storage');
@@ -300,11 +303,11 @@
 
 		getStorageValues(function (result) {
 
-			if (value == '__create') {
+			if (value === '__create') {
 				let newJsonFileName = window.prompt('New json config file name');
 				if (newJsonFileName) {
 					if (!result.includes(newJsonFileName)) {
-						if (newJsonFileName != '' && newJsonFileName != '__json' && newJsonFileName != '__create' && newJsonFileName != 'null') {
+						if (newJsonFileName !== '' && newJsonFileName !== '__json' && newJsonFileName !== '__create' && newJsonFileName !== 'null') {
 
 							result.push(newJsonFileName);
 							let resultJson = {};
@@ -344,7 +347,7 @@
 
 	/**
 	 * Gets the currently selected value of the storage
-	 * 
+	 *
 	 * @returns {string} the value
 	 */
 	function getCurrentStorageValue() {
@@ -356,7 +359,7 @@
 	/**
 	 * Loads the text editor with the selected file
 	 * Also updates the visual editor
-	 * 
+	 *
 	 */
 	function loadTextEditorWithStorageFile() {
 		let currentValue = getCurrentStorageValue();
@@ -379,7 +382,7 @@
 
 	/**
 	 * Saves the current text in the text-editor to storage
-	 * 
+	 *
 	 */
 	function saveTextToStorage() {
 		let currentValue = getCurrentStorageValue();
@@ -399,7 +402,7 @@
 
 	/**
 	 * Deletes the currently selected storage file
-	 * 
+	 *
 	 */
 	function deleteStorageFile() {
 		let currentValue = getCurrentStorageValue();
@@ -412,7 +415,7 @@
 						if (index > -1) {
 							jsons.splice(index, 1);
 						}
-						jsonToAdd = {}
+						let jsonToAdd = {};
 						jsonToAdd['__jsons'] = jsons;
 						chrome.storage.local.set(jsonToAdd, function () {
 							initStorageSelect();
@@ -430,7 +433,7 @@
 	/**
 	 * Changes the editor tab
 	 * Visual or Text
-	 * 
+	 *
 	 */
 	function changeEditorTab() {
 		try {
@@ -469,10 +472,10 @@
 		}
 	}
 
-	
+
 	/**
 	 * Enables the save and delete button once the user has selected a file
-	 * 
+	 *
 	 */
 	function enableButtons() {
 		document.getElementById('storageSave').removeAttribute('disabled');
@@ -494,14 +497,14 @@
 
 
 	/*
-	 * VISUAL EDITOR FUNCTIONS 
+	 * VISUAL EDITOR FUNCTIONS
 	 *
 	 */
 
 
 	/**
 	 * Adds an exclude query to the visual editor
-	 * 
+	 *
 	 * @param {string} query - The query
 	 * @param {string|number} type - 0 for XPATH, 1 for CSS
 	 * @param {boolean} addToTextEditor - if undefined or true, adds the value to the text editor
@@ -519,10 +522,8 @@
 
 			let typeToAdd = 0;
 
-			if (typeof type == 'string') {
-				if (type == 'CSS') {
-					typeToAdd = 1;
-				}
+			if (type === 'CSS') {
+				typeToAdd = 1;
 			}
 
 			ruleElement.innerHTML = `
@@ -530,7 +531,7 @@
 				<input class="toggle" type="checkbox">
 				<input type="text" placeholder="Query">
 				<span class="glyphicon glyphicon-remove"></span>
-   			</div>
+			</div>
 			`;
 
 			let ruleDivElement = ruleElement.childNodes[1];
@@ -542,9 +543,9 @@
 
 			ruleElement.childNodes[1].childNodes[3].focus();
 
-			if (addToTextEditor == undefined || addToTextEditor == true) {
-				let jsonToAdd = {}
-				jsonToAdd['type'] = (typeToAdd == 1) ? 'CSS' : 'XPATH';
+			if (addToTextEditor === undefined || addToTextEditor === true) {
+				let jsonToAdd = {};
+				jsonToAdd['type'] = (typeToAdd === 1) ? 'CSS' : 'XPATH';
 				jsonToAdd['path'] = (typeof query === 'string') ? query : '';
 				modifyJsonExclude(true, jsonToAdd);
 			}
@@ -558,7 +559,7 @@
 
 	/**
 	 * Modifies the index of the exclude
-	 * 
+	 *
 	 * @param {number} index - The index, if true, push at the end
 	 * @param {object} data - The data {type:"", path:""}
 	 */
@@ -577,8 +578,8 @@
 
 	/**
 	 * Removes the index from the json exclude
-	 * 
-	 * @param {any} index 
+	 *
+	 * @param {any} index
 	 */
 	function removeJsonExclude(index) {
 		let tableElement = document.getElementById('exclude-table');
@@ -600,8 +601,8 @@
 
 	/**
 	 * Gets the current value of the exclude
-	 * 
-	 * @param {number} index 
+	 *
+	 * @param {number} index
 	 * @returns {object} The current values
 	 */
 	function getJsonExclude(index) {
@@ -614,7 +615,7 @@
 
 	/**
 	 * Adds a metadata field to the visual editor
-	 * 
+	 *
 	 * @param {string} field - The field to pass
 	 * @param {string} query - The query to pass
 	 * @param {string|number} type - The type to pass: 0 for XPATH, 1 for CSS
@@ -651,11 +652,8 @@
 		}
 
 		let typeToAdd = 0;
-
-		if (typeof type == 'string') {
-			if (type == 'CSS') {
-				typeToAdd = 1;
-			}
+		if (type === 'CSS') {
+			typeToAdd = 1;
 		}
 
 		ruleElement.innerHTML = `
@@ -679,9 +677,9 @@
 
 		ruleElement.childNodes[1].childNodes[3].focus();
 
-		if (addToTextEditor == undefined || addToTextEditor == true) {
+		if (addToTextEditor === undefined || addToTextEditor === true) {
 			let data = {
-				type: (typeToAdd == 1) ? 'CSS' : 'XPATH',
+				type: (typeToAdd === 1) ? 'CSS' : 'XPATH',
 				path: (typeof query === 'string') ? query : ''
 			};
 			modifyTextMetadata(fieldToAdd, fieldToAdd, data);
@@ -691,7 +689,7 @@
 
 	/**
 	 * Modifies the metadata of the text editor
-	 * 
+	 *
 	 * @param {string} newField - The new field
 	 * @param {string} oldField - the old field
 	 * @param {object} data - The data {type:"XPATH", path:""}
@@ -708,7 +706,7 @@
 
 	/**
 	 * Removes the row from the visual editor and the field of the text editor
-	 * 
+	 *
 	 * @param {number} row - The row of the visual editor to remove
 	 */
 	function removeTextMetadata(row) {
@@ -732,12 +730,12 @@
 
 	/**
 	 * Gets the metadata for a specific field
-	 * 
+	 *
 	 * @param {string} field - The field
 	 * @returns {object} The field data
 	 */
 	function getTextMetadata(field) {
-		if (field == null) {
+		if (!field) {
 			field = '';
 		}
 		let textAreaElement = document.getElementById('json-config');
@@ -749,27 +747,27 @@
 
 	/**
 	 * Builds the visual editor from the text editor data
-	 * 
+	 *
 	 */
 	function buildVisualFromText() {
 		let textAreaElement = document.getElementById('json-config');
 		let currentValue = textAreaElement.value;
 		let editorElement = document.getElementById('editor');
 
-		if (currentValue == defaultTextEditorValue) {
+		if (currentValue === defaultTextEditorValue) {
 			editorElement.innerHTML = defaultTextEditorValue;
 		}
 		else {
 			editorElement.innerHTML = `
-			<p>Exclude</p> 
-			<table id="exclude-table"> 
-			</table> 
+			<p>Exclude</p>
+			<table id="exclude-table">
+			</table>
 			<div class="center-button">
 				<div id="add-exclude" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span> </div>
 			</div>
-			<p>Metadata</p> 
-			<table id="metadata-table"> 
-			</table> 
+			<p>Metadata</p>
+			<table id="metadata-table">
+			</table>
 			<div class="center-button">
 				<div id="add-metadata" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span> </div>
 			</div>
@@ -797,7 +795,7 @@
 
 	/**
 	 * The onchange function for the <select> of the exclude type in the visual editor
-	 * 
+	 *
 	 */
 	function excludeTypeOnChange() {
 		let row = this.parentNode.parentNode.parentNode.rowIndex;
@@ -812,7 +810,7 @@
 
 	/**
 	 * The oninput function for the <input> of the exclude query in the visual editor
-	 * 
+	 *
 	 */
 	function excludeQueryOninput() {
 		let query = this.value;
@@ -828,14 +826,14 @@
 
 	/**
 	 * The onchange function for the <select> of the metadata type in the visual editor
-	 * 
+	 *
 	 */
 	function metadataTypeOnChange() {
 		let currentField = this.parentNode.getAttribute('data-field');
 		let jsonToMod = {
 			type: getTypebyCheck(this.checked),
 			path: getTextMetadata(currentField)['path']
-		}
+		};
 		modifyTextMetadata(currentField, currentField, jsonToMod);
 		autoValidate();
 	}
@@ -843,7 +841,7 @@
 
 	/**
 	 * The oninput function for the <input> of the metadata query in the visual editor
-	 * 
+	 *
 	 */
 	function metadataQueryOnInput() {
 		let query = this.value;
@@ -859,7 +857,7 @@
 
 	/**
 	 * The oninput function for the <input> of the metadata field in the visual editor
-	 * 
+	 *
 	 */
 	function metadataFieldOnInput() {
 		try {
@@ -880,10 +878,10 @@
 		}
 	}
 
-	
+
 	/**
 	 * Encodes or decodes the current json config depending on it's current state
-	 * 
+	 *
 	 */
 	function changeEncodeOnClick(){
 		let encodeButtonElement = document.getElementById('encode');
@@ -891,7 +889,7 @@
 
 		if(isTextEncoded){
 			try{
-				textArea.value = JSON.parse(textArea.value)
+				textArea.value = JSON.parse(textArea.value);
 				pretty();
 			}
 			catch(err){
@@ -900,7 +898,7 @@
 			encodeButtonElement.innerHTML = "Encode";
 		}
 		else{
-			textArea.value = JSON.stringify(textArea.value, null, 0)
+			textArea.value = JSON.stringify(textArea.value, null, 0);
 			encodeButtonElement.innerHTML = "Decode";
 		}
 
@@ -923,14 +921,14 @@
 
 
 	/*
-	 * MAIN FUNCTION 
+	 * MAIN FUNCTION
 	 *
 	 */
 
 
 	/**
 	 * The init function
-	 * 
+	 *
 	 */
 	function init() {
 		try {
@@ -948,7 +946,7 @@
 			document.getElementById('text-editor-button').onclick = changeEditorTab;
 			document.getElementById('clear').onclick = clearPage;
 			document.getElementById('encode').onclick = changeEncodeOnClick;
-			document.getElementById('copy').onclick = copyToClipboard
+			document.getElementById('copy').onclick = copyToClipboard;
 			initStorageSelect();
 
 			//Creates the value table
@@ -964,7 +962,7 @@
 			buildVisualFromText();
 
 			//The onMessage function
-			backgroundPageConnection.onMessage.addListener(function (message, sender, sendResponse) {
+			backgroundPageConnection.onMessage.addListener(function (message/*, sender, sendResponse*/) {
 
 				if (message.return) {
 
@@ -982,11 +980,11 @@
 						try {
 							console.log(element);
 							//If the message received was an error
-							if (element['type'] == "__error") {
+							if (element['type'] === "__error") {
 								errorElement.innerHTML += element['value'] + "<br>";
 							}
 							//Else it adds it to the field table
-							else if (element['type'] != "__error") {
+							else {
 								//Convert to list if greater than one
 								if (element['value'].length > 1) {
 									element['value'] = element['value'].join('<br>');
