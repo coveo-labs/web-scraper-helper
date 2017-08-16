@@ -1,6 +1,9 @@
 'use strict';
+// jshint -W110, -W003
+/*global chrome*/
+
 window.onload = function () {
-	// your code 
+	// your code
 
 	setTimeout(function () {
 		let jsonToSend = {};
@@ -8,7 +11,7 @@ window.onload = function () {
 		chrome.runtime.sendMessage(jsonToSend);
 	}, 1);
 
-	var __port = chrome.runtime.connect();
+	chrome.runtime.connect();
 	//global since it needs to persist beyond the function scope
 	var __elementsToHide = [];
 	var __previousSelectedElement;
@@ -21,7 +24,7 @@ window.onload = function () {
 	 * Parses the XPath
 	 * sample return
 	 * {type:'title', value:[element, element]}
-	 * 
+	 *
 	 * @param {string} title - the name of the metadata field
 	 * @param {string} xpathString - the xpath to use to find the element in the page
 	 * @param {boolean} shouldReturnText - set to true if you want the text value of the element found with xpath. (optional)
@@ -33,7 +36,7 @@ window.onload = function () {
 			let e, elements = [];
 
 			if (nodes.resultType === XPathResult.UNORDERED_NODE_ITERATOR_TYPE || nodes.resultType === XPathResult.ORDERED_NODE_ITERATOR_TYPE) {
-				while (e = nodes.iterateNext()) {
+				while ( (e = nodes.iterateNext()) ) {
 					let value = e;
 					if (shouldReturnText) {
 						value = e.nodeValue;
@@ -56,13 +59,13 @@ window.onload = function () {
 		catch (err) {
 			return { type: '__error', value: 'Failed to parse XPath "' + xpathString + '"<br>' + err };
 		}
-	}
+	};
 
 	/**
 	 * Parses the CSS selector
 	 * sample return
 	 * {type:'title', value:[element, element]}
-	 * 
+	 *
 	 * @param {string} title - The string for the type
 	 * @param {string} cssSelector - the css selector to parse
 	 * @param {Boolen} isMetadata - If its metadata or not
@@ -88,18 +91,18 @@ window.onload = function () {
 			}
 
 			let nodes = document.body.querySelectorAll(cssSelector);
-			let e, elements = [];
+			let elements = [];
 			nodes.forEach(function (e) {
 				let value = e;
 				if (shouldReturnText) {
 					value = e.textContent;
 				}
-				
+
 				if(shouldReturnAttr){
 					value = e.getAttribute(attrToGet);
 				}
 				if(isMetadata && value === e){
-					value = ""
+					value = "";
 				}
 
 				elements.push(value);
@@ -109,14 +112,14 @@ window.onload = function () {
 		catch (err) {
 			return { type: '__error', value: 'Failed to parse CSS "' + cssSelector + '"<br>' + err };
 		}
-	}
+	};
 
 
 	/**
 	 * Parses the jsonData
 	 * Hides the elements on the webpage
 	 * Sends back to the panel all the parses xpath and css selectors
-	 * 
+	 *
 	 * @param {object} jsonData - The json to parse
 	 */
 	function parseJsonConfig(jsonData) {
@@ -133,7 +136,7 @@ window.onload = function () {
 
 		if (__elementsToHide.length > 0) {
 			__elementsToHide.forEach(function (elementObject) {
-				if (elementObject['type'] != '__error') {
+				if (elementObject['type'] !== '__error') {
 					elementObject['value'].forEach(function (element) {
 						try {
 							element.style.opacity = 1;
@@ -147,7 +150,7 @@ window.onload = function () {
 		}
 
 		//Reset the elementsToHide after everything is back to normal
-		__elementsToHide = []
+		__elementsToHide = [];
 
 		//Grab all the metadata specified in the json
 		//Gets the nodeValue for XPATH
@@ -176,7 +179,7 @@ window.onload = function () {
 		//Reduces opacity of elements in elementsToHide
 		//If an error is found, adds it in elements to send back
 		__elementsToHide.forEach(function (elementObject) {
-			if (elementObject['type'] != '__error') {
+			if (elementObject['type'] !== '__error') {
 				elementObject['value'].forEach(function (element) {
 					try {
 						element.style.opacity = 0.1;
@@ -202,8 +205,8 @@ window.onload = function () {
 
 	/**
 	 * Adds the __highlight class to the object at the currently being moused over
-	 * 
-	 * @param {event} event 
+	 *
+	 * @param {event} event
 	 * @returns nothing
 	 */
 	function mouseoverHandler(event) {
@@ -241,7 +244,7 @@ window.onload = function () {
 	/**
 	 * Stops the mouse click and instead sends the element being moused over to the panel
 	 * Then turns itself off
-	 * 
+	 *
 	 * @param {event} e - The mouse click event
 	 * @returns {boolean} false
 	 */
@@ -261,7 +264,7 @@ window.onload = function () {
 
 	/**
 	 * Sends the xpath of the element that was moused over to the panel
-	 * 
+	 *
 	 */
 	function sendMouseElement() {
 		__ableToClick = true;
@@ -290,32 +293,31 @@ window.onload = function () {
 	/**
 	 * Gets a xpath string from a node
 	 * https://stackoverflow.com/questions/9197884/how-do-i-get-the-xpath-of-an-element-in-an-x-html-file
-	 * 
-	 * @param {element} node 
+	 *
+	 * @param {element} node
 	 * @returns {string} the xpath string
 	 */
 	function getXPath(node) {
 		var comp, comps = [];
-		var parent = null;
 		var xpath = '';
 		var getPos = function (node) {
 			var position = 1, curNode;
-			if (node.nodeType == Node.ATTRIBUTE_NODE) {
+			if (node.nodeType === Node.ATTRIBUTE_NODE) {
 				return null;
 			}
 			for (curNode = node.previousSibling; curNode; curNode = curNode.previousSibling) {
-				if (curNode.nodeName == node.nodeName) {
+				if (curNode.nodeName === node.nodeName) {
 					++position;
 				}
 			}
 			return position;
-		}
+		};
 
 		if (node instanceof Document) {
 			return '/';
 		}
 
-		for (; node && !(node instanceof Document); node = node.nodeType == Node.ATTRIBUTE_NODE ? node.ownerElement : node.parentNode) {
+		for (; node && !(node instanceof Document); node = node.nodeType === Node.ATTRIBUTE_NODE ? node.ownerElement : node.parentNode) {
 			comp = comps[comps.length] = {};
 			switch (node.nodeType) {
 				case Node.TEXT_NODE:
@@ -340,7 +342,7 @@ window.onload = function () {
 		for (var i = comps.length - 1; i >= 0; i--) {
 			comp = comps[i];
 			xpath += '/' + comp.name;
-			if (comp.position != null && comp.position > 1) {
+			if (comp.position !== null && comp.position > 1) {
 				xpath += '[' + comp.position + ']';
 			}
 		}
@@ -351,13 +353,12 @@ window.onload = function () {
 
 	function validateJson(jsonToValidate) {
 		let jsonToSend = {
-			validate:
-			{
+			validate: {
 				metadata: {},
 				exclude: [],
 				errors: []
 			}
-		}
+		};
 
 		jsonToValidate = JSON.parse(jsonToValidate);
 
@@ -421,10 +422,10 @@ window.onload = function () {
 
 	/**
 	 * Adds a listener to the received messages
-	 * 
+	 *
 	 */
 	chrome.runtime.onMessage.addListener(
-		function (request, sender, sendResponse) {
+		function (request/*, sender, sendResponse*/) {
 
 			if (request.json) {
 				parseJsonConfig(request.json);
