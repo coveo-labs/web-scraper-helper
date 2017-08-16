@@ -23,23 +23,10 @@
 	defaultJson = JSON.stringify(defaultJson, null, 2);
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 	/*
 	 * HELPER FUNCTIONS
 	 *
 	 */
-
 
 	/**
 	 * Add the string to the log
@@ -53,7 +40,6 @@
 	function logBackground(object) {
 		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, log: object });
 	}
-
 
 	/**
 	 * Returns XPATH or CSS depending on the check
@@ -82,7 +68,6 @@
 		}
 	}
 
-
 	/**
 	 * Clears the webpage CSS and results table
 	 *
@@ -109,7 +94,6 @@
 		}
 	}
 
-
 	/**
 	 * Launches the a timeout to validate the visual editor after 100ms
 	 *
@@ -132,7 +116,6 @@
 		textAreaElement.value = prettyJson;
 	}
 
-
 	/**
 	 * Resets the value table back to default
 	 *
@@ -149,7 +132,6 @@
 	function mouseAdd() {
 		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, mouse: '1' });
 	}
-
 
 	/**
 	 * Checks if the key exists in the metadata of the json
@@ -184,25 +166,10 @@
 	}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	/*
 	 * STORAGE FUNCTIONS
 	 *
 	 */
-
 
 	/**
 	 * Displays the string next to the storage in green
@@ -226,7 +193,6 @@
 			e.innerHTML = '';
 		}, 2000);
 	}
-
 
 	/**
 	 * Creates the storage file select
@@ -254,7 +220,6 @@
 		}
 	}
 
-
 	/**
 	 * Gets all the name of the files stored in the storage
 	 *
@@ -274,7 +239,6 @@
 		return [];
 	}
 
-
 	/**
 	 * Determines wheter a file exists in storage
 	 *
@@ -288,7 +252,6 @@
 			});
 		}
 	}
-
 
 	/**
 	 * Called onchange of the storage select
@@ -344,7 +307,6 @@
 		});
 	}
 
-
 	/**
 	 * Gets the currently selected value of the storage
 	 *
@@ -354,7 +316,6 @@
 		let e = document.getElementById('storage');
 		return e.options[e.selectedIndex].value;
 	}
-
 
 	/**
 	 * Loads the text editor with the selected file
@@ -399,7 +360,6 @@
 		});
 	}
 
-
 	/**
 	 * Deletes the currently selected storage file
 	 *
@@ -429,7 +389,6 @@
 		});
 	}
 
-
 	/**
 	 * Changes the editor tab
 	 * Visual or Text
@@ -451,7 +410,7 @@
 
 			this.parentNode.setAttribute('class', 'active');
 
-			if (document.getElementById(toShow).style.display !== 'block') {
+			if (document.getElementById(toShow).style.display === 'none') {
 				//Tabs switching from text to visual editor
 				if (toShow === 'editor') {
 					if(isTextEncoded){
@@ -465,13 +424,12 @@
 			tabs.forEach(function (element) {
 				element.style.display = 'none';
 			}, this);
-			document.getElementById(toShow).style.display = 'block';
+			document.getElementById(toShow).style.display = 'inherit';
 		}
 		catch (err) {
 			alert(err);
 		}
 	}
-
 
 	/**
 	 * Enables the save and delete button once the user has selected a file
@@ -483,24 +441,10 @@
 	}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 	/*
 	 * VISUAL EDITOR FUNCTIONS
 	 *
 	 */
-
 
 	/**
 	 * Adds an exclude query to the visual editor
@@ -556,7 +500,6 @@
 		}
 	}
 
-
 	/**
 	 * Modifies the index of the exclude
 	 *
@@ -595,9 +538,7 @@
 			textAreaElement.value = JSON.stringify(json, null, 2);
 			autoValidate();
 		}
-
 	}
-
 
 	/**
 	 * Gets the current value of the exclude
@@ -611,7 +552,6 @@
 		let json = JSON.parse(currentValue);
 		return json[0]['exclude'][index];
 	}
-
 
 	/**
 	 * Adds a metadata field to the visual editor
@@ -662,7 +602,7 @@
 				<input type="text" placeholder="Field" class="field-input">
 				<input type="text" placeholder="Query">
 				<span class="glyphicon glyphicon-remove"></span>
-   			</div>
+			</div>
 		`;
 
 		let ruleDivElement = ruleElement.childNodes[1];
@@ -686,7 +626,6 @@
 		}
 	}
 
-
 	/**
 	 * Modifies the metadata of the text editor
 	 *
@@ -702,7 +641,6 @@
 		json[0]['metadata'][newField] = data;
 		textAreaElement.value = JSON.stringify(json, null, 2);
 	}
-
 
 	/**
 	 * Removes the row from the visual editor and the field of the text editor
@@ -724,9 +662,7 @@
 			textAreaElement.value = JSON.stringify(json, null, 2);
 			autoValidate();
 		}
-
 	}
-
 
 	/**
 	 * Gets the metadata for a specific field
@@ -744,7 +680,6 @@
 		return json[0]['metadata'][field];
 	}
 
-
 	/**
 	 * Builds the visual editor from the text editor data
 	 *
@@ -760,16 +695,14 @@
 		else {
 			editorElement.innerHTML = `
 			<p>Exclude</p>
-			<table id="exclude-table">
-			</table>
+			<table id="exclude-table"></table>
 			<div class="center-button">
-				<div id="add-exclude" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span> </div>
+				<div id="add-exclude" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span></div>
 			</div>
 			<p>Metadata</p>
-			<table id="metadata-table">
-			</table>
+			<table id="metadata-table"></table>
 			<div class="center-button">
-				<div id="add-metadata" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span> </div>
+				<div id="add-metadata" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span></div>
 			</div>
 			`;
 			document.getElementById('add-exclude').onclick = addExcludeVisual;
@@ -792,7 +725,6 @@
 		validateJson();
 	}
 
-
 	/**
 	 * The onchange function for the <select> of the exclude type in the visual editor
 	 *
@@ -806,7 +738,6 @@
 		modifyJsonExclude(row, jsonToMod);
 		autoValidate();
 	}
-
 
 	/**
 	 * The oninput function for the <input> of the exclude query in the visual editor
@@ -823,7 +754,6 @@
 		autoValidate();
 	}
 
-
 	/**
 	 * The onchange function for the <select> of the metadata type in the visual editor
 	 *
@@ -837,7 +767,6 @@
 		modifyTextMetadata(currentField, currentField, jsonToMod);
 		autoValidate();
 	}
-
 
 	/**
 	 * The oninput function for the <input> of the metadata query in the visual editor
@@ -853,7 +782,6 @@
 		modifyTextMetadata(currentField, currentField, jsonToMod);
 		autoValidate();
 	}
-
 
 	/**
 	 * The oninput function for the <input> of the metadata field in the visual editor
@@ -877,7 +805,6 @@
 			alert(err);
 		}
 	}
-
 
 	/**
 	 * Encodes or decodes the current json config depending on it's current state
@@ -906,25 +833,10 @@
 	}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	/*
 	 * MAIN FUNCTION
 	 *
 	 */
-
 
 	/**
 	 * The init function
@@ -932,7 +844,6 @@
 	 */
 	function init() {
 		try {
-
 			//Adds the fetch function to the button
 			document.getElementById('fetch').onclick = fetch;
 			document.getElementById('pretty').onclick = pretty;

@@ -1,27 +1,55 @@
-body{
+html {
+	height: 100%;
+}
+body {
 	margin: 0;
 	font-size: 16px;
 	font-family: 'Lato', sans-serif;
 	color: #313A45;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
 }
 
-#json-config{
-	width: 99%;
-	height: 440px;
+#setup, #rules-and-results > * {
+	padding: 8px;
 }
 
-#error{
-	color:red;
+#rules-and-results {
+	flex: 1;
+	display: flex;
 }
 
-#storageError{
+@media only screen and (max-width: 1000px) {
+	#rules-and-results {
+		flex-direction: column;
+	}
+}
+
+#rules, #results {
+	flex: 1;
+	overflow: auto;
+}
+
+#rules {
+	display: flex;
+	flex-direction: column;
+	overflow: auto;
+}
+#rules #editor-container {
+	flex: 1;
+}
+
+#error, #storageError{
 	color:red;
 }
 
 #log{
 	border: 1px solid silver;
 }
-
+#log:empty{
+	display: none;
+}
 /*Result Table*/
 #resultTable{
 	background-color: #FAFAFA;
@@ -64,17 +92,27 @@ body{
 	border: 1px solid #ddd;
 	border-top: none;
 	padding: 5px;
-	width: 100%;
-	height: 500px;
 	overflow-y: scroll;
 	overflow-x: hidden;
 	box-sizing: border-box;
+
+	display: flex;
+	flex-direction: columns;
 }
 
-#editor-text{
-	padding: 0;
-	margin: 0;
-	font-size: 20px;
+#editor-container > * {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+#text-editor {
+	display: flex;
+	flex-direction: column;
+}
+#json-config {
+	flex: 1;
+	margin-bottom: 8px;
 }
 
 #editor > p{
@@ -94,7 +132,7 @@ body{
 .add-button{
 	background-color: green;
 	height: 28px;
-    width: 28px;
+	width: 28px;
 	color: white;
 	border: none;
 	cursor: pointer;
@@ -131,56 +169,56 @@ body{
 /*New visuals*/
 
 .rule {
-    border: 1px solid silver;
-    display: flex;
-    overflow: hidden;
-    margin-bottom: 5px;
+	border: 1px solid silver;
+	display: flex;
+	overflow: hidden;
+	margin-bottom: 5px;
 	width: 100%;
 	background-color: white;
 }
 
 .rule > *, .toggle::after {
-    line-height: 30px;
-    margin: 0;
+	line-height: 30px;
+	margin: 0;
 }
 
 .rule input[type=checkbox] {
-    margin: 0;
+	margin: 0;
 }
 
 .rule input[type=text] {
-    border: 0;
-    /*flex: 1;*/
-    padding-left: 10px;
-    outline: none;
+	border: 0;
+	/*flex: 1;*/
+	padding-left: 10px;
+	outline: none;
 	width: 100%;
 	text-overflow: ellipsis;
 }
 
 .glyphicon-remove {
-    color: #CE3F00;
-    visibility: hidden;
-    transition: margin 0.25s;
-    cursor: pointer;
+	color: #CE3F00;
+	visibility: hidden;
+	transition: margin 0.25s;
+	cursor: pointer;
 }
 
 .rule:hover .glyphicon-remove {
-    visibility: visible;
+	visibility: visible;
 }
 
 .toggle {
-    -webkit-appearance: inherit;
-    min-width: 60px;
-    text-align: center;
-    padding: 5px;
-    cursor: pointer;
-    border-right: 1px solid silver;
+	-webkit-appearance: inherit;
+	min-width: 60px;
+	text-align: center;
+	padding: 5px;
+	cursor: pointer;
+	border-right: 1px solid silver;
 }
 .toggle::after {
-    content: "XPATH";
+	content: "XPATH";
 }
 .toggle:checked::after {
-    content: "CSS"
+	content: "CSS"
 }
 
 /*************/
@@ -195,13 +233,13 @@ body{
 }
 
 .btn-circle-sm {
-  width: 35px;
-  height: 35px;
-  text-align: center;
-  padding: 2px 0;
-  font-size: 20px;
-  line-height: 1.65;
-  border-radius: 30px;
+	width: 35px;
+	height: 35px;
+	text-align: center;
+	padding: 2px 0;
+	font-size: 20px;
+	line-height: 1.65;
+	border-radius: 30px;
 }
 
 button:disabled{
