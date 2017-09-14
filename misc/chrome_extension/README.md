@@ -1,26 +1,49 @@
 # Chrome Extension
-The chrome extension part
+The web-scraper-helper Google Chrome extension allows you to easily create and test web scraping configurations to use with Coveo Cloud V2 Web and Sitemap source types. 
 
-## Description
-This started out as a tampermonkey script turned into a chrome extension. The goal of this is to make creating and changing the JSON rules for the Coveo webcrawler faster.
+The web scraping configuration developped with the extenson can tell the crawler to exclude web page sections and extract metadata (see [Web Scraping Configuration](http://www.coveo.com/go?dest=cloudhelp&lcid=9&context=277)). The extension does not currently support testing the creation of sub-items. 
 
-## How to build
-1. Download/clone git repo
-2. Turn on developer mode in chrome
-3. Load unpacked extension
-4. Find the "chrome_extension" folder in the repo
+The extension provides both a GUI and a JSON text editor to create, save, and test your web scraping configuration on specific pages to immediately see the results. 
 
-## How to run
-On any webpage, just open the developer tools (Control+Shift+I) and navigate to the "Web Scraping" tab
+## Installation
+
+The extension is currently not publicly available on the **chrome web store** (only to Coveo employees under **For coveo.com**), but coming soon. So for now, you must install it as an unpacked extension. 
+
+1. Download/clone this Git repo.
+1. In Google Chrome:
+   1. Go to the **Extensions** page.
+   1. Select the **Developer mode** check box.
+   1. Click **Load unpack extension**. 
+   1. Find the `chrome_extension` folder of  the repo, and then click **Select**.
+   
+   1. Ensure the added extension **Enabled** check box is selected.
+
+## Usage
+1. With Google Chrome, go to any web page for which you want to create a web scraping configuration.
+1. Open the Chrome Developer tools (Windows: Control+Shift+I Mac: alt+cmd+I). 
+1. Navigate to the new **Web Scraping** tab, and then: 
+   1. In the **Select a file to work on** dropdown, select **Create new file** and then click **Save** to be able to start the configuration. 
+   1. Extract a piece of the page as a metadata, and then click **Run**. 
+
+      The extracted value appears in the **Fields** and **Value** table.
+   
+      Demo:
+       ![metadata_demo](https://user-images.githubusercontent.com/17149559/27700307-360ca4e4-5ccb-11e7-80f4-632dcde89d52.gif)
+   1. Exclude a section of the page (such as the header that you typically do not want to index). 
+   
+      The excluded section appears with a semi-transparent white overlay.
+
+      Demo:  
+   ![exclude_demo](https://user-images.githubusercontent.com/17149559/27700335-493b506a-5ccb-11e7-99cb-66a4104046bf.gif)
+   1. Click **Save** once you are happy with your web scraping configuration. 
+1. Test and fine-tune your web scraping configuration with other pages to which it applies.
+1. Once happy with the configuration, use the content of your saved file (or copy the JSON in the **Text** tab). 
+1. In the Coveo Cloud V2 administration console, add your web scraping configuration to your source configuration: 
+   - Web source (see [Add/Edit Web Source - Panel](http://www.coveo.com/go?dest=cloudhelp&lcid=9&context=276)) 
+   - Sitemap source (see [Add/Edit Sitemap Source - Panel](http://www.coveo.com/go?dest=cloudhelp&lcid=9&context=275))
 
 ## Dependencies
 Google Chrome or Chromium
-
-## Demo
-Adding a metadata:
-![metadata_demo](https://user-images.githubusercontent.com/17149559/27700307-360ca4e4-5ccb-11e7-80f4-632dcde89d52.gif)
-Adding an exclude:
-![exclude_demo](https://user-images.githubusercontent.com/17149559/27700335-493b506a-5ccb-11e7-99cb-66a4104046bf.gif)
 
 ## References
 
