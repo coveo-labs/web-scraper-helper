@@ -1,6 +1,6 @@
 # Tampermonkey Script
 
-The Tampermonkey script is now depricated. It is recommended to rather use the more convenient and up-to-date Google Chrome extension also included in this repo (see Chrome extension [README](../chrome_extension/README.md)).
+The Tampermonkey script is now deprecated. It is recommended to rather use the more convenient and up-to-date Google Chrome extension also included in this repo (see Chrome extension [README](../chrome_extension/README.md)).
 
 Tampermonkey is a popular userscript manager that you can install in most browsers (see [Tampermonkey](https://tampermonkey.net/)). The web-scraper-helper Tampermonkey script allows you to create and test web scraping configurations directly from the brwoser when visiting web pages for which you want to customize the indexing. 
 
