@@ -1,10 +1,10 @@
 # Tampermonkey Script
 
-The Tampermonkey script is no longer up-to-date. It is recommended to rather use the more convenient and up-to-date Google Chrome extension also included in this repo (see Chrome extension [README](../chrome_extension/README.md)).
+The Tampermonkey script is now depricated. It is recommended to rather use the more convenient and up-to-date Google Chrome extension also included in this repo (see Chrome extension [README](../chrome_extension/README.md)).
 
 Tampermonkey is a popular userscript manager that you can install in most browsers (see [Tampermonkey](https://tampermonkey.net/)). The web-scraper-helper Tampermonkey script allows you to create and test web scraping configurations directly from the brwoser when visiting web pages for which you want to customize the indexing. 
 
-The web scraping configuration developed with the extenson can tell the Seb and Sitemap sources to exclude web page sections and extract metadata (see [Web Scraping Configuration](http://www.coveo.com/go?dest=cloudhelp&lcid=9&context=277)). The extension does not currently support testing the creation of sub-items. 
+The web scraping configuration developed with the extenson can tell the Web and Sitemap sources to exclude web page sections and extract metadata (see [Web Scraping Configuration](http://www.coveo.com/go?dest=cloudhelp&lcid=9&context=277)). The extension does not currently support testing the creation of sub-items. 
 
 The extension provides some GUI to create, save, and test your web scraping configuration on specific pages to immediately see the results. 
 
