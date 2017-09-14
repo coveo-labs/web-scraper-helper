@@ -1,21 +1,29 @@
-#Tampermonkey Script
-The Tampermonkey script part
+# Tampermonkey Script
 
-## Description
-When you create Web or Sitemap sources in the Coveo platform, you can add Web scraping rules to retrieve or to exclude content from the web pages it will crawl.
-This Tampermonkey script helps with testing your web scraper rules.
-You will be able to test your rules and verify which metadata will be extracted from the page without having to re-index your source.
+The Tampermonkey script is now deprecated. It is recommended to rather use the more convenient and up-to-date Google Chrome extension also included in this repo (see Chrome extension [README](../chrome_extension/README.md)).
 
-## How-to Use
+Tampermonkey is a popular userscript manager that you can install in most browsers (see [Tampermonkey](https://tampermonkey.net/)). The web-scraper-helper Tampermonkey script allows you to create and test web scraping configurations directly from the brwoser when visiting web pages for which you want to customize the indexing. 
 
-* Import the `misc/Webscraping.user.js` file in your Tampermonkey extension.
-* From within the Tampermonkey editor:
-  * Edit the `@match` to include the site you are working with
-  * Edit the `jsonRules`
-  * Save the script
-* Reload your site
+The web scraping configuration developed with the extenson can tell the Web and Sitemap sources to exclude web page sections and extract metadata (see [Web Scraping Configuration](http://www.coveo.com/go?dest=cloudhelp&lcid=9&context=277)). The extension does not currently support testing the creation of sub-items. 
 
-Once you are happy with your rules, copy and paste the JSON structure from the Tampermonkey editor to your Web source in your [Coveo organization](https://platform.cloud.coveo.com/admin/).
+The extension provides some GUI to create, save, and test your web scraping configuration on specific pages to immediately see the results. 
+
+## Installation
+1. If not already done, install Tampermonkey in your favorite browser (see [Tampermonkey](https://tampermonkey.net/)).
+1. Import the `misc/Webscraping.user.js` file in your Tampermonkey extension. 
+
+## Usage
+1. From within the Tampermonkey editor, edit the script:
+   1. Edit `@match` to activate the script for the desired web site pages.
+   1. Edit the `jsonRules` with the desired web scraping configuration (see [Web Scraping Configuration](http://www.coveo.com/go?dest=cloudhelp&lcid=9&context=277)).
+   1. Save the script.
+1. Reload the web site page.
+
+   The excluded sections appear with a semi-transparent white overlay. Extracted metadata values appear in the web-scraper-helper panel on the right. 
+1. Test and find-tune your web scraping configuration with other site pages. 
+1. Once you are happy with your scraping rules, copy and paste the JSON configuration from the Tampermonkey editor to your Web or Sitemap source in the Coveo Cloud V2 organization using the [administration console](https://platform.cloud.coveo.com/admin/).
+1. Rebuild your source. 
+1. Validate that your web scraping configuration performed as expected on all source items. 
 
 ## Dependencies
-This tool is a Tampermonkey script. You need to install the [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) extension in your Chrome browser to use it.
+This earlier version of the tool is a [Tampermonkey](https://tampermonkey.net/) script.
