@@ -37,9 +37,9 @@ window.onload = function () {
 
 			if (nodes.resultType === XPathResult.UNORDERED_NODE_ITERATOR_TYPE || nodes.resultType === XPathResult.ORDERED_NODE_ITERATOR_TYPE) {
 				while ( (e = nodes.iterateNext()) ) {
-					let value = e;
-					if (shouldReturnText) {
-						value = e.nodeValue;
+					let value = e.nodeValue;
+					if (value === null) {
+						value = e.outerHTML;
 					}
 					elements.push(value);
 				}
@@ -90,9 +90,10 @@ window.onload = function () {
 				cssSelector = cssSelector.split(attrSub)[0];
 			}
 
-			let nodes = document.body.querySelectorAll(cssSelector);
-			let elements = [];
-			nodes.forEach(function (e) {
+			let nodes = document.querySelectorAll(cssSelector),
+				elements = [];
+
+			nodes.forEach(e => {
 				let value = e;
 				if (shouldReturnText) {
 					value = e.textContent;
@@ -101,12 +102,9 @@ window.onload = function () {
 				if(shouldReturnAttr){
 					value = e.getAttribute(attrToGet);
 				}
-				if(isMetadata && value === e){
-					value = "";
-				}
 
 				elements.push(value);
-			}, this);
+			});
 			return { type: title, value: elements };
 		}
 		catch (err) {

@@ -150,19 +150,32 @@
 	 * Copies the text content to the clipboard
 	 *
 	 */
-	function copyToClipboard(){
+	function copyToClipboard(bEncode){
 		document.getElementById('text-editor-button').click();
 		let textAreaElement = document.getElementById('json-config');
+		let originalValue = textAreaElement.value;
+
+		if (bEncode===true) { // may receive an event as parameter
+			let val = JSON.stringify(JSON.parse(originalValue)); // will strip out lines
+			val = val.replace(/\\/g, '\\\\').replace(/"/g, '\\"'); // escape backslash and quotes
+			textAreaElement.value = `"${val}"`;
+		}
+
 		textAreaElement.focus();
 		textAreaElement.select();
 		try {
 			let successful = document.execCommand('copy');
-			if(successful){
+			textAreaElement.value = originalValue;
+			if (successful) {
 				displayStorageSuccess('Copied!');
 			}
 		} catch (err) {
 			alert('Failed to copy');
 		}
+	}
+
+	function copyToClipboardEscaped() {
+		copyToClipboard(true);
 	}
 
 
@@ -694,32 +707,36 @@
 		}
 		else {
 			editorElement.innerHTML = `
-			<p>Exclude</p>
-			<table id="exclude-table"></table>
-			<div class="center-button">
-				<div id="add-exclude" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span></div>
-			</div>
-			<p>Metadata</p>
-			<table id="metadata-table"></table>
-			<div class="center-button">
-				<div id="add-metadata" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span></div>
-			</div>
-			`;
+				<p>Exclude</p>
+				<table id="exclude-table"></table>
+				<div class="center-button">
+					<div id="add-exclude" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span></div>
+				</div>
+				<p>Metadata</p>
+				<table id="metadata-table"></table>
+				<div class="center-button">
+					<div id="add-metadata" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span></div>
+				</div>`;
+
 			document.getElementById('add-exclude').onclick = addExcludeVisual;
 			document.getElementById('add-metadata').onclick = addMetadataVisual;
 
-			let json = JSON.parse(currentValue);
+			try {
+				let json = JSON.parse(currentValue);
+				let {metadata, exclude} = json[0];
 
-			let metadata = json[0]['metadata'];
-			let exclude = json[0]['exclude'];
+				for (let key in metadata) {
+					addMetadataVisual(key, metadata[key]['path'], metadata[key]['type'], false);
+				}
 
-			for (let key in metadata) {
-				addMetadataVisual(key, metadata[key]['path'], metadata[key]['type'], false);
+				exclude.forEach( ({path, type}) => {
+					addExcludeVisual(path, type, false);
+				} );
+
 			}
-
-			exclude.forEach(function (element) {
-				addExcludeVisual(element['path'], element['type'], false);
-			}, this);
+			catch(e) {
+				console.error(e);
+			}
 		}
 
 		validateJson();
@@ -814,18 +831,21 @@
 		let encodeButtonElement = document.getElementById('encode');
 		let textArea = document.getElementById('json-config');
 
-		if(isTextEncoded){
+		if (isTextEncoded) {
+			let msg = (typeof textArea.value) + ': ' + textArea.value;
 			try{
-				textArea.value = JSON.parse(textArea.value);
+				textArea.value = JSON.stringify(JSON.parse(textArea.value));
 				pretty();
 			}
 			catch(err){
-				alert(err);
+				alert(err + '\n\nmsg:\n' + msg);
+				console.error(err);
 			}
 			encodeButtonElement.innerHTML = "Encode";
 		}
-		else{
-			textArea.value = JSON.stringify(textArea.value, null, 0);
+		else {
+			let txt = JSON.stringify(JSON.parse(textArea.value), null, 0);
+			textArea.value = '"' + txt.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
 			encodeButtonElement.innerHTML = "Decode";
 		}
 
@@ -856,8 +876,10 @@
 			document.getElementById('editor-button').onclick = changeEditorTab;
 			document.getElementById('text-editor-button').onclick = changeEditorTab;
 			document.getElementById('clear').onclick = clearPage;
-			document.getElementById('encode').onclick = changeEncodeOnClick;
+			//document.getElementById('encode').onclick = changeEncodeOnClick;
 			document.getElementById('copy').onclick = copyToClipboard;
+			document.getElementById('copyEscaped').onclick = copyToClipboardEscaped;
+
 			initStorageSelect();
 
 			//Creates the value table
@@ -886,27 +908,33 @@
 					//Turns the message into readable JSON
 					message['return'] = JSON.parse(message['return']);
 
+					let encodeHtml = str => {
+						return (''+str).replace(/</g,'&lt;');
+					};
+
 					//Parses through all the received messages
-					message['return'].forEach(function (element) {
+					message['return'].forEach( ({type, value}) => {
 						try {
-							console.log(element);
 							//If the message received was an error
-							if (element['type'] === "__error") {
-								errorElement.innerHTML += element['value'] + "<br>";
+							if (type === "__error") {
+								errorElement.innerHTML += encodeHtml(value) + "<br>";
 							}
 							//Else it adds it to the field table
 							else {
 								//Convert to list if greater than one
-								if (element['value'].length > 1) {
-									element['value'] = element['value'].join('<br>');
+								if (value.length > 1) {
+									value = value.map(encodeHtml).join('<br>');
 								}
-								document.getElementById("resultTable").innerHTML += "<tr><td>" + element['type'] + "</td><td>" + element['value'] + "</td></tr>";
+								else {
+									value = encodeHtml(value);
+								}
+								document.getElementById("resultTable").innerHTML += `<tr><td>${type}</td><td>${value}</td></tr>`;
 							}
 						} catch (err) {
 							//If an error occurs, it goes in the log
 							log(err + "\n" + JSON.stringify(element, null, 2));
 						}
-					}, this);
+					});
 				}
 
 				//Disabled for now
