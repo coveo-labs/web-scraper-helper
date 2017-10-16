@@ -37,10 +37,6 @@
 		document.getElementById('log').innerText += (s + '\n' + new Date() + '\n\n');
 	}
 
-	function logBackground(object) {
-		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, log: object });
-	}
-
 	/**
 	 * Returns XPATH or CSS depending on the check
 	 *
@@ -122,15 +118,6 @@
 	 */
 	function resetResultTable() {
 		document.getElementById('resultTable').innerHTML = '<tr><th>Field</th><th>Value(s)</th></tr>';
-	}
-
-	/**
-	 * Turn on the mouseover on the webpage
-	 * Deactivated for now
-	 *
-	 */
-	function mouseAdd() {
-		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, mouse: '1' });
 	}
 
 	/**
@@ -411,11 +398,9 @@
 		try {
 
 			let toShow = this.getAttribute('data-show');
-
 			let liElements = this.parentNode.parentNode.childNodes;
 
 			liElements.forEach(function (element) {
-
 				if (element.tagName === 'LI') {
 					element.removeAttribute('class');
 				}
@@ -426,9 +411,6 @@
 			if (document.getElementById(toShow).style.display === 'none') {
 				//Tabs switching from text to visual editor
 				if (toShow === 'editor') {
-					if(isTextEncoded){
-						changeEncodeOnClick();
-					}
 					buildVisualFromText();
 				}
 			}
@@ -823,35 +805,6 @@
 		}
 	}
 
-	/**
-	 * Encodes or decodes the current json config depending on it's current state
-	 *
-	 */
-	function changeEncodeOnClick(){
-		let encodeButtonElement = document.getElementById('encode');
-		let textArea = document.getElementById('json-config');
-
-		if (isTextEncoded) {
-			let msg = (typeof textArea.value) + ': ' + textArea.value;
-			try{
-				textArea.value = JSON.stringify(JSON.parse(textArea.value));
-				pretty();
-			}
-			catch(err){
-				alert(err + '\n\nmsg:\n' + msg);
-				console.error(err);
-			}
-			encodeButtonElement.innerHTML = "Encode";
-		}
-		else {
-			let txt = JSON.stringify(JSON.parse(textArea.value), null, 0);
-			textArea.value = '"' + txt.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
-			encodeButtonElement.innerHTML = "Decode";
-		}
-
-		isTextEncoded = !isTextEncoded;
-	}
-
 
 	/*
 	 * MAIN FUNCTION
@@ -867,8 +820,6 @@
 			//Adds the fetch function to the button
 			document.getElementById('fetch').onclick = fetch;
 			document.getElementById('pretty').onclick = pretty;
-			//Disabled for now
-			//document.getElementById('mouseAdd').onclick = mouseAdd;
 			document.getElementById('storage').onchange = storageOnChange;
 			document.getElementById('storage').onfocus = saveTextToStorage;
 			document.getElementById('storageSave').onclick = saveTextToStorage;
@@ -876,7 +827,6 @@
 			document.getElementById('editor-button').onclick = changeEditorTab;
 			document.getElementById('text-editor-button').onclick = changeEditorTab;
 			document.getElementById('clear').onclick = clearPage;
-			//document.getElementById('encode').onclick = changeEncodeOnClick;
 			document.getElementById('copy').onclick = copyToClipboard;
 			document.getElementById('copyEscaped').onclick = copyToClipboardEscaped;
 
@@ -913,26 +863,26 @@
 					};
 
 					//Parses through all the received messages
-					message['return'].forEach( ({type, value}) => {
+					message['return'].forEach( ({title, value, error}) => {
 						try {
 							//If the message received was an error
-							if (type === "__error") {
-								errorElement.innerHTML += encodeHtml(value) + "<br>";
+							if (error) {
+								errorElement.innerHTML += encodeHtml(error) + "<br>";
 							}
 							//Else it adds it to the field table
 							else {
 								//Convert to list if greater than one
-								if (value.length > 1) {
+								if (value && value.length > 1) {
 									value = value.map(encodeHtml).join('<br>');
 								}
 								else {
 									value = encodeHtml(value);
 								}
-								document.getElementById("resultTable").innerHTML += `<tr><td>${type}</td><td>${value}</td></tr>`;
+								document.getElementById("resultTable").innerHTML += `<tr><td>${title}</td><td>${value}</td></tr>`;
 							}
 						} catch (err) {
 							//If an error occurs, it goes in the log
-							log(err + "\n" + JSON.stringify(element, null, 2));
+							log(err + "\n" + JSON.stringify({title, value, error}, null, 2));
 						}
 					});
 				}
@@ -943,12 +893,12 @@
 					document.getElementById('queryToAddType').selectedIndex = 0;
 				}
 
+				console.log(message.validate);
 				if (message.validate) {
 					let errorElement = document.getElementById('error');
-					errorElement.innerHTML = "";
-					message.validate.errors.forEach(function (element) {
-						errorElement.innerHTML += element['value'] + "<br>";
-					}, this);
+					let errorMessages = message.validate.errors.join('<br>');
+					console.log(errorMessages);
+					errorElement.innerHTML = errorMessages;
 
 					let excludeTable = document.getElementById("exclude-table");
 					let metadataTable = document.getElementById("metadata-table");

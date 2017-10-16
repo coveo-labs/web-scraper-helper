@@ -74,15 +74,6 @@ body {
 }
 /**************/
 
-#quickAddBorder{
-	border:1px solid black;
-	padding: 5px;
-}
-
-#quickAddContainer{
-	margin-top: 10px;
-}
-
 #storageSuccess{
 	color: green;
 	display: inline;
