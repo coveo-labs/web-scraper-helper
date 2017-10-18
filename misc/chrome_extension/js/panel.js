@@ -5,22 +5,24 @@
 
 	let defaultTextEditorValue = 'Create/Load a file...';
 	let autoValidateTimeout;
-	let isTextEncoded = false;
+
 
 	//TEST JSON VALUE
-	let defaultJson = [{
-		"for": {
-			"urls": [
-				".*"
-			]
-		},
-		"exclude": [
-		],
-		"metadata": {
-		}
-	}];
+	let defaultJson = JSON.stringify([{
+			"for": {
+				"urls": [
+					".*"
+				]
+			},
+			"exclude": [
+			],
+			"metadata": {
+			}
+		}],null,2);
 
-	defaultJson = JSON.stringify(defaultJson, null, 2);
+	let getCurrentSpec = ()=>{
+		return document.getElementById('json-config').value;
+	};
 
 
 	/*
@@ -53,7 +55,7 @@
 	 */
 	function fetch() {
 		try {
-			let valueToSend = document.getElementById('json-config').value;
+			let valueToSend = getCurrentSpec();
 			if (valueToSend === defaultTextEditorValue) {
 				valueToSend = defaultJson;
 			}
@@ -78,7 +80,7 @@
 	 */
 	function validateJson() {
 		try {
-			let valueToSend = document.getElementById('json-config').value;
+			let valueToSend = getCurrentSpec();
 			if (valueToSend === defaultTextEditorValue) {
 				valueToSend = defaultJson;
 			}
@@ -106,10 +108,8 @@
 	 *
 	 */
 	function pretty() {
-		let textAreaElement = document.getElementById('json-config');
-		let uglyJson = JSON.parse(textAreaElement.value);
-		let prettyJson = JSON.stringify(uglyJson, null, 2);
-		textAreaElement.value = prettyJson;
+		let uglyJson = JSON.parse(getCurrentSpec());
+		document.getElementById('json-config').value = JSON.stringify(uglyJson, null, 2);
 	}
 
 	/**
@@ -127,9 +127,7 @@
 	 * @returns {boolean} True if the key exists
 	 */
 	function doesKeyExist(key) {
-		let textAreaElement = document.getElementById('json-config');
-		let currentValue = textAreaElement.value;
-		let json = JSON.parse(currentValue);
+		let json = JSON.parse(getCurrentSpec());
 		return json[0]['metadata'][key] !== undefined;
 	}
 
@@ -140,7 +138,7 @@
 	function copyToClipboard(bEncode){
 		document.getElementById('text-editor-button').click();
 		let textAreaElement = document.getElementById('json-config');
-		let originalValue = textAreaElement.value;
+		let originalValue = getCurrentSpec();
 
 		if (bEncode===true) { // may receive an event as parameter
 			let val = JSON.stringify(JSON.parse(originalValue)); // will strip out lines
@@ -227,13 +225,12 @@
 	 * @returns {Object} An empty object if the callback isn't there
 	 */
 	function getStorageValues(callback) {
-		chrome.storage.local.get('__jsons', function (result) {
+		chrome.storage.local.get('__jsons', (result) => {
 			if (!result.__jsons) {
 				result.__jsons = [];
 			}
 
 			callback(result.__jsons);
-
 		});
 
 		return [];
@@ -253,53 +250,61 @@
 		}
 	}
 
+
+	let createNewSpec = (result) => {
+		let e = document.getElementById('storage'),
+			errorElement = document.getElementById('storageError');
+
+		let newJsonFileName = window.prompt('New json config file name');
+		if (newJsonFileName) {
+			if (!result.includes(newJsonFileName)) {
+				if (newJsonFileName !== '' && newJsonFileName !== '__json' && newJsonFileName !== '__create' && newJsonFileName !== 'null') {
+
+					result.push(newJsonFileName);
+					let resultJson = {__jsons: result};
+					chrome.storage.local.set(resultJson, ()=>{
+						let newJson = {};
+						newJson[newJsonFileName] = defaultJson;
+						chrome.storage.local.set(newJson);
+						initStorageSelect(() => {
+							e.selectedIndex = e.options.length - 2;
+							loadTextEditorWithStorageFile();
+						});
+					});
+
+				}
+				else {
+					errorElement.innerHTML += 'Name is a keyword<br>';
+					e.selectedIndex = 0;
+				}
+			}
+			else {
+				errorElement.innerHTML += 'Name already taken<br>';
+				e.selectedIndex = 0;
+			}
+		}
+		else {
+			errorElement.innerHTML += 'No name entered<br>';
+			e.selectedIndex = 0;
+		}
+	};
+
 	/**
 	 * Called onchange of the storage select
 	 * Creates a new file when the create option is selected
 	 *
 	 */
 	function storageOnChange() {
-		let e = document.getElementById('storage');
-		let errorElement = document.getElementById('storageError');
-		let value = e.options[e.selectedIndex].value;
+		let e = document.getElementById('storage'),
+			value = e.options[e.selectedIndex].value,
+			errorElement = document.getElementById('storageError');
+
 		errorElement.innerHTML = '';
 
-		getStorageValues(function (result) {
+		getStorageValues( result => {
 
 			if (value === '__create') {
-				let newJsonFileName = window.prompt('New json config file name');
-				if (newJsonFileName) {
-					if (!result.includes(newJsonFileName)) {
-						if (newJsonFileName !== '' && newJsonFileName !== '__json' && newJsonFileName !== '__create' && newJsonFileName !== 'null') {
-
-							result.push(newJsonFileName);
-							let resultJson = {};
-							resultJson['__jsons'] = result;
-							chrome.storage.local.set(resultJson, function () {
-								let newJson = {};
-								newJson[newJsonFileName] = defaultJson;
-								chrome.storage.local.set(newJson);
-								initStorageSelect(function () {
-									e.selectedIndex = e.options.length - 2;
-									loadTextEditorWithStorageFile();
-								});
-							});
-
-						}
-						else {
-							errorElement.innerHTML += 'Name is a keyword<br>';
-							e.selectedIndex = 0;
-						}
-					}
-					else {
-						errorElement.innerHTML += 'Name already taken<br>';
-						e.selectedIndex = 0;
-					}
-				}
-				else {
-					errorElement.innerHTML += 'No name entered<br>';
-					e.selectedIndex = 0;
-				}
+				createNewSpec(result);
 			}
 			else {
 				loadTextEditorWithStorageFile();
@@ -348,12 +353,10 @@
 	function saveTextToStorage() {
 		let currentValue = getCurrentStorageValue();
 		//If current value is present
-		storageValueExists(currentValue, function (exists) {
+		storageValueExists(currentValue, (exists) => {
 			if (exists) {
-
-				let textArea = document.getElementById('json-config');
 				let jsonToAdd = {};
-				jsonToAdd[currentValue] = textArea.value;
+				jsonToAdd[currentValue] = getCurrentSpec();
 				chrome.storage.local.set(jsonToAdd);
 				displayStorageSuccess("Save successful");
 			}
@@ -367,22 +370,17 @@
 	function deleteStorageFile() {
 		let currentValue = getCurrentStorageValue();
 		//If current value is present
-		storageValueExists(currentValue, function (exists) {
+		storageValueExists(currentValue, (exists) => {
 			if (exists) {
-				if (confirm('Are you sure you want to delete: ' + currentValue)) {
-					getStorageValues(function (jsons) {
+				if (window.confirm('Are you sure you want to delete: ' + currentValue)) {
+					getStorageValues(jsons => {
 						let index = jsons.indexOf(currentValue);
 						if (index > -1) {
 							jsons.splice(index, 1);
 						}
-						let jsonToAdd = {};
-						jsonToAdd['__jsons'] = jsons;
-						chrome.storage.local.set(jsonToAdd, function () {
-							initStorageSelect();
-						});
-						chrome.storage.local.remove(currentValue, function () {
-							loadTextEditorWithStorageFile();
-						});
+						let jsonToAdd = {__jsons: jsons};
+						chrome.storage.local.set(jsonToAdd, initStorageSelect);
+						chrome.storage.local.remove(currentValue, loadTextEditorWithStorageFile);
 					});
 				}
 			}
@@ -400,11 +398,11 @@
 			let toShow = this.getAttribute('data-show');
 			let liElements = this.parentNode.parentNode.childNodes;
 
-			liElements.forEach(function (element) {
+			liElements.forEach(element => {
 				if (element.tagName === 'LI') {
 					element.removeAttribute('class');
 				}
-			}, this);
+			});
 
 			this.parentNode.setAttribute('class', 'active');
 
@@ -416,9 +414,9 @@
 			}
 
 			let tabs = [].slice.call(document.getElementsByClassName('tab'));
-			tabs.forEach(function (element) {
+			tabs.forEach(element=>{
 				element.style.display = 'none';
-			}, this);
+			});
 			document.getElementById(toShow).style.display = 'inherit';
 		}
 		catch (err) {
@@ -448,44 +446,35 @@
 	 * @param {string|number} type - 0 for XPATH, 1 for CSS
 	 * @param {boolean} addToTextEditor - if undefined or true, adds the value to the text editor
 	 */
-	function addExcludeVisual(query, type, addToTextEditor) {
+	function addExcludeVisual(path, type, addToTextEditor) {
 		try {
-			let tableElement = document.getElementById('exclude-table');
-			let row = tableElement.insertRow();
-			let ruleElement = row.insertCell(0);
+			let rulesContainer = document.getElementById('exclude-rules');
+			let id = guid();
 
-			let queryToAdd = '';
-			if (query && typeof query === 'string') {
-				queryToAdd = query;
-			}
-
-			let typeToAdd = 0;
-
-			if (type === 'CSS') {
-				typeToAdd = 1;
-			}
-
-			ruleElement.innerHTML = `
-			<div class="rule">
-				<input class="toggle" type="checkbox">
-				<input type="text" placeholder="Query">
+			rulesContainer.innerHTML += `
+			<div id="${id}" class="rule">
+				<input type="checkbox" class="wsh-rule-type" ${type === 'CSS' ? 'checked' : ''}>
+				<input type="text" class="wsh-rule-path" placeholder="Selector (XPath or CSS)" value="${path}">
 				<span class="glyphicon glyphicon-remove"></span>
 			</div>
 			`;
 
-			let ruleDivElement = ruleElement.childNodes[1];
-			ruleDivElement.childNodes[1].onchange = excludeTypeOnChange;
-			ruleDivElement.childNodes[1].checked = typeToAdd;
-			ruleDivElement.childNodes[3].oninput = excludeQueryOninput;
-			ruleDivElement.childNodes[3].value = queryToAdd;
-			ruleDivElement.childNodes[5].onclick = function () { removeJsonExclude(row.rowIndex); };
+			rulesContainer.querySelector(`#${id} .wsh-rule-path`).focus();
+			rulesContainer.querySelector(`#${id} .wsh-rule-type`).onchange = excludeTypeOnChange;
 
-			ruleElement.childNodes[1].childNodes[3].focus();
+			// let ruleDivElement = ruleElement.childNodes[1];
+			// ruleDivElement.childNodes[1].onchange = excludeTypeOnChange;
+			// ruleDivElement.childNodes[1].checked = typeToAdd;
+			// ruleDivElement.childNodes[3].oninput = excludeQueryOninput;
+			// ruleDivElement.childNodes[3].value = queryToAdd;
+			// ruleDivElement.childNodes[5].onclick = () => { removeJsonExclude(row.rowIndex); };
+
+			// ruleElement.childNodes[1].childNodes[3].focus();
 
 			if (addToTextEditor === undefined || addToTextEditor === true) {
-				let jsonToAdd = {};
-				jsonToAdd['type'] = (typeToAdd === 1) ? 'CSS' : 'XPATH';
-				jsonToAdd['path'] = (typeof query === 'string') ? query : '';
+				let jsonToAdd = {
+					type, path
+				};
 				modifyJsonExclude(true, jsonToAdd);
 			}
 
@@ -502,9 +491,7 @@
 	 * @param {object} data - The data {type:"", path:""}
 	 */
 	function modifyJsonExclude(index, data) {
-		let textAreaElement = document.getElementById('json-config');
-		let currentValue = textAreaElement.value;
-		let json = JSON.parse(currentValue);
+		let json = JSON.parse(getCurrentSpec());
 		if (index === true) {
 			json[0]['exclude'].push(data);
 		}
@@ -520,15 +507,14 @@
 	 * @param {any} index
 	 */
 	function removeJsonExclude(index) {
-		let tableElement = document.getElementById('exclude-table');
+		let tableElement = document.getElementById('exclude-rules');
 		let textAreaElement = document.getElementById('json-config');
 
 		index = parseInt(index);
 
 		if (typeof index === 'number') {
 			tableElement.deleteRow(index);
-			let currentValue = textAreaElement.value;
-			let json = JSON.parse(currentValue);
+			let json = JSON.parse(getCurrentSpec());
 			json[0]['exclude'].splice(index, 1);
 			textAreaElement.value = JSON.stringify(json, null, 2);
 			autoValidate();
@@ -542,9 +528,7 @@
 	 * @returns {object} The current values
 	 */
 	function getJsonExclude(index) {
-		let textAreaElement = document.getElementById('json-config');
-		let currentValue = textAreaElement.value;
-		let json = JSON.parse(currentValue);
+		let json = JSON.parse(getCurrentSpec());
 		return json[0]['exclude'][index];
 	}
 
@@ -556,68 +540,50 @@
 	 * @param {string|number} type - The type to pass: 0 for XPATH, 1 for CSS
 	 * @param {boolean} addToTextEditor - if undefined or true, adds the value to the text editor
 	 */
-	function addMetadataVisual(field, query, type, addToTextEditor) {
-		let tableElement = document.getElementById('metadata-table');
+	function addMetadataVisual(name, path, type, addToTextEditor) {
+		// let tableElement = document.getElementById('metadata-rules');
 
-		//Checks if an empty field already exists
-		//if it does, then dont create a new one
-		let shouldAdd = true;
+		// //Checks if an empty field already exists
+		// //if it does, then dont create a new one
+		// if (document.querySelector('#metadata-rules'))
 
-		for (let i = 0; i < tableElement.rows.length; i++) {
-			if (tableElement.rows[i].childNodes[0].childNodes[1].getAttribute('data-field') === "") {
-				shouldAdd = false;
-			}
-		}
+		// for (let i = 0; i < tableElement.rows.length; i++) {
+		// 	if (tableElement.rows[i].childNodes[0].childNodes[1].getAttribute('data-field') === "") {
+		// 		return;
+		// 	}
+		// }
 
-		if (!shouldAdd) {
-			return;
-		}
-
-		let row = tableElement.insertRow();
-		let ruleElement = row.insertCell(0);
-
-		let queryToAdd = '';
-		if (query && typeof query === 'string') {
-			queryToAdd = query;
-		}
-
-		let fieldToAdd = '';
-		if (field && typeof field === 'string') {
-			fieldToAdd = field;
-		}
-
-		let typeToAdd = 0;
-		if (type === 'CSS') {
-			typeToAdd = 1;
-		}
-
-		ruleElement.innerHTML = `
-			<div class="rule">
-				<input class="toggle" type="checkbox">
-				<input type="text" placeholder="Field" class="field-input">
-				<input type="text" placeholder="Query">
+		// let row = tableElement.insertRow();
+		// let ruleElement = row.insertCell(0);
+		let rulesContainer = document.getElementById('metadata-rules');
+		let id = guid();
+		rulesContainer.innerHTML += `
+			<div id="${id}" class="rule" data-field="${name}">
+				<input type="checkbox" class="wsh-rule-type" ${type === 'CSS' ? 'checked' : ''}>
+				<input type="text" class="wsh-rule-name" placeholder="Name" value="${name}">
+				<input type="text" class="wsh-rule-path" placeholder="Selector (XPath or CSS)" value="${path}">
 				<span class="glyphicon glyphicon-remove"></span>
+				<label><input type="checkbox" class="wsh-rule-bool"> bool</label>
 			</div>
 		`;
 
-		let ruleDivElement = ruleElement.childNodes[1];
-		ruleDivElement.setAttribute('data-field', fieldToAdd);
-		ruleDivElement.childNodes[1].checked = typeToAdd;
-		ruleDivElement.childNodes[1].onchange = metadataTypeOnChange;
-		ruleDivElement.childNodes[3].value = fieldToAdd;
-		ruleDivElement.childNodes[3].oninput = metadataFieldOnInput;
-		ruleDivElement.childNodes[5].value = queryToAdd;
-		ruleDivElement.childNodes[5].oninput = metadataQueryOnInput;
-		ruleDivElement.childNodes[7].onclick = function () { removeTextMetadata(row.rowIndex); };
+		// let ruleDivElement = ruleElement.childNodes[1];
+		// ruleDivElement.setAttribute('data-field', fieldToAdd);
+		// ruleDivElement.childNodes[1].onchange = metadataTypeOnChange;
+		// ruleDivElement.childNodes[3].oninput = metadataFieldOnInput;
+		// ruleDivElement.childNodes[5].oninput = metadataQueryOnInput;
+		// ruleDivElement.childNodes[7].onclick = ()=>{ removeTextMetadata(row.rowIndex); };
 
-		ruleElement.childNodes[1].childNodes[3].focus();
+		let focusEl = rulesContainer.querySelector(`#${id} .wsh-rule-name`);
+		if (focusEl) {
+			focusEl.focus();
+		}
 
 		if (addToTextEditor === undefined || addToTextEditor === true) {
 			let data = {
-				type: (typeToAdd === 1) ? 'CSS' : 'XPATH',
-				path: (typeof query === 'string') ? query : ''
+				type, path
 			};
-			modifyTextMetadata(fieldToAdd, fieldToAdd, data);
+			modifyTextMetadata(name, name, data);
 		}
 	}
 
@@ -630,8 +596,7 @@
 	 */
 	function modifyTextMetadata(newField, oldField, data) {
 		let textAreaElement = document.getElementById('json-config');
-		let currentValue = textAreaElement.value;
-		let json = JSON.parse(currentValue);
+		let json = JSON.parse(getCurrentSpec());
 		delete json[0]['metadata'][oldField];
 		json[0]['metadata'][newField] = data;
 		textAreaElement.value = JSON.stringify(json, null, 2);
@@ -643,7 +608,7 @@
 	 * @param {number} row - The row of the visual editor to remove
 	 */
 	function removeTextMetadata(row) {
-		let tableElement = document.getElementById('metadata-table');
+		let tableElement = document.getElementById('metadata-rules');
 		let textAreaElement = document.getElementById('json-config');
 		let field = tableElement.rows[row].childNodes[0].childNodes[1].getAttribute('data-field');
 
@@ -651,8 +616,7 @@
 
 		if (typeof row === 'number') {
 			tableElement.deleteRow(row);
-			let currentValue = textAreaElement.value;
-			let json = JSON.parse(currentValue);
+			let json = JSON.parse(getCurrentSpec());
 			delete json[0]['metadata'][field];
 			textAreaElement.value = JSON.stringify(json, null, 2);
 			autoValidate();
@@ -669,9 +633,7 @@
 		if (!field) {
 			field = '';
 		}
-		let textAreaElement = document.getElementById('json-config');
-		let currentValue = textAreaElement.value;
-		let json = JSON.parse(currentValue);
+		let json = JSON.parse(getCurrentSpec());
 		return json[0]['metadata'][field];
 	}
 
@@ -680,45 +642,31 @@
 	 *
 	 */
 	function buildVisualFromText() {
-		let textAreaElement = document.getElementById('json-config');
-		let currentValue = textAreaElement.value;
-		let editorElement = document.getElementById('editor');
+		try {
+			let ws = WebScraperSpec.create(getCurrentSpec());
+			if (ws) {
+				let editorElement = document.getElementById('editor');
+				editorElement.innerHTML = ws.render();
 
-		if (currentValue === defaultTextEditorValue) {
-			editorElement.innerHTML = defaultTextEditorValue;
+				document.getElementById('add-exclude').onclick = addExcludeVisual;
+				document.getElementById('add-metadata').onclick = addMetadataVisual;
+			}
+
+		// try {
+		// 	let json = JSON.parse(currentValue);
+		// 	let {metadata, exclude} = json[0];
+
+		// 	for (let key in metadata) {
+		// 		addMetadataVisual(key, metadata[key]['path'], metadata[key]['type'], false);
+		// 	}
+
+		// 	exclude.forEach( ({path, type}) => {
+		// 		addExcludeVisual(path, type, false);
+		// 	} );
+
 		}
-		else {
-			editorElement.innerHTML = `
-				<p>Exclude</p>
-				<table id="exclude-table"></table>
-				<div class="center-button">
-					<div id="add-exclude" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span></div>
-				</div>
-				<p>Metadata</p>
-				<table id="metadata-table"></table>
-				<div class="center-button">
-					<div id="add-metadata" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span></div>
-				</div>`;
-
-			document.getElementById('add-exclude').onclick = addExcludeVisual;
-			document.getElementById('add-metadata').onclick = addMetadataVisual;
-
-			try {
-				let json = JSON.parse(currentValue);
-				let {metadata, exclude} = json[0];
-
-				for (let key in metadata) {
-					addMetadataVisual(key, metadata[key]['path'], metadata[key]['type'], false);
-				}
-
-				exclude.forEach( ({path, type}) => {
-					addExcludeVisual(path, type, false);
-				} );
-
-			}
-			catch(e) {
-				console.error(e);
-			}
+		catch(e) {
+			console.error(e);
 		}
 
 		validateJson();
@@ -728,13 +676,13 @@
 	 * The onchange function for the <select> of the exclude type in the visual editor
 	 *
 	 */
-	function excludeTypeOnChange() {
-		let row = this.parentNode.parentNode.parentNode.rowIndex;
-		let jsonToMod = {
-			type: getTypebyCheck(this.checked),
-			path: getJsonExclude(row)['path']
-		};
-		modifyJsonExclude(row, jsonToMod);
+	function excludeTypeOnChange(id) {
+		console.log('ID : ', id, this.checked);
+		// let jsonToMod = {
+		// 	type: getTypebyCheck(this.checked),
+		// 	path: getJsonExclude(row)['path']
+		// };
+		// modifyJsonExclude(row, jsonToMod);
 		autoValidate();
 	}
 
@@ -790,10 +738,10 @@
 		try {
 			let field = this.value;
 			if (doesKeyExist(field)) {
-				this.setAttribute("class", "field-input bg-danger");
+				this.setAttribute("class", "wsh-rule-name bg-danger");
 			}
 			else {
-				this.setAttribute("class", "field-input");
+				this.setAttribute("class", "wsh-rule-name");
 				let currentField = this.parentNode.getAttribute('data-field');
 				modifyTextMetadata(field, currentField, getTextMetadata(currentField));
 				this.parentNode.setAttribute('data-field', field);
@@ -887,12 +835,6 @@
 					});
 				}
 
-				//Disabled for now
-				if (message.mouse) {
-					document.getElementById('queryToAdd').value = message.mouse + ((document.getElementById("addText").checked) ? "/text()" : "");
-					document.getElementById('queryToAddType').selectedIndex = 0;
-				}
-
 				console.log(message.validate);
 				if (message.validate) {
 					let errorElement = document.getElementById('error');
@@ -900,27 +842,28 @@
 					console.log(errorMessages);
 					errorElement.innerHTML = errorMessages;
 
-					let excludeTable = document.getElementById("exclude-table");
-					let metadataTable = document.getElementById("metadata-table");
+					let excludeTable = document.getElementById("exclude-rules");
+					let metadataTable = document.getElementById("metadata-rules");
+
+					let updateClass = (el, cls) => {
+						el.removeAttribute("class");
+						el.setAttribute("class", "wsh-rule-type " + cls);
+					};
 
 					if (excludeTable && excludeTable.rows) {
 						for (let i = 0; i < excludeTable.rows.length; i++) {
-							//The toggle
 							let element = excludeTable.rows[i].childNodes[0].childNodes[1].childNodes[1];
-							element.removeAttribute("class");
-							element.setAttribute("class", "toggle " + message.validate.exclude[i]);
+							updateClass(element, message.validate.exclude[i]);
+						}
+					}
+					if (metadataTable && metadataTable.rows) {
+						for (let i = 0; i < metadataTable.rows.length; i++) {
+							let c = metadataTable.rows[i].childNodes[0].childNodes[1],
+								key = c.getAttribute('data-field');
+							updateClass(c.childNodes[1], message.validate.metadata[key]);
 						}
 					}
 
-					if (metadataTable && metadataTable.rows) {
-						for (let i = 0; i < metadataTable.rows.length; i++) {
-							//The toggle
-							let element = metadataTable.rows[i].childNodes[0].childNodes[1].childNodes[1];
-							let key = metadataTable.rows[i].childNodes[0].childNodes[1].getAttribute('data-field');
-							element.removeAttribute("class");
-							element.setAttribute("class", "toggle " + message.validate.metadata[key]);
-						}
-					}
 				}
 
 				if (message.reload) {

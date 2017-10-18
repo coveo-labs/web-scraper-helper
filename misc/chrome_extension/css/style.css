@@ -168,7 +168,7 @@ body {
 	background-color: white;
 }
 
-.rule > *, .toggle::after {
+.rule > *, .wsh-rule-type::after {
 	line-height: 30px;
 	margin: 0;
 }
@@ -197,7 +197,7 @@ body {
 	visibility: visible;
 }
 
-.toggle {
+.wsh-rule-type {
 	-webkit-appearance: inherit;
 	min-width: 60px;
 	text-align: center;
@@ -205,16 +205,16 @@ body {
 	cursor: pointer;
 	border-right: 1px solid silver;
 }
-.toggle::after {
+.wsh-rule-type::after {
 	content: "XPATH";
 }
-.toggle:checked::after {
+.wsh-rule-type:checked::after {
 	content: "CSS"
 }
 
 /*************/
 
-.field-input{
+.wsh-rule-name {
 	width: 20% !important;
 	border-right: 1px solid silver !important;
 }
