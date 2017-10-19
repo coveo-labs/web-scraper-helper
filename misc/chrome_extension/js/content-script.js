@@ -175,7 +175,7 @@ let createRule = (obj, title) => {
 	if (obj.type === 'XPATH') {
 		return new XPathRule(obj, title);
 	}
-	return ErrorRule(obj, title);
+	return new ErrorRule(obj, title);
 };
 
 window.onload = ()=>{
@@ -199,11 +199,11 @@ window.onload = ()=>{
 	 *
 	 * @param {object} jsonData - The json to parse
 	 */
-	let parseJsonConfig = (webScraperSpec) => {
+	let parseJsonConfig = (sJson) => {
 		clearPreviousExcludedElements();
 
-		let wsSpecs = JSON.parse(webScraperSpec);
-		let globalSpec = wsSpecs[0];
+		let wsSpecs = JSON.parse(sJson);
+		let globalSpec = wsSpecs; // TODO: update when adding support for subItems
 
 		//Get the metadata field and exclude field from the json
 		let metadata = globalSpec.metadata;
@@ -232,7 +232,7 @@ window.onload = ()=>{
 		}, 1);
 	};
 
-	let validateJson = (webScraperSpec) => {
+	let validateJson = (sJson) => {
 		clearPreviousExcludedElements();
 
 		let validationResults = {
@@ -241,7 +241,7 @@ window.onload = ()=>{
 			errors: []
 		};
 
-		let wsSpecs = JSON.parse(webScraperSpec);
+		let wsSpecs = JSON.parse(sJson);
 		let globalSpec = wsSpecs[0];
 
 		globalSpec.exclude.forEach(element => {
@@ -290,7 +290,7 @@ window.onload = ()=>{
 			}
 
 			if (request.log) {
-				console.log(request.log);
+				console.log('request.log:\n', request.log);
 			}
 
 			if (request.validate) {

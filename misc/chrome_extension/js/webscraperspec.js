@@ -7,7 +7,7 @@ class WebScraperSelector {
   constructor(json) {
     this.id = guid();
     this.setType(json && json.type);
-    this.path = json && json.path || '';
+    this.path = (json && json.path) || '';
   }
   render() {
     return `<div id="${this.id}" class="rule">
@@ -30,11 +30,11 @@ class WebScraperSelector {
 class WebScraperMetadata extends WebScraperSelector {
   constructor(name, json) {
     super(json);
-    this.name = name;
+    this.name = name || '';
   }
 
   render() {
-    return `<div id="${this.id}" class="rule">
+    return `<div id="${this.id}" class="rule" data-field="${this.name}">
       <input type="checkbox" class="wsh-rule-type" ${this.type === 'CSS' ? 'checked' : ''}>
       <input type="text" class="wsh-rule-name" placeholder="Name" value="${this.name}">
       <input type="text" class="wsh-rule-path" placeholder="Selector (XPath or CSS)" value="${this.path}">
@@ -78,11 +78,23 @@ class WebScraperItem {
       });
     }
   }
+
   _metaArrayToMap(name) {
-    let items = (this[name] || []).map(r=>r.toJson()).filter(r=>r);
-    items = Object.assign.call(this, items);
-    return Object.keys(items).length ? items : null;
+    let map = {};
+    (this[name] || [])
+      .map(r=>r.toJson()) // simplify objects to their JSON expression
+      .filter(r=>r) // Filter out null values
+      .forEach(r=>{
+        Object.assign(map, r); // add to map
+      });
+    return Object.keys(map).length ? map : null;
   }
+
+  removeById(id) {
+    this.exclude = this.exclude.filter(item=>{return item.id !== id;});
+    this.metadata = this.metadata.filter(item=>{return item.id !== id;});
+  }
+
   toJson() {
     let o = {
       for: this._for,
@@ -97,6 +109,9 @@ class WebScraperItem {
       o.subItems = m;
     }
     return o;
+  }
+  toString() {
+    return JSON.stringify(this.toJson());
   }
 }
 
@@ -123,17 +138,26 @@ class WebScraperSpec {
   }
 
   addExclude() {
-    this._global.exclude.push(new WebScraperSelector());
-  }
-  addMeta() {
-    this._global.metadata.push(new WebScraperMetadata());
+    let newItem = new WebScraperSelector();
+    this._global.exclude.push(newItem);
+    return newItem;
   }
 
-  addSubItem(json) {
+  addMeta() {
+    let newItem = new WebScraperMetadata();
+    this._global.metadata.push(newItem);
+    return newItem;
+  }
+
+  // addSubItem(json) {
+  // }
+
+  removeById(id) {
+    this._global.removeById(id);
   }
 
   _renderAddButton(name) {
-    return `<div class="center-button">
+    return `<div class="text-center">
         <div id="add-${name}" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span></div>
       </div>`;
   }
@@ -141,7 +165,7 @@ class WebScraperSpec {
   render() {
       return `
       <h1>Exclude</h1>
-      <div id="exlude-rules">
+      <div id="exclude-rules">
         ${this._global.exclude.map(e=>e.render()).join('\n')}
       </div>
       ${this._renderAddButton('exclude')}
@@ -153,7 +177,8 @@ class WebScraperSpec {
   }
 
   toJson() {
-    return Object.assign({}, this._global.toJson(), this._subItems);
+    return [ Object.assign({}, this._global.toJson()) ];
+    // , this._subItems);
   }
 
   toString() {
@@ -161,4 +186,6 @@ class WebScraperSpec {
   }
 }
 
-module.exports = WebScraperSpec;
+if (typeof module !== 'undefined') {
+  module.exports = WebScraperSpec;
+}

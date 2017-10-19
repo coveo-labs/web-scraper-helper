@@ -3,6 +3,7 @@
 
 (function () {
 
+	let _WS_ = null;
 	let defaultTextEditorValue = 'Create/Load a file...';
 	let autoValidateTimeout;
 
@@ -55,11 +56,9 @@
 	 */
 	function fetch() {
 		try {
-			let valueToSend = getCurrentSpec();
-			if (valueToSend === defaultTextEditorValue) {
-				valueToSend = defaultJson;
+			if (_WS_) {
+				chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, json: _WS_._global.toString() });
 			}
-			chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, json: valueToSend });
 		}
 		catch (err) {
 			document.getElementById('error').innerHTML = "Failed to parse JSON<br>" + err;
@@ -80,12 +79,10 @@
 	 */
 	function validateJson() {
 		try {
-			let valueToSend = getCurrentSpec();
-			if (valueToSend === defaultTextEditorValue) {
-				valueToSend = defaultJson;
+			if (_WS_) {
+				chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, validate: _WS_.toString() });
+				fetch();
 			}
-			chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, validate: valueToSend });
-			fetch();
 		}
 		catch (err) {
 			document.getElementById('error').innerHTML = "Failed to parse JSON<br>" + err;
@@ -200,13 +197,17 @@
 	function initStorageSelect(callback) {
 		try {
 			let select = document.getElementById('storage');
-			let optionsHtml = ['<option selected disabled>Select a file to work on</option><option disabled>------------------------------</option>'];
+			let optionsHtml = [
+				'<option selected disabled>Select a file to work on</option>',
+				'<option disabled>------------------------------</option>'
+			];
 			getStorageValues(function (results) {
 				results.forEach(function (element) {
 					optionsHtml.push(`<option value="${element}">${element}</option>`);
 				}, this);
 				optionsHtml.push('<option value="__create">Create new file...</option>');
 				select.innerHTML = optionsHtml.join('');
+
 				if (callback) {
 					callback();
 				}
@@ -498,6 +499,7 @@
 		else {
 			json[0]['exclude'][index] = data;
 		}
+		let textAreaElement = document.getElementById('json-config');
 		textAreaElement.value = JSON.stringify(json, null, 2);
 	}
 
@@ -541,49 +543,14 @@
 	 * @param {boolean} addToTextEditor - if undefined or true, adds the value to the text editor
 	 */
 	function addMetadataVisual(name, path, type, addToTextEditor) {
-		// let tableElement = document.getElementById('metadata-rules');
+		let newMeta = _WS_.addMeta(), $rc = $('#metadata-rules');
 
-		// //Checks if an empty field already exists
-		// //if it does, then dont create a new one
-		// if (document.querySelector('#metadata-rules'))
+		$rc.append( $(newMeta.render()) );
+		$('.glyphicon-remove', $rc).on('click', removeItem);
 
-		// for (let i = 0; i < tableElement.rows.length; i++) {
-		// 	if (tableElement.rows[i].childNodes[0].childNodes[1].getAttribute('data-field') === "") {
-		// 		return;
-		// 	}
-		// }
-
-		// let row = tableElement.insertRow();
-		// let ruleElement = row.insertCell(0);
-		let rulesContainer = document.getElementById('metadata-rules');
-		let id = guid();
-		rulesContainer.innerHTML += `
-			<div id="${id}" class="rule" data-field="${name}">
-				<input type="checkbox" class="wsh-rule-type" ${type === 'CSS' ? 'checked' : ''}>
-				<input type="text" class="wsh-rule-name" placeholder="Name" value="${name}">
-				<input type="text" class="wsh-rule-path" placeholder="Selector (XPath or CSS)" value="${path}">
-				<span class="glyphicon glyphicon-remove"></span>
-				<label><input type="checkbox" class="wsh-rule-bool"> bool</label>
-			</div>
-		`;
-
-		// let ruleDivElement = ruleElement.childNodes[1];
-		// ruleDivElement.setAttribute('data-field', fieldToAdd);
-		// ruleDivElement.childNodes[1].onchange = metadataTypeOnChange;
-		// ruleDivElement.childNodes[3].oninput = metadataFieldOnInput;
-		// ruleDivElement.childNodes[5].oninput = metadataQueryOnInput;
-		// ruleDivElement.childNodes[7].onclick = ()=>{ removeTextMetadata(row.rowIndex); };
-
-		let focusEl = rulesContainer.querySelector(`#${id} .wsh-rule-name`);
+		let focusEl = document.querySelector(`#${newMeta.id} .wsh-rule-name`);
 		if (focusEl) {
 			focusEl.focus();
-		}
-
-		if (addToTextEditor === undefined || addToTextEditor === true) {
-			let data = {
-				type, path
-			};
-			modifyTextMetadata(name, name, data);
 		}
 	}
 
@@ -637,6 +604,12 @@
 		return json[0]['metadata'][field];
 	}
 
+	let removeItem = (e)=>{
+		let item = $(e.target).closest('.rule');
+		_WS_.removeById(item.id);
+		item.remove();
+	};
+
 	/**
 	 * Builds the visual editor from the text editor data
 	 *
@@ -648,8 +621,14 @@
 				let editorElement = document.getElementById('editor');
 				editorElement.innerHTML = ws.render();
 
-				document.getElementById('add-exclude').onclick = addExcludeVisual;
-				document.getElementById('add-metadata').onclick = addMetadataVisual;
+				// document.getElementById('add-exclude').onclick = addExcludeVisual;
+				// document.getElementById('add-metadata').onclick = addMetadataVisual;
+				$('#add-exclude').on('click', addExcludeVisual);
+				$('#add-metadata').on('click', addMetadataVisual);
+
+				$('.glyphicon-remove', $('#editor')).on('click', removeItem);
+
+				_WS_ = ws;
 			}
 
 		// try {
@@ -765,6 +744,7 @@
 	 */
 	function init() {
 		try {
+			console.log($('.btn'));
 			//Adds the fetch function to the button
 			document.getElementById('fetch').onclick = fetch;
 			document.getElementById('pretty').onclick = pretty;
@@ -810,6 +790,7 @@
 						return (''+str).replace(/</g,'&lt;');
 					};
 
+					let rowsHtml = [];
 					//Parses through all the received messages
 					message['return'].forEach( ({title, value, error}) => {
 						try {
@@ -826,13 +807,14 @@
 								else {
 									value = encodeHtml(value);
 								}
-								document.getElementById("resultTable").innerHTML += `<tr><td>${title}</td><td>${value}</td></tr>`;
+								rowsHtml.push(`<tr><td>${title}</td><td>${value}</td></tr>`);
 							}
 						} catch (err) {
 							//If an error occurs, it goes in the log
 							log(err + "\n" + JSON.stringify({title, value, error}, null, 2));
 						}
 					});
+					document.getElementById("resultTable").innerHTML += rowsHtml.join('\n');
 				}
 
 				console.log(message.validate);
@@ -842,27 +824,44 @@
 					console.log(errorMessages);
 					errorElement.innerHTML = errorMessages;
 
-					let excludeTable = document.getElementById("exclude-rules");
-					let metadataTable = document.getElementById("metadata-rules");
+					let $exclude = $("#exclude-rules");
+					let $metadata = $("#metadata-rules");
 
-					let updateClass = (el, cls) => {
-						el.removeAttribute("class");
-						el.setAttribute("class", "wsh-rule-type " + cls);
-					};
+					// let updateClass = (el, cls) => {
+					// 	el.removeAttribute("class");
+					// 	el.setAttribute("class", "wsh-rule-type " + cls);
+					// };
 
-					if (excludeTable && excludeTable.rows) {
-						for (let i = 0; i < excludeTable.rows.length; i++) {
-							let element = excludeTable.rows[i].childNodes[0].childNodes[1].childNodes[1];
-							updateClass(element, message.validate.exclude[i]);
-						}
+					// if (excludeTable && excludeTable.rows) {
+					// 	for (let i = 0; i < excludeTable.rows.length; i++) {
+					// 		let element = excludeTable.rows[i].childNodes[0].childNodes[1].childNodes[1];
+					// 		updateClass(element, message.validate.exclude[i]);
+					// 	}
+					// }
+
+					// reset all to invalid
+					$('.rule .wsh-rule-type').removeClass('bg-success bg-warning').addClass('bg-danger');
+
+					$('.rule', $exclude).each((i,el)=>{
+						console.log(i,el);
+						$('.wsh-rule-type', el).removeClass('bg-success bg-warning bg-danger').addClass(message.validate.exclude[i]);
+					});
+
+					let msgMeta = message.validate.metadata;
+					for (let k in msgMeta) {
+						let v = msgMeta[k];
+						console.log(k,v,$(`.rule[data-field="${k}"] .wsh-rule-type`, $metadata));
+						$(`.rule[data-field="${k}"] .wsh-rule-type`, $metadata)
+							.removeClass('bg-success bg-warning bg-danger')
+							.addClass(v);
 					}
-					if (metadataTable && metadataTable.rows) {
-						for (let i = 0; i < metadataTable.rows.length; i++) {
-							let c = metadataTable.rows[i].childNodes[0].childNodes[1],
-								key = c.getAttribute('data-field');
-							updateClass(c.childNodes[1], message.validate.metadata[key]);
-						}
-					}
+					// if (metadataTable && metadataTable.rows) {
+					// 	for (let i = 0; i < metadataTable.rows.length; i++) {
+					// 		let c = metadataTable.rows[i].childNodes[0].childNodes[1],
+					// 			key = c.getAttribute('data-field');
+					// 		updateClass(c.childNodes[1], message.validate.metadata[key]);
+					// 	}
+					// }
 
 				}
 
@@ -878,6 +877,7 @@
 				tabId: chrome.devtools.inspectedWindow.tabId
 			});
 		} catch (err) {
+			console.error(err);
 			alert(err);
 		}
 	}

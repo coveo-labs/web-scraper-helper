@@ -8,35 +8,39 @@
 
 <head>
 	<title>Coveo webscraper helper</title>
-	<script src="../js/webscraperspec.js"></script>
-	<script src="../js/panel.js"></script>
+	<link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<link rel="stylesheet" href="../css/style.css">
-	<link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+
+	<script src="../js/jquery-3.2.1.min.js"></script>
+	<script src="../js/bootstrap.3.3.7.min.js"></script>
+	<script src="../js/WebScraperSpec.js"></script>
+	<script src="../js/panel.js"></script>
 </head>
 
 <body>
 
 	<div id="setup">
-		<select id="storage" class="form-control"></select>
-		<button id="storageSave" class="button" disabled>Save</button>
-		<button id="storageDelete" class="button" disabled>Delete</button>
+		<select id="storage" class="form-control" style="max-width:200px;display:inline-block;margin-right: 20px;"></select>
+		<button id="storageSave" class="btn btn-primary" disabled>Save</button>
+		<button id="storageDelete" class="btn btn-danger" disabled>Delete</button>
 		<span id="storageSuccess"></span>
 		<span id="storageError" style="margin-right: 50px;"></span>
-		<button id="fetch" class="button">Run</button>
-		<button id="clear" class="button">Clear page</button>
-		<button id="copy" class="button">Copy to clipboard</button>
-		<button id="copyEscaped" class="button">Copy to clipboard (escaped)</button>
+		<button id="fetch" class="btn btn-default">Run</button>
+		<button id="clear" class="btn btn-default">Clear page</button>
+		<button id="copy" class="btn btn-default">Copy to clipboard</button>
+		<button id="copyEscaped" class="btn btn-default">Copy to clipboard (escaped)</button>
 	</div>
 
 	<div id="rules-and-results">
 		<div id="rules">
+
 			<ul class="nav nav-tabs">
 				<li class="active"><a href="#" data-show="editor" id="editor-button">Visual</a></li>
 				<li><a href="#" data-show="text-editor" id="text-editor-button">Text</a></li>
 			</ul>
 			<div id="editor-container">
-				<div id="editor" class="tab">exit</div>
+				<div id="editor" class="tab"></div>
 				<div id="text-editor" class="tab" style="display:none;">
 					<textarea id="json-config"></textarea>
 					<div>
@@ -44,6 +48,7 @@
 					</div>
 				</div>
 			</div>
+
 		</div>
 
 		<div id="results">
