@@ -1,10 +1,9 @@
 // jshint -W110, -W003
 /*global chrome*/
 
-(function () {
+// (function () {
 
 	let _WS_ = null;
-	let defaultTextEditorValue = 'Create/Load a file...';
 	let autoValidateTimeout;
 
 
@@ -21,8 +20,12 @@
 			}
 		}],null,2);
 
-	let getCurrentSpec = ()=>{
-		return document.getElementById('json-config').value;
+	let getCurrentSpec = (asJson)=>{
+		let s = document.getElementById('json-config').value || defaultJson;
+		if (asJson) {
+			return JSON.parse(s)[0];
+		}
+		return s;
 	};
 
 
@@ -124,8 +127,8 @@
 	 * @returns {boolean} True if the key exists
 	 */
 	function doesKeyExist(key) {
-		let json = JSON.parse(getCurrentSpec());
-		return json[0]['metadata'][key] !== undefined;
+		let json = getCurrentSpec(true);
+		return json.metadata[key] !== undefined;
 	}
 
 	/**
@@ -155,285 +158,6 @@
 			alert('Failed to copy');
 		}
 	}
-
-	function copyToClipboardEscaped() {
-		copyToClipboard(true);
-	}
-
-
-	/*
-	 * STORAGE FUNCTIONS
-	 *
-	 */
-
-	/**
-	 * Displays the string next to the storage in green
-	 *
-	 * @param {string} value - The string to display
-	 */
-	function displayStorageSuccess(value) {
-		let e = document.getElementById('storageSuccess');
-		e.innerHTML = value;
-		removeStorageSuccess();
-	}
-
-
-	/**
-	 * Removes the success string after 2 seconds
-	 *
-	 */
-	function removeStorageSuccess() {
-		setTimeout(function () {
-			let e = document.getElementById('storageSuccess');
-			e.innerHTML = '';
-		}, 2000);
-	}
-
-	/**
-	 * Creates the storage file select
-	 *
-	 * @param {requestCallback} [callback] - After the select is created and ready to be used
-	 */
-	function initStorageSelect(callback) {
-		try {
-			let select = document.getElementById('storage');
-			let optionsHtml = [
-				'<option selected disabled>Select a file to work on</option>',
-				'<option disabled>------------------------------</option>'
-			];
-			getStorageValues(function (results) {
-				results.forEach(function (element) {
-					optionsHtml.push(`<option value="${element}">${element}</option>`);
-				}, this);
-				optionsHtml.push('<option value="__create">Create new file...</option>');
-				select.innerHTML = optionsHtml.join('');
-
-				if (callback) {
-					callback();
-				}
-			});
-
-		}
-		catch (err) {
-			alert(err);
-		}
-	}
-
-	/**
-	 * Gets all the name of the files stored in the storage
-	 *
-	 * @param {requestCallback} callback - Passes the Object list to the callback
-	 * @returns {Object} An empty object if the callback isn't there
-	 */
-	function getStorageValues(callback) {
-		chrome.storage.local.get('__jsons', (result) => {
-			if (!result.__jsons) {
-				result.__jsons = [];
-			}
-
-			callback(result.__jsons);
-		});
-
-		return [];
-	}
-
-	/**
-	 * Determines wheter a file exists in storage
-	 *
-	 * @param {string} value - The file to check
-	 * @param {requestCallback} callback - Calls this with a {boolean}
-	 */
-	function storageValueExists(value, callback) {
-		if (value) {
-			getStorageValues(function (results) {
-				callback(results.includes(value));
-			});
-		}
-	}
-
-
-	let createNewSpec = (result) => {
-		let e = document.getElementById('storage'),
-			errorElement = document.getElementById('storageError');
-
-		let newJsonFileName = window.prompt('New json config file name');
-		if (newJsonFileName) {
-			if (!result.includes(newJsonFileName)) {
-				if (newJsonFileName !== '' && newJsonFileName !== '__json' && newJsonFileName !== '__create' && newJsonFileName !== 'null') {
-
-					result.push(newJsonFileName);
-					let resultJson = {__jsons: result};
-					chrome.storage.local.set(resultJson, ()=>{
-						let newJson = {};
-						newJson[newJsonFileName] = defaultJson;
-						chrome.storage.local.set(newJson);
-						initStorageSelect(() => {
-							e.selectedIndex = e.options.length - 2;
-							loadTextEditorWithStorageFile();
-						});
-					});
-
-				}
-				else {
-					errorElement.innerHTML += 'Name is a keyword<br>';
-					e.selectedIndex = 0;
-				}
-			}
-			else {
-				errorElement.innerHTML += 'Name already taken<br>';
-				e.selectedIndex = 0;
-			}
-		}
-		else {
-			errorElement.innerHTML += 'No name entered<br>';
-			e.selectedIndex = 0;
-		}
-	};
-
-	/**
-	 * Called onchange of the storage select
-	 * Creates a new file when the create option is selected
-	 *
-	 */
-	function storageOnChange() {
-		let e = document.getElementById('storage'),
-			value = e.options[e.selectedIndex].value,
-			errorElement = document.getElementById('storageError');
-
-		errorElement.innerHTML = '';
-
-		getStorageValues( result => {
-
-			if (value === '__create') {
-				createNewSpec(result);
-			}
-			else {
-				loadTextEditorWithStorageFile();
-			}
-		});
-	}
-
-	/**
-	 * Gets the currently selected value of the storage
-	 *
-	 * @returns {string} the value
-	 */
-	function getCurrentStorageValue() {
-		let e = document.getElementById('storage');
-		return e.options[e.selectedIndex].value;
-	}
-
-	/**
-	 * Loads the text editor with the selected file
-	 * Also updates the visual editor
-	 *
-	 */
-	function loadTextEditorWithStorageFile() {
-		let currentValue = getCurrentStorageValue();
-		let textArea = document.getElementById('json-config');
-		//If current value is present
-		storageValueExists(currentValue, function (exists) {
-			if (exists) {
-				chrome.storage.local.get(currentValue, function (result) {
-					textArea.value = result[currentValue];
-					enableButtons();
-					buildVisualFromText();
-				});
-			}
-			else {
-				textArea.value = defaultTextEditorValue;
-				buildVisualFromText();
-			}
-		});
-	}
-
-	/**
-	 * Saves the current text in the text-editor to storage
-	 *
-	 */
-	function saveTextToStorage() {
-		let currentValue = getCurrentStorageValue();
-		//If current value is present
-		storageValueExists(currentValue, (exists) => {
-			if (exists) {
-				let jsonToAdd = {};
-				jsonToAdd[currentValue] = getCurrentSpec();
-				chrome.storage.local.set(jsonToAdd);
-				displayStorageSuccess("Save successful");
-			}
-		});
-	}
-
-	/**
-	 * Deletes the currently selected storage file
-	 *
-	 */
-	function deleteStorageFile() {
-		let currentValue = getCurrentStorageValue();
-		//If current value is present
-		storageValueExists(currentValue, (exists) => {
-			if (exists) {
-				if (window.confirm('Are you sure you want to delete: ' + currentValue)) {
-					getStorageValues(jsons => {
-						let index = jsons.indexOf(currentValue);
-						if (index > -1) {
-							jsons.splice(index, 1);
-						}
-						let jsonToAdd = {__jsons: jsons};
-						chrome.storage.local.set(jsonToAdd, initStorageSelect);
-						chrome.storage.local.remove(currentValue, loadTextEditorWithStorageFile);
-					});
-				}
-			}
-		});
-	}
-
-	/**
-	 * Changes the editor tab
-	 * Visual or Text
-	 *
-	 */
-	function changeEditorTab() {
-		try {
-
-			let toShow = this.getAttribute('data-show');
-			let liElements = this.parentNode.parentNode.childNodes;
-
-			liElements.forEach(element => {
-				if (element.tagName === 'LI') {
-					element.removeAttribute('class');
-				}
-			});
-
-			this.parentNode.setAttribute('class', 'active');
-
-			if (document.getElementById(toShow).style.display === 'none') {
-				//Tabs switching from text to visual editor
-				if (toShow === 'editor') {
-					buildVisualFromText();
-				}
-			}
-
-			let tabs = [].slice.call(document.getElementsByClassName('tab'));
-			tabs.forEach(element=>{
-				element.style.display = 'none';
-			});
-			document.getElementById(toShow).style.display = 'inherit';
-		}
-		catch (err) {
-			alert(err);
-		}
-	}
-
-	/**
-	 * Enables the save and delete button once the user has selected a file
-	 *
-	 */
-	function enableButtons() {
-		document.getElementById('storageSave').removeAttribute('disabled');
-		document.getElementById('storageDelete').removeAttribute('disabled');
-	}
-
 
 	/*
 	 * VISUAL EDITOR FUNCTIONS
@@ -492,12 +216,12 @@
 	 * @param {object} data - The data {type:"", path:""}
 	 */
 	function modifyJsonExclude(index, data) {
-		let json = JSON.parse(getCurrentSpec());
+		let json = getCurrentSpec(true);
 		if (index === true) {
-			json[0]['exclude'].push(data);
+			json.exclude.push(data);
 		}
 		else {
-			json[0]['exclude'][index] = data;
+			json.exclude[index] = data;
 		}
 		let textAreaElement = document.getElementById('json-config');
 		textAreaElement.value = JSON.stringify(json, null, 2);
@@ -516,8 +240,8 @@
 
 		if (typeof index === 'number') {
 			tableElement.deleteRow(index);
-			let json = JSON.parse(getCurrentSpec());
-			json[0]['exclude'].splice(index, 1);
+			let json = getCurrentSpec(true);
+			json.exclude.splice(index, 1);
 			textAreaElement.value = JSON.stringify(json, null, 2);
 			autoValidate();
 		}
@@ -530,8 +254,8 @@
 	 * @returns {object} The current values
 	 */
 	function getJsonExclude(index) {
-		let json = JSON.parse(getCurrentSpec());
-		return json[0]['exclude'][index];
+		let json = getCurrentSpec(true);
+		return json.exclude[index];
 	}
 
 	/**
@@ -563,9 +287,9 @@
 	 */
 	function modifyTextMetadata(newField, oldField, data) {
 		let textAreaElement = document.getElementById('json-config');
-		let json = JSON.parse(getCurrentSpec());
-		delete json[0]['metadata'][oldField];
-		json[0]['metadata'][newField] = data;
+		let json = getCurrentSpec(true);
+		delete json.metadata[oldField];
+		json.metadata[newField] = data;
 		textAreaElement.value = JSON.stringify(json, null, 2);
 	}
 
@@ -583,8 +307,8 @@
 
 		if (typeof row === 'number') {
 			tableElement.deleteRow(row);
-			let json = JSON.parse(getCurrentSpec());
-			delete json[0]['metadata'][field];
+			let json = getCurrentSpec(true);
+			delete json.metadata[field];
 			textAreaElement.value = JSON.stringify(json, null, 2);
 			autoValidate();
 		}
@@ -600,8 +324,8 @@
 		if (!field) {
 			field = '';
 		}
-		let json = JSON.parse(getCurrentSpec());
-		return json[0]['metadata'][field];
+		let json = getCurrentSpec(true);
+		return json.metadata[field];
 	}
 
 	let removeItem = (e)=>{
@@ -621,10 +345,10 @@
 				let editorElement = document.getElementById('editor');
 				editorElement.innerHTML = ws.render();
 
-				// document.getElementById('add-exclude').onclick = addExcludeVisual;
-				// document.getElementById('add-metadata').onclick = addMetadataVisual;
-				$('#add-exclude').on('click', addExcludeVisual);
-				$('#add-metadata').on('click', addMetadataVisual);
+				$('#add-exclude', editorElement).on('click', addExcludeVisual);
+				$('#add-metadata', editorElement).on('click', addMetadataVisual);
+				$('.wsh-rule-type', editorElement).on('click', metadataTypeOnChange);
+
 
 				$('.glyphicon-remove', $('#editor')).on('click', removeItem);
 
@@ -684,13 +408,16 @@
 	 * The onchange function for the <select> of the metadata type in the visual editor
 	 *
 	 */
-	function metadataTypeOnChange() {
-		let currentField = this.parentNode.getAttribute('data-field');
-		let jsonToMod = {
-			type: getTypebyCheck(this.checked),
-			path: getTextMetadata(currentField)['path']
-		};
-		modifyTextMetadata(currentField, currentField, jsonToMod);
+	function metadataTypeOnChange(e) {
+		let t = $(e.target), id = t.closest('.rule').attr('id');
+		console.log('CHANGE TYPE: ', id, t.closest('.rule'), t, t.checked, t.prop('checked'));
+		_WS_.changeType(id, t.prop('checked'));
+		// let currentField = this.parentNode.getAttribute('data-field');
+		// let jsonToMod = {
+		// 	type: getTypebyCheck(this.checked),
+		// 	path: getTextMetadata(currentField)['path']
+		// };
+		// modifyTextMetadata(currentField, currentField, jsonToMod);
 		autoValidate();
 	}
 
@@ -752,11 +479,10 @@
 			document.getElementById('storage').onfocus = saveTextToStorage;
 			document.getElementById('storageSave').onclick = saveTextToStorage;
 			document.getElementById('storageDelete').onclick = deleteStorageFile;
-			document.getElementById('editor-button').onclick = changeEditorTab;
-			document.getElementById('text-editor-button').onclick = changeEditorTab;
+			// document.getElementById('editor-button').onclick = changeEditorTab;
+			// document.getElementById('text-editor-button').onclick = changeEditorTab;
 			document.getElementById('clear').onclick = clearPage;
 			document.getElementById('copy').onclick = copyToClipboard;
-			document.getElementById('copyEscaped').onclick = copyToClipboardEscaped;
 
 			initStorageSelect();
 
@@ -769,7 +495,7 @@
 			});
 
 			//Sets the textarea to the default json
-			document.getElementById('json-config').value = defaultTextEditorValue;
+			document.getElementById('json-config').value = '';
 			buildVisualFromText();
 
 			//The onMessage function
@@ -850,7 +576,7 @@
 					let msgMeta = message.validate.metadata;
 					for (let k in msgMeta) {
 						let v = msgMeta[k];
-						console.log(k,v,$(`.rule[data-field="${k}"] .wsh-rule-type`, $metadata));
+						// console.log(k,v,$(`.rule[data-field="${k}"] .wsh-rule-type`, $metadata));
 						$(`.rule[data-field="${k}"] .wsh-rule-type`, $metadata)
 							.removeClass('bg-success bg-warning bg-danger')
 							.addClass(v);
@@ -884,4 +610,4 @@
 
 	setTimeout(init, 100);
 
-})();
+// })();

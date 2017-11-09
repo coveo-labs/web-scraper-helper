@@ -90,6 +90,15 @@ class WebScraperItem {
     return Object.keys(map).length ? map : null;
   }
 
+  changeType(id, isCss) {
+    let type = isCss ? 'CSS' : 'XPATH';
+    this.exclude.concat(this.metadata)
+      .filter(item=>{return item.id === id;})
+      .forEach(item=>{
+        item.setType(type);
+      });
+  }
+
   removeById(id) {
     this.exclude = this.exclude.filter(item=>{return item.id !== id;});
     this.metadata = this.metadata.filter(item=>{return item.id !== id;});
@@ -128,6 +137,7 @@ class WebScraperSpec {
 
   static create(sJson) {
     try {
+      console.debug('create: ', sJson);
       let json = JSON.parse(sJson);
       return new WebScraperSpec(json);
     }
@@ -147,6 +157,10 @@ class WebScraperSpec {
     let newItem = new WebScraperMetadata();
     this._global.metadata.push(newItem);
     return newItem;
+  }
+
+  changeType(id, b) {
+    this._global.changeType(id, b);
   }
 
   // addSubItem(json) {
