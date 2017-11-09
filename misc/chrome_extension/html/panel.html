@@ -15,6 +15,7 @@
 	<script src="../js/jquery-3.2.1.min.js"></script>
 	<script src="../js/bootstrap.3.3.7.min.js"></script>
 	<script src="../js/WebScraperSpec.js"></script>
+	<script src="../js/Storage.js"></script>
 	<script src="../js/panel.js"></script>
 </head>
 
@@ -29,23 +30,20 @@
 		<button id="fetch" class="btn btn-default">Run</button>
 		<button id="clear" class="btn btn-default">Clear page</button>
 		<button id="copy" class="btn btn-default">Copy to clipboard</button>
-		<button id="copyEscaped" class="btn btn-default">Copy to clipboard (escaped)</button>
 	</div>
 
 	<div id="rules-and-results">
 		<div id="rules">
 
-			<ul class="nav nav-tabs">
-				<li class="active"><a href="#" data-show="editor" id="editor-button">Visual</a></li>
-				<li><a href="#" data-show="text-editor" id="text-editor-button">Text</a></li>
+			<ul class="nav nav-tabs" role="tablist">
+				<li role="presentation" class="active"><a href="#editor" aria-controls="editor" role="tab" data-toggle="tab" id="editor-button">Visual</a></li>
+				<li role="presentation"><a href="#text-editor" aria-controls="text-editor" role="tab" data-toggle="tab" id="text-editor-button">Text</a></li>
 			</ul>
-			<div id="editor-container">
-				<div id="editor" class="tab"></div>
-				<div id="text-editor" class="tab" style="display:none;">
-					<textarea id="json-config"></textarea>
-					<div>
-						<button id="pretty" class="button">Make JSON pretty</button>
-					</div>
+			<div id="editor-container" class="tab-content">
+				<div id="editor" role="tabpanel" class="tab-pane active"></div>
+				<div id="text-editor" role="tabpanel" class="tab-pane">
+					<textarea id="json-config" placeholder="Create/Load a file..."></textarea>
+					<button id="pretty" class="button">Make JSON pretty</button>
 				</div>
 			</div>
 
