@@ -2,7 +2,8 @@
 /*global chrome*/
 
 // (function () {
-
+	let DEBUG_LOCAL = 1;
+	let TAB_ID = '';
 	let _WS_ = null;
 	let autoValidateTimeout;
 
@@ -27,6 +28,8 @@
 		}
 		return s;
 	};
+
+	let CHROME_RUNTIME = chrome.runtime;
 
 
 	/*
@@ -60,7 +63,7 @@
 	function fetch() {
 		try {
 			if (_WS_) {
-				chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, json: _WS_._global.toString() });
+				chrome.runtime.sendMessage({ tabId: TAB_ID, json: _WS_._global.toString() });
 			}
 		}
 		catch (err) {
@@ -73,7 +76,7 @@
 	 *
 	 */
 	function clearPage() {
-		chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, json: defaultJson });
+		chrome.runtime.sendMessage({ tabId: TAB_ID, json: defaultJson });
 	}
 
 	/**
@@ -83,7 +86,7 @@
 	function validateJson() {
 		try {
 			if (_WS_) {
-				chrome.runtime.sendMessage({ tabId: chrome.devtools.inspectedWindow.tabId, validate: _WS_.toString() });
+				chrome.runtime.sendMessage({ tabId: TAB_ID, validate: _WS_.toString() });
 				fetch();
 			}
 		}
@@ -167,7 +170,7 @@
 	/**
 	 * Adds an exclude query to the visual editor
 	 *
-	 * @param {string} query - The query
+	 * @param {string} path - The selector
 	 * @param {string|number} type - 0 for XPATH, 1 for CSS
 	 * @param {boolean} addToTextEditor - if undefined or true, adds the value to the text editor
 	 */
@@ -340,17 +343,19 @@
 	 */
 	function buildVisualFromText() {
 		try {
-			let ws = WebScraperSpec.create(getCurrentSpec());
+			let ws = _WS_ || WebScraperSpec.create(getCurrentSpec());
 			if (ws) {
-				let editorElement = document.getElementById('editor');
-				editorElement.innerHTML = ws.render();
+				ws.render( document.getElementById('editor') );
 
-				$('#add-exclude', editorElement).on('click', addExcludeVisual);
-				$('#add-metadata', editorElement).on('click', addMetadataVisual);
-				$('.wsh-rule-type', editorElement).on('click', metadataTypeOnChange);
+				// $('#add-exclude', editorElement).on('click', ()=>{
+				// 	ws.addExclude();
+				// 	buildVisualFromText();
+				// });
+				// $('#add-metadata', editorElement).on('click', addMetadataVisual);
+				// $('.wsh-rule-type', editorElement).on('click', metadataTypeOnChange);
 
 
-				$('.glyphicon-remove', $('#editor')).on('click', removeItem);
+				// $('.glyphicon-remove', $('#editor')).on('click', removeItem);
 
 				_WS_ = ws;
 			}
@@ -471,6 +476,8 @@
 	 */
 	function init() {
 		try {
+			TAB_ID = chrome.devtools && chrome.devtools.inspectedWindow.tabId;
+
 			console.log($('.btn'));
 			//Adds the fetch function to the button
 			document.getElementById('fetch').onclick = fetch;
@@ -489,10 +496,22 @@
 			//Creates the value table
 			resetResultTable();
 
-			//Connects to the messeger
-			let backgroundPageConnection = chrome.runtime.connect({
-				name: 'panel'
-			});
+			//Connects to the messenger
+			let backgroundPageConnection = null;
+			if (!DEBUG_LOCAL) {
+				backgroundPageConnection = chrome.runtime.connect({
+					name: 'panel'
+				});
+			}
+			else {
+				CHROME_RUNTIME = {sendMessage: (m)=>{console.log('SendMsg:', m);}};
+
+				// running local, for testing - use a Mock for chrome.runtime.connect
+				backgroundPageConnection = {
+					onMessage: { addListener: ()=>{} }, // empty function for now
+					postMessage: ()=>{}, // empty function for now
+				};
+			}
 
 			//Sets the textarea to the default json
 			document.getElementById('json-config').value = '';
@@ -600,7 +619,7 @@
 			// Send a message to background page so that the background page can associate panel to the current host page
 			backgroundPageConnection.postMessage({
 				name: 'panel-init',
-				tabId: chrome.devtools.inspectedWindow.tabId
+				tabId: TAB_ID
 			});
 		} catch (err) {
 			console.error(err);

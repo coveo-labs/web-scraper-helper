@@ -166,6 +166,11 @@ class WebScraperSpec {
   // addSubItem(json) {
   // }
 
+  onRemove(e) {
+    let id = $(e.target).closest('.rule').id;
+    console.log('REMOVE: ', id);
+  }
+
   removeById(id) {
     this._global.removeById(id);
   }
@@ -176,8 +181,15 @@ class WebScraperSpec {
       </div>`;
   }
 
-  render() {
-      return `
+  render(container) {
+      if (container) {
+        this._container = container;
+      }
+      let c = this._container;
+
+      $(c).empty().off();
+
+      let html = `
       <h1>Exclude</h1>
       <div id="exclude-rules">
         ${this._global.exclude.map(e=>e.render()).join('\n')}
@@ -188,6 +200,22 @@ class WebScraperSpec {
         ${this._global.metadata.map(e=>e.render()).join('\n')}
       </div>
       ${this._renderAddButton('metadata')}`;
+
+      c.innerHTML = html;
+
+
+      $('#add-exclude', c).on('click', ()=>{
+      	this.addExclude();
+      	this.render();
+      });
+      $('#add-metadata', c).on('click', ()=>{
+      	this.addMeta();
+      	this.render();
+      });
+
+      $('.wsh-rule-type', c).on('click', this.changeType.bind(this));
+
+      $('.glyphicon-remove', $('#editor')).on('click', this.onRemove.bind(this));
   }
 
   toJson() {

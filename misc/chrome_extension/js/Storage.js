@@ -1,10 +1,57 @@
 // jshint -W110, -W003
 /*global chrome*/
 
-/*
-	* STORAGE FUNCTIONS
-	*
-	*/
+let MOCK = {
+	'__jsons': ['blog.coveo.com', 'bell.ca'],
+	'blog.coveo.com': JSON.stringify([{"for":{"urls":[".*"]},"exclude":[{"type":"CSS","path":"header,aside,footer"}],"metadata":{"tags":{"type":"CSS","path":".topics li::text"}}}]),
+	'bell.ca': JSON.stringify([{"for":{"urls":[".*"]},"exclude":[{"type":"CSS","path":"footer, #inqC2CImgContainer_AnchoredB,iframe, .rsx-icon-links, .icon-links"},{"type":"CSS","path":"header > *:not(.rsx-federal-bar), .rsx-federal-bar *:not(option)"},{"type":"CSS","path":".rsx-modal-group-wrap, #write-review-modal-lightbox, .rsx-availability-bar, .availability-bar, .rsx-offer-details, .fui-box-footer"},{"type":"CSS","path":"ul.mte-page-header__options"},{"type":"CSS","path":".mte-category-header, .mte-category-nav, .mte-back"},{"type":"CSS","path":".fui-topbar, .fui-topnav, .fui-page-footer, .fui-page-aside"},{"type":"CSS","path":".rsx-connector-login-modal-pane,  .rsx-modal-group-wrap"},{"type":"CSS","path":".mte-article-footer, .mte-multi-column, .mte-back-to-top, .modal, figure.figure, .mte-contact-us"}],"metadata":{"errorpage":{"type":"CSS","isBoolean":true,"path":"main.error-page"},"howtotopic":{"type":"CSS","path":".mte-article-header h1::text"},"howtosteps":{"type":"CSS","path":".mte-article .mte-emulator__step-nav-item::text"},"howtosteps2":{"type":"CSS","path":".mte-article .mte-emulator__step-nav-item a::text"},"prov":{"type":"CSS","path":"footer .js-current-language-native option:not([disabled])::attr(value)"}}}]),
+};
+
+class Storage {
+	static get(attr, callback) {
+		if (chrome.storage && chrome.storage.local) {
+			return chrome.storage.local.get(attr, callback);
+		}
+
+		console.log(`GET - Need mock for:`, attr);
+		let val = MOCK[attr], spec = {};
+
+		if (val) {
+			spec[attr] = val;
+		}
+		if (callback) {
+			callback(spec);
+		}
+		return spec;
+	}
+
+	static getDefault() {
+		return JSON.stringify( [{"for":{"urls":[".*"]},"exclude":[],"metadata":{}}] );
+	}
+
+	static remove(attr, callback) {
+		if (chrome.storage && chrome.storage.local) {
+			return chrome.storage.local.remove(attr, callback);
+		}
+
+		console.log(`REMOVE - Need mock for`, attr, callback);
+	}
+
+	static set(json, callback) {
+		if (chrome.storage && chrome.storage.local) {
+			return chrome.storage.local.set(json, callback);
+		}
+
+		console.log(`SET - Need mock for`, json, callback);
+		Object.keys(json).forEach(k=>{
+			MOCK[k] = json[k];
+		});
+
+		if (callback) {
+			callback();
+		}
+	}
+}
 
 /**
  * Displays the string next to the storage in green
@@ -30,10 +77,11 @@ function initStorageSelect(callback) {
 			'<option selected disabled>Select a file to work on</option>',
 			'<option disabled>------------------------------</option>'
 		];
-		getStorageValues(function (results) {
-			results.forEach(function (element) {
-				optionsHtml.push(`<option value="${element}">${element}</option>`);
-			}, this);
+		getSavedSpecNames(specNames => {
+			console.log(2, specNames);
+			specNames.forEach(name => {
+				optionsHtml.push(`<option value="${name}">${name}</option>`);
+			});
 			optionsHtml.push('<option value="__create">Create new file...</option>');
 			select.innerHTML = optionsHtml.join('');
 
@@ -51,11 +99,11 @@ function initStorageSelect(callback) {
 /**
  * Gets all the name of the files stored in the storage
  *
- * @param {requestCallback} callback - Passes the Object list to the callback
+ * @param {requestCallback} callback - Passes the Object list (array of names) to the callback
  * @returns {Object} An empty object if the callback isn't there
  */
-function getStorageValues(callback) {
-	chrome.storage.local.get('__jsons', (result) => {
+function getSavedSpecNames(callback) {
+	Storage.get('__jsons', (result) => {
 		if (!result.__jsons) {
 			result.__jsons = [];
 		}
@@ -74,27 +122,31 @@ function getStorageValues(callback) {
  */
 function storageValueExists(value, callback) {
 	if (value) {
-		getStorageValues(function (results) {
-			callback(results.includes(value));
+		getSavedSpecNames(existingSpecNames => {
+			callback( existingSpecNames.includes(value) );
 		});
 	}
 }
 
-
-let createNewSpec = (result) => {
+/**
+ * Create a new Spec.
+ * @param {string[]} specNames - results from getSavedSpecNames()
+ */
+let createNewSpec = (existingSpecNames) => {
 	let e = document.getElementById('storage'), errorMsg = null;
 
 	let newJsonFileName = window.prompt('New json config file name');
 	if (newJsonFileName) {
-		if (!result.includes(newJsonFileName)) {
-			if (newJsonFileName !== '' && newJsonFileName !== '__json' && newJsonFileName !== '__create' && newJsonFileName !== 'null') {
+		if (!existingSpecNames.includes(newJsonFileName)) {
+			if ( !(['', '__json', '__create', 'null'].includes(newJsonFileName)) ) {
 
-				result.push(newJsonFileName);
-				let resultJson = {__jsons: result};
-				chrome.storage.local.set(resultJson, ()=>{
+				// Save the new name in local storage.
+				existingSpecNames.push(newJsonFileName);
+				Storage.set({__jsons: existingSpecNames}, ()=>{
+					// Then save the new spec
 					let newJson = {};
-					newJson[newJsonFileName] = defaultJson;
-					chrome.storage.local.set(newJson);
+					newJson[newJsonFileName] = Storage.getDefault();
+					Storage.set(newJson);
 					initStorageSelect(() => {
 						e.selectedIndex = e.options.length - 2;
 						loadTextEditorWithStorageFile();
@@ -132,10 +184,9 @@ function storageOnChange() {
 
 	errorElement.innerHTML = '';
 
-	getStorageValues( result => {
-
+	getSavedSpecNames( specNames => {
 		if (value === '__create') {
-			createNewSpec(result);
+			createNewSpec(specNames);
 		}
 		else {
 			loadTextEditorWithStorageFile();
@@ -164,7 +215,7 @@ function loadTextEditorWithStorageFile() {
 	//If current value is present
 	storageValueExists(currentValue, function (exists) {
 		if (exists) {
-			chrome.storage.local.get(currentValue, function (result) {
+			Storage.get(currentValue, function (result) {
 				textArea.value = result[currentValue];
 				enableButtons();
 				buildVisualFromText();
@@ -188,7 +239,7 @@ function saveTextToStorage() {
 		if (exists) {
 			let jsonToAdd = {};
 			jsonToAdd[currentValue] = getCurrentSpec();
-			chrome.storage.local.set(jsonToAdd);
+			Storage.set(jsonToAdd);
 			displayStorageSuccess("Save successful");
 		}
 	});
@@ -204,14 +255,14 @@ function deleteStorageFile() {
 	storageValueExists(currentValue, (exists) => {
 		if (exists) {
 			if (window.confirm('Are you sure you want to delete: ' + currentValue)) {
-				getStorageValues(jsons => {
-					let index = jsons.indexOf(currentValue);
+				getSavedSpecNames(specNames => {
+					let index = specNames.indexOf(currentValue);
 					if (index > -1) {
-						jsons.splice(index, 1);
+						specNames.splice(index, 1);
 					}
-					let jsonToAdd = {__jsons: jsons};
-					chrome.storage.local.set(jsonToAdd, initStorageSelect);
-					chrome.storage.local.remove(currentValue, loadTextEditorWithStorageFile);
+					let jsonToAdd = {__jsons: specNames};
+					Storage.set(jsonToAdd, initStorageSelect);
+					Storage.remove(currentValue, loadTextEditorWithStorageFile);
 				});
 			}
 		}
