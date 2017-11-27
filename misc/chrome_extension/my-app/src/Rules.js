@@ -105,11 +105,13 @@ class Rules extends Component {
         "prov":{"type":"CSS","path":"footer .js-current-language-native option:not([disabled])::attr(value)"}
       }
     });
-    this.onSpecUpdate = this.onSpecUpdate.bind(this);
+    this.state = null;
+    this._onSpecUpdate = this.onSpecUpdate.bind(this);
+    this._listenerId = null;
   }
 
   componentDidMount() {
-    this._listenerId = Storage.addChangeListener(this.onSpecUpdate);
+    this._listenerId = Storage.addChangeListener(this._onSpecUpdate);
   }
 
   componentWillUnmount() {
@@ -129,7 +131,6 @@ class Rules extends Component {
   getSpec() {
     let metadata = {};
     let a = this.state.metadata;
-    console.log(JSON.stringify(a));
     a.forEach(m=>{
       let spec = {...m};
       delete spec.id;
@@ -144,6 +145,16 @@ class Rules extends Component {
     }];
 
     return spec;
+  }
+
+  prettifyJson() {
+    try {
+      let txt = JSON.stringify( JSON.parse(this.state.txt), 2, 2 );
+      this.setState({txt, txtState: 'valid'});
+    }
+    catch(e) {
+      console.log(e);
+    }
   }
 
   onChangeItem(changeSpec) {
@@ -227,7 +238,7 @@ class Rules extends Component {
         o.metadata[k] = m;
         return m;
       });
-      console.log('M:', JSON.stringify(metadata) );
+
       o.metadata = metadata;
     }
     return o;
@@ -239,12 +250,22 @@ class Rules extends Component {
       // support only the first group (.*)
       spec = o[0];
     }
-    spec = this.setIdsOnSpec(spec);
+    spec = spec && this.setIdsOnSpec(spec);
     console.log('Update Spec: ', JSON.stringify(spec));
     this.setState( spec );
   }
 
   render() {
+    <div class="alert alert-warning" role="alert">...</div>
+
+    if ( !(this.state && this.state.for) ) {
+      return (<div id="rules">
+          <div className="alert alert-warning" role="alert">
+            Create or Load a spec.
+          </div>
+        </div>);
+    }
+
     let onRemove = this.onRemoveItem.bind(this);
     let onChange = this.onChangeItem.bind(this);
 
@@ -259,6 +280,11 @@ class Rules extends Component {
     let isTextEditor = (this.state.tab === 'text-editor');
     let txtClass = this.state.txtState || 'valid';
     let textValue = isTextEditor ? this.state.txt : JSON.stringify(this.getSpec(),2,2);
+
+    if (txtClass === 'valid') {
+      console.log('    this._listenerId = ', this._listenerId);
+      Storage.set(textValue, this._listenerId);
+    }
 
     return (
       <div id="rules">
@@ -284,7 +310,7 @@ class Rules extends Component {
 
           <div id="text-editor" role="tabpanel" className={ isTextEditor? 'tab-pane active' : 'tab-pane'}>
             <textarea id="json-config" className={txtClass} placeholder="Create/Load a file..." value={textValue} onChange={this.onTextChange.bind(this)}></textarea>
-            <button id="pretty" className="button">Make JSON pretty</button>
+            <button id="pretty" className="button" onClick={this.prettifyJson.bind(this)}>Make JSON pretty</button>
           </div>
         </div>
       </div>

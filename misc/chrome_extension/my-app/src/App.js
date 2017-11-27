@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+// import logo from './logo.svg';
 import './App.css';
 import Library from './Library';
 import Rules from './Rules';
-import Storage from './Storage';
+// import Storage from './Storage';
 
 
 // class Rules extends Component {
