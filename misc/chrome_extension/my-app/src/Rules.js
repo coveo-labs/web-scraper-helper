@@ -106,12 +106,11 @@ class Rules extends Component {
       }
     });
     this.state = null;
-    this._onSpecUpdate = this.onSpecUpdate.bind(this);
     this._listenerId = null;
   }
 
   componentDidMount() {
-    this._listenerId = Storage.addChangeListener(this._onSpecUpdate);
+    this._listenerId = Storage.addChangeListener(this.onSpecUpdate.bind(this));
   }
 
   componentWillUnmount() {
@@ -256,8 +255,6 @@ class Rules extends Component {
   }
 
   render() {
-    <div class="alert alert-warning" role="alert">...</div>
-
     if ( !(this.state && this.state.for) ) {
       return (<div id="rules">
           <div className="alert alert-warning" role="alert">
@@ -282,7 +279,6 @@ class Rules extends Component {
     let textValue = isTextEditor ? this.state.txt : JSON.stringify(this.getSpec(),2,2);
 
     if (txtClass === 'valid') {
-      console.log('    this._listenerId = ', this._listenerId);
       Storage.set(textValue, this._listenerId);
     }
 

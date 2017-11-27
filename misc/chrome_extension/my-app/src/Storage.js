@@ -14,6 +14,9 @@ class Storage {
 		this._sCurrentName = null;
 		this._sCurrentSpec = null;
 		this.specs = MOCK;
+
+		console.log('SORTAGA:E');
+		this.reload();
 	}
 
 	addChangeListener(f) {
@@ -64,6 +67,36 @@ class Storage {
 	newSpec(name) {
 		console.log('NEW SPEC: ', name);
 		this.specs[name] = this.getDefault();
+	}
+
+	reload(callback) {
+		if (chrome.storage && chrome.storage.local) {
+			chrome.storage.local.get(null, store=>{
+				console.log('RELOAD-CB: ', store);
+				let specs = {};
+				try {
+					Object.keys(store).forEach(k=>{
+						try {
+							let j = JSON.parse(store[k]);
+							j = j && j.length && j[0];
+							if (j && j.exclude && j.metadata) {
+								specs[k] = store[k];
+							}
+						}
+						catch(e) {
+							console.log('Parse failed for ', k, store[k]);
+						}
+					});
+					this.specs = specs;
+					if (callback) {
+						callback(this.specs);
+					}
+				}
+				catch(e) {
+					console.log(e);
+				}
+			});
+		}
 	}
 
 	remove(name) {

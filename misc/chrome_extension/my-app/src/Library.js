@@ -20,6 +20,9 @@ class Library extends Component {
 
   componentDidMount() {
     // this._listenerId = Storage.addChangeListener(this.onSpecUpdate);
+    Storage.reload(()=>{
+      this.setState({names: Storage.getNames()});
+    });
   }
 
   componentWillUnmount() {

@@ -2,6 +2,6 @@
 /*global chrome*/
 chrome.devtools.panels.create("W-S-H",
     "/images/icon-19.png",
-    "/html/panel.html",
+    "/my-app/build/index.html",
     null
 );

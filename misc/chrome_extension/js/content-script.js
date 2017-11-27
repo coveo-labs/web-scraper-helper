@@ -75,22 +75,22 @@ class CssRule extends RulePath {
 	}
 	getElements() {
 		try {
-			let textSub = "::text";
-			let attrSub = "::attr";
+			let reTextSub = /::text\b/;
+			let reAttrSub = /::attr\b/;
 			let shouldReturnAttr = false;
 			let attrToGet = "";
 			let shouldReturnText = false;
 
 			let cssSelector = this.path || '';
-			if(cssSelector.includes(textSub)){
+			if( reTextSub.test(cssSelector) ){
 				shouldReturnText = true;
-				cssSelector = cssSelector.split(textSub)[0];
+				cssSelector = cssSelector.split(reTextSub)[0];
 			}
 
-			if(cssSelector.includes(attrSub)){
+			if( reAttrSub.test(cssSelector) ){
 				shouldReturnAttr = true;
-				attrToGet = cssSelector.split(attrSub)[1].slice(1,-1);
-				cssSelector = cssSelector.split(attrSub)[0];
+				attrToGet = cssSelector.split(reAttrSub)[1].slice(1,-1);
+				cssSelector = cssSelector.split(reAttrSub)[0];
 			}
 
 			let nodes = document.querySelectorAll(cssSelector),
@@ -179,6 +179,7 @@ let createRule = (obj, title) => {
 };
 
 window.onload = ()=>{
+	console.log('CS-onload');
 	// your code
 	setTimeout(()=>{
 		chrome.runtime.sendMessage({reload:1});
@@ -203,8 +204,8 @@ window.onload = ()=>{
 		clearPreviousExcludedElements();
 
 		let wsSpecs = JSON.parse(sJson);
-		let globalSpec = wsSpecs; // TODO: update when adding support for subItems
-
+		let globalSpec = wsSpecs[0]; // TODO: update when adding support for subItems
+console.log('CS: GS', globalSpec);
 		//Get the metadata field and exclude field from the json
 		let metadata = globalSpec.metadata;
 		let exclude = globalSpec.exclude;
@@ -276,6 +277,8 @@ window.onload = ()=>{
 			chrome.runtime.sendMessage(payload);
 		}, 1);
 	};
+
+	console.log('CS-onload :: adding L');
 
 	/**
 	 * Adds a listener to the received messages
