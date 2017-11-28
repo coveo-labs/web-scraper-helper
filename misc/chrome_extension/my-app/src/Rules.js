@@ -6,15 +6,6 @@ let _guid = 0, guid = ()=> { return `guid-${_guid++}`; };
 
 class Item extends Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      name: props.name || '',
-      type: props.type || 'CSS',
-      path: props.path || ''
-    };
-  }
-
   static getId(e) {
     let id = null;
     if (e) {
@@ -28,8 +19,6 @@ class Item extends Component {
 
   // Pass along the change to the listener.
   onChange(state, e) {
-    this.setState(state);
-
     state.id = Item.getId(e.target);
     this.props.onChange( state );
    }
@@ -43,15 +32,20 @@ class Item extends Component {
   }
 
   renderPath() {
+    let cssName = 'wsh-rule-path';
     return [
-      <input key="1" type="text" className="wsh-rule-path" placeholder="Selector (XPath or CSS)" value={this.state.path} onChange={this.onChangePath.bind(this)} />,
+      <input key="1" type="text" className={cssName} placeholder="Selector (XPath or CSS)" value={this.props.path} onChange={this.onChangePath.bind(this)} />,
       <span key="2" className="glyphicon glyphicon-remove" onClick={this.props.onRemove}></span>
     ];
   }
 
   renderType() {
-    let isCss = this.state.type === 'CSS';
-    return <input type="checkbox" className="wsh-rule-type" checked={isCss} onChange={this.onChangeType.bind(this)}/>;
+    let isCss = this.props.type === 'CSS';
+    let cssName = 'wsh-rule-type';
+    if (this.props.validationState) {
+      cssName += ' ' + this.props.validationState;
+    }
+    return <input type="checkbox" className={cssName} checked={isCss} onChange={this.onChangeType.bind(this)}/>;
   }
 
   render() {
@@ -74,7 +68,7 @@ class MetaItem extends Item {
     return (
       <div data-id={this.props.id} className="rule">
         {this.renderType()}
-        <input type="text" className="wsh-rule-name" placeholder="Name" value={this.state.name} onChange={this.onNameChange.bind(this)} />
+        <input type="text" className="wsh-rule-name" placeholder="Name" value={this.props.name} onChange={this.onNameChange.bind(this)} />
         {this.renderPath()}
       </div>
     );
@@ -85,28 +79,9 @@ class MetaItem extends Item {
 class Rules extends Component {
   constructor(props) {
     super(props);
-    this.state = this.setIdsOnSpec({
-      exclude: [
-        {"type":"CSS","path":"footer, #inqC2CImgContainer_AnchoredB,iframe, .rsx-icon-links, .icon-links"},
-        {"type":"CSS","path":"header > *:not(.rsx-federal-bar), .rsx-federal-bar *:not(option)"},
-        {"type":"CSS","path":".rsx-modal-group-wrap, #write-review-modal-lightbox, .rsx-availability-bar, .availability-bar, .rsx-offer-details, .fui-box-footer"},
-        {"type":"CSS","path":"ul.mte-page-header__options"},
-        {"type":"CSS","path":".mte-category-header, .mte-category-nav, .mte-back"},
-        {"type":"CSS","path":".fui-topbar, .fui-topnav, .fui-page-footer, .fui-page-aside"},
-        {"type":"CSS","path":".rsx-connector-login-modal-pane,  .rsx-modal-group-wrap"},
-        {"type":"CSS","path":".mte-article-footer, .mte-multi-column, .mte-back-to-top, .modal, figure.figure, .mte-contact-us"}
-      ],
-      metadata:{
-        "aside":{"type":"XPATH","path":"//aside"},
-        "errorpage":{"type":"CSS","isBoolean":true,"path":"main.error-page"},
-        "howtotopic":{"type":"CSS","path":".mte-article-header h1::text"},
-        "howtosteps":{"type":"CSS","path":".mte-article .mte-emulator__step-nav-item::text"},
-        "howtosteps2":{"type":"CSS","path":".mte-article .mte-emulator__step-nav-item a::text"},
-        "prov":{"type":"CSS","path":"footer .js-current-language-native option:not([disabled])::attr(value)"}
-      }
-    });
     this.state = null;
     this._listenerId = null;
+    this._subItems = {};
   }
 
   componentDidMount() {
@@ -183,7 +158,8 @@ class Rules extends Component {
 
   onRemoveItem(e) {
     let id = Item.getId(e.target);
-    console.log('REMOVING: ', Item.getId(e.target));
+
+    delete this._subItems[id];
     let exclude = this.state.exclude.filter( e=>(e.id !== id) );
     let metadata = this.state.metadata.filter( e=>(e.id !== id) );
 
@@ -191,14 +167,12 @@ class Rules extends Component {
   }
 
   onSpecUpdate(spec) {
-    console.log('RULES::onSpecUpdate', JSON.stringify(spec));
     this.setSpec(spec);
   }
 
   onTab(id, e) {
     e.preventDefault();
     let state = {tab: id};
-    console.log( `TAB: "${id}"` );
     if (id === 'text-editor') {
       state.txt = JSON.stringify(this.getSpec(),2,2);
     }
@@ -220,6 +194,47 @@ class Rules extends Component {
     }
 
     this.setState({txt, txtState});
+  }
+
+  onValidate(validateSpec) {
+    let previousState = JSON.stringify(this.state);
+
+    let state = {...this.state};
+    (validateSpec.exclude || []).forEach( (vExcludeState,idx) => {
+      try{
+        state.exclude[idx].validationState = vExcludeState;
+      }
+      catch(e) {
+        console.log('Rules::onValidate(exclude) ', e);
+      }
+    });
+    try {
+      let vStates = validateSpec.metadata || {};
+      state.metadata = (state.metadata || []).map(m=>{
+        let vState = vStates[m.name];
+        if (vState) {
+          m.validationState = vState;
+        }
+        return m;
+      });
+    }
+    catch(e) {
+      console.log('Rules::onValidate(metadata) ', e);
+    }
+
+    // skip updates if state has not changed.
+    if (previousState !== JSON.stringify(state)) {
+      this.setState(state, ()=>{
+        let updateSubItem = e=>{
+          let i = this._subItems[e.id];
+          if (i) {
+            i.setState({validationState: e.validationState});
+          }
+        };
+        this.state.exclude.forEach(updateSubItem);
+        this.state.metadata.forEach(updateSubItem);
+      });
+    }
   }
 
   setIdsOnSpec(o) {
@@ -246,11 +261,10 @@ class Rules extends Component {
   setSpec(o) {
     let spec = o;
     if (o && o.length) {
-      // support only the first group (.*)
+      // support only the first group (.*) for now
       spec = o[0];
     }
     spec = spec && this.setIdsOnSpec(spec);
-    console.log('Update Spec: ', JSON.stringify(spec));
     this.setState( spec );
   }
 
@@ -263,24 +277,25 @@ class Rules extends Component {
         </div>);
     }
 
-    let onRemove = this.onRemoveItem.bind(this);
-    let onChange = this.onChangeItem.bind(this);
-
-    let excludes = this.state.exclude.map((e)=>
-      <Item key={e.id} onRemove={onRemove} onChange={onChange} {...e}/>
-    );
-
-    let metas = this.state.metadata.map((e)=>
-      <MetaItem key={e.id} onRemove={onRemove} onChange={onChange} {...e}/>
-    );
-
     let isTextEditor = (this.state.tab === 'text-editor');
     let txtClass = this.state.txtState || 'valid';
     let textValue = isTextEditor ? this.state.txt : JSON.stringify(this.getSpec(),2,2);
 
     if (txtClass === 'valid') {
+      this._lastTextValue = textValue;
       Storage.set(textValue, this._listenerId);
     }
+
+    let onRemove = this.onRemoveItem.bind(this);
+    let onChange = this.onChangeItem.bind(this);
+
+    let excludes = this.state.exclude.map((e)=>
+      <Item key={e.id} ref={(ref) => { this._subItems[e.id] = ref; }} onRemove={onRemove} onChange={onChange} {...e}/>
+    );
+
+    let metas = this.state.metadata.map((e)=>
+      <MetaItem key={e.id} ref={(ref) => { this._subItems[e.id] = ref; }} onRemove={onRemove} onChange={onChange} {...e}/>
+    );
 
     return (
       <div id="rules">

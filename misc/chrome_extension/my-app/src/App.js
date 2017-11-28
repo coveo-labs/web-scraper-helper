@@ -4,55 +4,9 @@ import React, { Component } from 'react';
 // import logo from './logo.svg';
 import './App.css';
 import Library from './Library';
+import Results from './Results';
 import Rules from './Rules';
 import Storage from './Storage';
-
-
-// class Rules extends Component {
-//   render() {
-//     return (
-//       <div>
-//         RULES
-//       </div>
-//     );
-//   }
-// }
-
-
-class Results extends Component {
-  render() {
-    let results = [], res = '';
-    try {
-      let encodeHtml = str => {
-        return (''+str).replace(/</g,'&lt;');
-      };
-      let encodeValue = (value) => {
-        if (value && value.length > 1) {
-          return value.map(encodeHtml).join('\n');
-        }
-        return encodeHtml(value || '-');
-      };
-      results = (this.state && JSON.parse(this.state.return || null)) || [];
-      res = results.map( (r,index) => (
-        <tr key={index}><td>{r.title}</td><td>{encodeValue(r.value)}</td></tr>
-      ));
-    }
-    catch(e) {
-      console.log(e);
-      res = '';
-    }
-    return (
-      <div id="results">
-        RESULTS
-        <table id="resultTable" class="table table-condensed table-bordered">
-          <tr><th>Field</th><th>Value(s)</th></tr>
-          {res}
-        </table>
-      </div>
-    );
-  }
-}
-
 
 class App extends Component {
 
@@ -90,14 +44,28 @@ class App extends Component {
 
   onMessage(msg) {
     console.log('APP:onMessage ', msg);
-    if (this.results && this.results.setState) {
+    if (this.results && this.results.setState && (msg.return || msg.errors)) {
       this.results.setState(msg);
+    }
+    if (this.results && this.results.onValidate && msg.validate) {
+      this.results.onValidate(msg.validate);
+    }
+    if (this.rules && this.rules.onValidate && msg.validate) {
+      this.rules.onValidate(msg.validate);
     }
   }
 
   onSpecUpdate(spec) {
-    console.log('APP::onSpecUpdate', JSON.stringify(spec));
-    chrome.runtime.sendMessage({ tabId: this.TAB_ID, json: JSON.stringify(spec) });
+    let sSpec = JSON.stringify(spec);
+    if (sSpec !== this._lastSpec) {
+      console.log('APP::onSpecUpdate', sSpec);
+      this._lastSpec = sSpec;
+      chrome.runtime.sendMessage({ tabId: this.TAB_ID, validate: sSpec });
+      chrome.runtime.sendMessage({ tabId: this.TAB_ID, json: sSpec });
+    }
+    else {
+      console.log('APP::onSpecUpdate SKIPPED', sSpec);
+    }
   }
 
   render() {
@@ -105,7 +73,7 @@ class App extends Component {
       <div className="App">
         <Library onLoad={this.onLoadSpec.bind(this)} />
         <div id="rules-and-results">
-          <Rules />
+          <Rules ref={(rules) => { this.rules = rules; }}/>
           <Results ref={(res) => { this.results = res; }}/>
         </div>
       </div>

@@ -44,6 +44,7 @@ body, .App, #root {
 
 #error, #storageError {
 	color:red;
+	white-space: pre;
 }
 
 textarea.invalid {
@@ -57,23 +58,30 @@ textarea.invalid {
 	display: none;
 }
 /*Result Table*/
-#resultTable{
+#resultTable {
 	background-color: #FAFAFA;
 }
 
-#resultTable th{
+#resultTable tr:nth-child(odd) {
+	background-color: #F0F0F0;
+}
+
+#resultTable th {
 	color: #F58020;
+	padding: 5px;
 }
 
-#resultTable td{
+#resultTable td {
 	color: #313A45;
+	white-space: pre;
+	padding: 5px;
 }
 
-#resultTable td:first-child{
+#resultTable td:first-child {
 	color: #004990;
 }
 
-#resultTable ol{
+#resultTable ol {
 	padding-right: 0;
 	padding-left: 1em;
 	margin: 0;

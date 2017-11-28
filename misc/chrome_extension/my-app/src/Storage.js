@@ -119,6 +119,11 @@ class Storage {
 
 	saveCurrent() {
 		this.specs[this._sCurrentName] = this._sCurrentSpec;
+		if (chrome.storage && chrome.storage.local) {
+			return chrome.storage.local.set({
+				[this._sCurrentName]: this._sCurrentSpec
+			});
+		}
 	}
 
 	set(json, id) {

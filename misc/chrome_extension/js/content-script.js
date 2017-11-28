@@ -26,7 +26,7 @@ class RulePath  {
 	}
 
 	formatError(err) {
-		return `[${this.title}] Failed to parse ${this.type} "${this.path}"<br>${err}`;
+		return `[${this.title}] Failed to parse ${this.type} "${this.path}"\n${err}`;
 	}
 
 	toJson() {
