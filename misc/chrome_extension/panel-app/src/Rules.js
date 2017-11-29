@@ -21,6 +21,10 @@ class Item extends Component {
     this.props.onChange( state );
    }
 
+   onChangeBool(e) {
+    this.onChange({isBoolean: e.target.checked}, e);
+  }
+
   onChangePath(e) {
     this.onChange({path: e.target.value}, e);
   }
@@ -29,12 +33,21 @@ class Item extends Component {
     this.onChange({type: e.target.checked ? 'CSS' : 'XPATH'}, e);
   }
 
-  renderPath() {
-    let cssName = 'wsh-rule-path';
-    return [
-      <input key="1" type="text" className={cssName} placeholder="Selector (XPath or CSS)" value={this.props.path} onChange={this.onChangePath.bind(this)} />,
-      <span key="2" className="glyphicon glyphicon-remove" onClick={this.props.onRemove}></span>
+  renderPath(withBool) {
+    let retval = [
+      <input key={this.props.id + '-text'} type="text" className="wsh-rule-path" placeholder="Selector (XPath or CSS)" value={this.props.path} onChange={this.onChangePath.bind(this)} />
     ];
+    if (withBool) {
+      let isBoolean = (this.props.isBoolean === true);
+      let labelCss = isBoolean ? 'checked' : '';
+      retval.push(
+        <label key={this.props.id + '-as-bool'} className={labelCss}><input type="checkbox" checked={isBoolean} onChange={this.onChangeBool.bind(this)}/> bool</label>
+      );
+    }
+    retval.push(
+      <span key={this.props.id + '-remove'} className="glyphicon glyphicon-remove" onClick={this.props.onRemove}></span>
+    );
+    return retval;
   }
 
   renderType() {
@@ -67,7 +80,7 @@ class MetaItem extends Item {
       <div data-id={this.props.id} className="rule">
         {this.renderType()}
         <input type="text" className="wsh-rule-name" placeholder="Name" value={this.props.name} onChange={this.onNameChange.bind(this)} />
-        {this.renderPath()}
+        {this.renderPath(true)}
       </div>
     );
   }
@@ -106,11 +119,14 @@ class Rules extends Component {
     a.forEach(m=>{
       let spec = {...m};
       delete spec.id;
-      metadata[spec.name]=spec;
+      if ( !spec.isBoolean ) {
+        delete spec.isBoolean;
+      }
+      metadata[spec.name] = spec;
     });
     let spec = [{
       "for": this.state.for || {"urls":[".*"]},
-      exclude: this.state.exclude.map(e=>{
+      exclude: (this.state.exclude || []).map(e=>{
         return {type: e.type, path: e.path};
       }),
       metadata

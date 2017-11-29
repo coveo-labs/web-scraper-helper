@@ -20,7 +20,10 @@ class Results extends Component {
       };
       results = (this.state && JSON.parse(this.state.return || null)) || [];
       res = results.map((r, index) => (
-        <tr key={index}><td>{r.title}</td><td>{encodeValue(r.value)}</td></tr>
+        <tr key={index}>
+          <td>{r.title}</td>
+          <td className={r.isBoolean? 'as-boolean': ''}>{encodeValue(r.value)}</td>
+        </tr>
       ));
     }
     catch (e) {

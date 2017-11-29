@@ -95,6 +95,10 @@ class CssRule extends RulePath {
 			let nodes = document.querySelectorAll(cssSelector),
 				elements = [];
 
+			if (this.isBoolean) {
+				return [ (nodes && nodes.length ? true : false) ];
+			}
+
 			(nodes||[]).forEach(e => {
 				let value = e;
 				if (shouldReturnText) {
@@ -144,9 +148,13 @@ class XPathRule extends RulePath {
 				case XPathResult.STRING_TYPE:
 					elements.push(nodes.stringValue);
 					break;
-				case XPathResult.NUMBEBOOLEAN_TYPER_TYPE:
+				case XPathResult.BOOLEAN_TYPE:
 					elements.push(nodes.booleanValue);
 					break;
+			}
+
+			if (this.isBoolean) {
+				return [ (elements && elements.length ? true : false) ];
 			}
 
 			return elements;
