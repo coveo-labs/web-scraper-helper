@@ -1,8 +1,6 @@
 /*global chrome*/
 
 import React, { Component } from 'react';
-// import logo from './logo.svg';
-import './App.css';
 import Library from './Library';
 import Results from './Results';
 import Rules from './Rules';
@@ -38,12 +36,7 @@ class App extends Component {
     this._backgroundPageConnection = null;
   }
 
-  onLoadSpec(spec) {
-    console.log('ON-LOAD', this);
-  }
-
   onMessage(msg) {
-    console.log('APP:onMessage ', msg);
     if (this.results && this.results.setState && (msg.return || msg.errors)) {
       this.results.setState(msg);
     }
@@ -58,20 +51,16 @@ class App extends Component {
   onSpecUpdate(spec) {
     let sSpec = JSON.stringify(spec);
     if (sSpec !== this._lastSpec) {
-      console.log('APP::onSpecUpdate', sSpec);
       this._lastSpec = sSpec;
       chrome.runtime.sendMessage({ tabId: this.TAB_ID, validate: sSpec });
       chrome.runtime.sendMessage({ tabId: this.TAB_ID, json: sSpec });
-    }
-    else {
-      console.log('APP::onSpecUpdate SKIPPED', sSpec);
     }
   }
 
   render() {
     return (
       <div className="App">
-        <Library onLoad={this.onLoadSpec.bind(this)} />
+        <Library />
         <div id="rules-and-results">
           <Rules ref={(rules) => { this.rules = rules; }}/>
           <Results ref={(res) => { this.results = res; }}/>

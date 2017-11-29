@@ -2,7 +2,6 @@
 // jshint -W110, -W003
 /*global chrome*/
 
-console.log('CS 0');
 class RulePath  {
 	constructor(spec, title) {
 		this.path = spec.path;
@@ -168,7 +167,6 @@ class ErrorRule extends RulePath {
 }
 
 let createRule = (obj, title) => {
-	console.log('CS::createRule', obj, title);
 	if (obj.type === 'CSS') {
 		return new CssRule(obj, title);
 	}
@@ -179,7 +177,6 @@ let createRule = (obj, title) => {
 };
 
 window.onload = ()=>{
-	console.log('CS-onload');
 	// your code
 	setTimeout(()=>{
 		chrome.runtime.sendMessage({reload:1});
@@ -205,7 +202,7 @@ window.onload = ()=>{
 
 		let wsSpecs = JSON.parse(sJson);
 		let globalSpec = wsSpecs[0]; // TODO: update when adding support for subItems
-console.log('CS: GS', globalSpec);
+
 		//Get the metadata field and exclude field from the json
 		let metadata = globalSpec.metadata;
 		let exclude = globalSpec.exclude;
@@ -216,7 +213,6 @@ console.log('CS: GS', globalSpec);
 		let rules = [];
 		for (let key in metadata) {
 			let rule = createRule(metadata[key], key);
-			console.log('CS:key = ', key, rule, rule.toJson());
 			rules.push( rule.toJson() );
 		}
 
@@ -228,7 +224,6 @@ console.log('CS: GS', globalSpec);
 
 		//Send back the values found
 		setTimeout(()=>{
-			console.log('---> ', JSON.stringify(rules));
 			chrome.runtime.sendMessage({return: JSON.stringify(rules)});
 		}, 1);
 	};
@@ -247,8 +242,6 @@ console.log('CS: GS', globalSpec);
 
 		globalSpec.exclude.forEach(element => {
 			let rule = createRule(element);
-			console.log('ED: ', element, rule);
-
 			if (rule.isError()) {
 				validationResults.exclude.push('bg-danger');
 				validationResults.errors.push(rule._error);
@@ -273,12 +266,9 @@ console.log('CS: GS', globalSpec);
 
 		setTimeout(()=>{
 			let payload = {validate: validationResults};
-			console.log('\n\nVALIDATE sending back:', JSON.stringify(payload,2,2));
 			chrome.runtime.sendMessage(payload);
 		}, 1);
 	};
-
-	console.log('CS-onload :: adding L');
 
 	/**
 	 * Adds a listener to the received messages
@@ -287,7 +277,6 @@ console.log('CS: GS', globalSpec);
 	chrome.runtime.onMessage.addListener(
 		(request/*, sender, sendResponse*/) => {
 
-			console.log('GOT MESSAGE\n', JSON.stringify(request,2,2));
 			if (request.json) {
 				parseJsonConfig(request.json);
 			}
