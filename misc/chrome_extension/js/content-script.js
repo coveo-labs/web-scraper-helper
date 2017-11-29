@@ -95,7 +95,7 @@ class CssRule extends RulePath {
 			let nodes = document.querySelectorAll(cssSelector),
 				elements = [];
 
-			nodes.forEach(e => {
+			(nodes||[]).forEach(e => {
 				let value = e;
 				if (shouldReturnText) {
 					value = e.textContent;
@@ -217,7 +217,7 @@ window.onload = ()=>{
 		}
 
 		//Adds the elements to exclude in the elementsToHide
-		exclude.forEach(r=> {
+		(exclude||[]).forEach(r=> {
 			let rule = createRule(r);
 			rule.exludeFromPage();
 		});
@@ -240,7 +240,7 @@ window.onload = ()=>{
 		let wsSpecs = JSON.parse(sJson);
 		let globalSpec = wsSpecs[0];
 
-		globalSpec.exclude.forEach(element => {
+		(globalSpec.exclude||[]).forEach(element => {
 			let rule = createRule(element);
 			if (rule.isError()) {
 				validationResults.exclude.push('bg-danger');

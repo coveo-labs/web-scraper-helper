@@ -226,3 +226,6 @@ textarea.invalid {
 	border-radius: 30px;
 }
 
+#messages > div {
+	margin: 5px;
+}

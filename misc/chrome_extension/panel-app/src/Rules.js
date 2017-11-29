@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
+import Guid from './Guid';
 import Storage from './Storage';
-
-
-let _guid = 0, guid = ()=> { return `guid-${_guid++}`; };
 
 class Item extends Component {
 
@@ -93,18 +91,18 @@ class Rules extends Component {
   }
 
   addExclude() {
-    this.state.exclude.push({id:guid(), type: 'CSS', path: ''});
+    this.state.exclude.push({id:Guid.get(), type: 'CSS', path: ''});
     this.setState(this.state.exclude);
   }
 
   addMeta() {
-    this.state.metadata.push({id:guid(), name: '', type: 'CSS', path: ''});
+    this.state.metadata.push({id:Guid.get(), name: '', type: 'CSS', path: ''});
     this.setState(this.state.metadata);
   }
 
   getSpec() {
     let metadata = {};
-    let a = this.state.metadata;
+    let a = this.state.metadata || [];
     a.forEach(m=>{
       let spec = {...m};
       delete spec.id;
@@ -231,8 +229,8 @@ class Rules extends Component {
             i.setState({validationState: e.validationState});
           }
         };
-        this.state.exclude.forEach(updateSubItem);
-        this.state.metadata.forEach(updateSubItem);
+        (this.state.exclude||[]).forEach(updateSubItem);
+        (this.state.metadata||[]).forEach(updateSubItem);
       });
     }
   }
@@ -240,7 +238,7 @@ class Rules extends Component {
   setIdsOnSpec(o) {
     if (o.exclude) {
       o.exclude = o.exclude.map(e=>{
-        e.id = e.id || guid();
+        e.id = e.id || Guid.get();
         return e;
       })
     }
@@ -248,7 +246,7 @@ class Rules extends Component {
       let metadata = Object.keys(o.metadata).map(k=>{
         let m = o.metadata[k];
         m.name = k;
-        m.id = m.id || guid();
+        m.id = m.id || Guid.get();
         o.metadata[k] = m;
         return m;
       });
