@@ -2,6 +2,6 @@
 /*global chrome*/
 chrome.devtools.panels.create("Web Scraping",
     "/images/icon-19.png",
-    "/html/panel.html",
+    "/panel-app/build/index.html",
     null
 );

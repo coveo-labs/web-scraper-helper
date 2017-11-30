@@ -2,98 +2,104 @@
 // jshint -W110, -W003
 /*global chrome*/
 
-window.onload = function () {
-	// your code
+class RulePath  {
+	constructor(spec, title) {
+		this.path = spec.path;
+		this.isBoolean = spec.isBoolean ? true : false;
+		if (title !== undefined) {
+			this.title = title;
+		}
 
-	setTimeout(function () {
-		let jsonToSend = {};
-		jsonToSend.reload = 1;
-		chrome.runtime.sendMessage(jsonToSend);
-	}, 1);
+		return this;
+	}
 
-	chrome.runtime.connect();
-	//global since it needs to persist beyond the function scope
-	var __elementsToHide = [];
-	var __previousSelectedElement;
-	var __ableToMouseOver = false;
-	var __ableToClick = true;
-	document.body.onmouseover = mouseoverHandler;
-	document.body.onclick = clickHandler;
+	getElements() {
+		return null;
+	}
+
+	exludeFromPage() {
+		let elements = this.getElements();
+		(elements || []).forEach(e=> {
+			e.classList.add('web-scraper-helper-exclude');
+		});
+	}
+
+	formatError(err) {
+		return `[${this.title}] Failed to parse ${this.type} "${this.path}"\n${err}`;
+	}
+
+	toJson() {
+		let o = {type:this.type, path: this.path};
+		if (this.isBoolean) {
+			o.isBoolean = true;
+		}
+		if (this.title !== undefined) {
+			o.title = this.title;
+		}
+		let elements = this.getElements();
+		if (elements) {
+			o.value = elements;
+		}
+		if (this._error ) {
+			o.error = this.error;
+		}
+		return o;
+	}
+
+	toString() {
+		return JSON.stringify(this.toJson());
+	}
+
+	isError() {
+		return this._error ? true : false;
+	}
 
 	/**
-	 * Parses the XPath
-	 * sample return
-	 * {type:'title', value:[element, element]}
-	 *
-	 * @param {string} title - the name of the metadata field
-	 * @param {string} xpathString - the xpath to use to find the element in the page
-	 * @param {boolean} shouldReturnText - set to true if you want the text value of the element found with xpath. (optional)
-	 * @returns {object} returns the title and the elements in an array
+	 * isValid means some element in the page matches this rule.
 	 */
-	var parseXPath = function (title, xpathString, shouldReturnText) {
-		try {
-			let nodes = document.evaluate(xpathString, document);
-			let e, elements = [];
-
-			if (nodes.resultType === XPathResult.UNORDERED_NODE_ITERATOR_TYPE || nodes.resultType === XPathResult.ORDERED_NODE_ITERATOR_TYPE) {
-				while ( (e = nodes.iterateNext()) ) {
-					let value = e.nodeValue;
-					if (value === null) {
-						value = e.outerHTML;
-					}
-					elements.push(value);
-				}
-			}
-			else if (nodes.resultType === XPathResult.NUMBER_TYPE) {
-				elements.push(nodes.numberValue);
-			}
-			else if (nodes.resultType === XPathResult.STRING_TYPE) {
-				elements.push(nodes.stringValue);
-			}
-			else if (nodes.resultType === XPathResult.BOOLEAN_TYPE) {
-				elements.push(nodes.booleanValue);
-			}
-
-			return { type: title, value: elements };
+	isValid() {
+		if (this._isValid === undefined) {
+			this._elements = this.getElements();
+			this._isValid = (this._elements && this._elements.length? true: false);
 		}
-		catch (err) {
-			return { type: '__error', value: 'Failed to parse XPath "' + xpathString + '"<br>' + err };
-		}
-	};
+		return this._isValid;
+	}
+}
 
-	/**
-	 * Parses the CSS selector
-	 * sample return
-	 * {type:'title', value:[element, element]}
-	 *
-	 * @param {string} title - The string for the type
-	 * @param {string} cssSelector - the css selector to parse
-	 * @param {Boolen} isMetadata - If its metadata or not
-	 * @returns {object} returns the title and the elements in an array
-	 */
-	var parseCss = function (title, cssSelector, isMetadata) {
+class CssRule extends RulePath {
+	constructor(spec, title) {
+		super(spec, title);
+		this.type = 'CSS';
+		this.isValid();
+	}
+	getElements() {
 		try {
-			let textSub = "::text";
-			let attrSub = "::attr";
+			let reTextSub = /::text\b/;
+			let reAttrSub = /::attr\b/;
 			let shouldReturnAttr = false;
 			let attrToGet = "";
 			let shouldReturnText = false;
 
-			if(cssSelector.includes(textSub)){
+			let cssSelector = this.path || '';
+			if( reTextSub.test(cssSelector) ){
 				shouldReturnText = true;
-				cssSelector = cssSelector.split(textSub)[0];
+				cssSelector = cssSelector.split(reTextSub)[0];
 			}
 
-			if(cssSelector.includes(attrSub)){
+			if( reAttrSub.test(cssSelector) ){
 				shouldReturnAttr = true;
-				attrToGet = cssSelector.split(attrSub)[1].slice(1,-1);
-				cssSelector = cssSelector.split(attrSub)[0];
+				attrToGet = cssSelector.split(reAttrSub)[1].slice(1,-1);
+				cssSelector = cssSelector.split(reAttrSub)[0];
 			}
 
 			let nodes = document.querySelectorAll(cssSelector),
 				elements = [];
 
-			nodes.forEach(e => {
+			if (this.isBoolean) {
+				return [ (nodes && nodes.length ? true : false) ];
+			}
+
+			(nodes||[]).forEach(e => {
 				let value = e;
 				if (shouldReturnText) {
 					value = e.textContent;
@@ -105,13 +111,92 @@ window.onload = function () {
 
 				elements.push(value);
 			});
-			return { type: title, value: elements };
+			return elements;
 		}
 		catch (err) {
-			return { type: '__error', value: 'Failed to parse CSS "' + cssSelector + '"<br>' + err };
+			this._error = this.formatError(err);
+			return null;
 		}
+	}
+}
+
+class XPathRule extends RulePath {
+	constructor(spec, title) {
+		super(spec, title);
+		this.type = 'XPATH';
+		this.isValid();
+	}
+	getElements() {
+		try {
+			let nodes = document.evaluate(this.path, document);
+			let e, elements = [];
+
+			switch(nodes.resultType) {
+				case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
+				case XPathResult.ORDERED_NODE_ITERATOR_TYPE:
+					while ( (e = nodes.iterateNext()) ) {
+						let value = e.nodeValue;
+						if (value === null) {
+							value = e.outerHTML;
+						}
+						elements.push(value);
+					}
+					break;
+				case XPathResult.NUMBER_TYPE:
+					elements.push(nodes.numberValue);
+					break;
+				case XPathResult.STRING_TYPE:
+					elements.push(nodes.stringValue);
+					break;
+				case XPathResult.BOOLEAN_TYPE:
+					elements.push(nodes.booleanValue);
+					break;
+			}
+
+			if (this.isBoolean) {
+				return [ (elements && elements.length ? true : false) ];
+			}
+
+			return elements;
+		}
+		catch (err) {
+			this._error = this.formatError(err);
+			return null;
+		}
+	}
+}
+
+class ErrorRule extends RulePath {
+	constructor(spec, title) {
+		super(spec, title);
+		this.type = 'ERROR';
+		this._error = 'Unknown type: ' + JSON.stringify(spec);
+	}
+}
+
+let createRule = (obj, title) => {
+	if (obj.type === 'CSS') {
+		return new CssRule(obj, title);
+	}
+	if (obj.type === 'XPATH') {
+		return new XPathRule(obj, title);
+	}
+	return new ErrorRule(obj, title);
+};
+
+window.onload = ()=>{
+	// your code
+	setTimeout(()=>{
+		chrome.runtime.sendMessage({reload:1});
+	}, 1);
+
+	let clearPreviousExcludedElements = ()=> {
+		document.querySelectorAll('.web-scraper-helper-exclude').forEach(e=>{
+			e.classList.remove('web-scraper-helper-exclude');
+		});
 	};
 
+	chrome.runtime.connect();
 
 	/**
 	 * Parses the jsonData
@@ -120,322 +205,92 @@ window.onload = function () {
 	 *
 	 * @param {object} jsonData - The json to parse
 	 */
-	function parseJsonConfig(jsonData) {
-		//Parses the current json from the request
-		//This is the same json as the textarea
-		let json = JSON.parse(jsonData);
-		//Create the elements list to send back
-		let elementsToReturn = [];
+	let parseJsonConfig = (sJson) => {
+		clearPreviousExcludedElements();
+
+		let wsSpecs = JSON.parse(sJson);
+		let globalSpec = wsSpecs[0]; // TODO: update when adding support for subItems
+
 		//Get the metadata field and exclude field from the json
-		let metadata = json[0]['metadata'];
-		let exclude = json[0]['exclude'];
-
-		//Show elements that were previously hidden from the elementsToHide global
-
-		if (__elementsToHide.length > 0) {
-			__elementsToHide.forEach(function (elementObject) {
-				if (elementObject['type'] !== '__error') {
-					elementObject['value'].forEach(function (element) {
-						try {
-							element.style.opacity = 1;
-						}
-						catch (err) {
-
-						}
-					}, this);
-				}
-			}, this);
-		}
-
-		//Reset the elementsToHide after everything is back to normal
-		__elementsToHide = [];
+		let metadata = globalSpec.metadata;
+		let exclude = globalSpec.exclude;
 
 		//Grab all the metadata specified in the json
 		//Gets the nodeValue for XPATH
 		//Gets the textContent for CSS
+		let rules = [];
 		for (let key in metadata) {
-			let currentExcludeObject = metadata[key];
-			if (currentExcludeObject['type'] === 'CSS') {
-				elementsToReturn.push(parseCss(key, currentExcludeObject['path'], true));
-			}
-			else if (currentExcludeObject['type'] === 'XPATH') {
-				elementsToReturn.push(parseXPath(key, currentExcludeObject['path'], true));
-			}
+			let rule = createRule(metadata[key], key);
+			rules.push( rule.toJson() );
 		}
 
 		//Adds the elements to exclude in the elementsToHide
-		for (let key in exclude) {
-			let currentMetadataObject = exclude[key];
-			if (currentMetadataObject['type'] === 'CSS') {
-				__elementsToHide.push(parseCss(key, currentMetadataObject['path'], false));
-			}
-			else if (currentMetadataObject['type'] === 'XPATH') {
-				__elementsToHide.push(parseXPath(key, currentMetadataObject['path'], false));
-			}
-		}
-
-		//Reduces opacity of elements in elementsToHide
-		//If an error is found, adds it in elements to send back
-		__elementsToHide.forEach(function (elementObject) {
-			if (elementObject['type'] !== '__error') {
-				elementObject['value'].forEach(function (element) {
-					try {
-						element.style.opacity = 0.1;
-					}
-					catch (err) {
-
-					}
-				}, this);
-			}
-			else {
-				elementsToReturn.push(elementObject);
-			}
-		}, this);
+		(exclude||[]).forEach(r=> {
+			let rule = createRule(r);
+			rule.exludeFromPage();
+		});
 
 		//Send back the values found
-		setTimeout(function () {
-			chrome.runtime.sendMessage({
-				return: JSON.stringify(elementsToReturn)
-			});
+		setTimeout(()=>{
+			chrome.runtime.sendMessage({return: JSON.stringify(rules)});
 		}, 1);
-	}
+	};
 
+	let validateJson = (sJson) => {
+		clearPreviousExcludedElements();
 
-	/**
-	 * Adds the __highlight class to the object at the currently being moused over
-	 *
-	 * @param {event} event
-	 * @returns nothing
-	 */
-	function mouseoverHandler(event) {
-
-		if (!__ableToMouseOver) {
-			return;
-		}
-
-		if (event.target === document.body ||
-			(__previousSelectedElement && __previousSelectedElement === event.target)) {
-			return;
-		}
-
-		//Removes the __highlight class from the last element
-		try {
-			if (__previousSelectedElement) {
-				__previousSelectedElement.className = __previousSelectedElement.className.replace(/\b__highlight\b/, '');
-			}
-		} catch (err) { }
-		__previousSelectedElement = null;
-
-		//Adds the __highlight class to the new element
-		try {
-			if (event.target) {
-				__previousSelectedElement = event.target;
-				__previousSelectedElement.className += ' __highlight';
-			}
-		}
-		catch (err) {
-			__previousSelectedElement = null;
-		}
-	}
-
-
-	/**
-	 * Stops the mouse click and instead sends the element being moused over to the panel
-	 * Then turns itself off
-	 *
-	 * @param {event} e - The mouse click event
-	 * @returns {boolean} false
-	 */
-	function clickHandler(e) {
-
-		if (!__ableToClick) {
-			e.stopPropagation();
-			e.preventDefault();
-			e.stopImmediatePropagation();
-			__ableToClick = true;
-			sendMouseElement();
-			return false;
-		}
-		return true;
-	}
-
-
-	/**
-	 * Sends the xpath of the element that was moused over to the panel
-	 *
-	 */
-	function sendMouseElement() {
-		__ableToClick = true;
-		__ableToMouseOver = false;
-
-		let jsonToSend = {
-			mouse: getXPath(__previousSelectedElement)
+		let validationResults = {
+			metadata: {},
+			exclude: [],
+			errors: []
 		};
 
-		try {
-			if (__previousSelectedElement) {
-				__previousSelectedElement.className = __previousSelectedElement.className.replace(/\b__highlight\b/, '');
-				__previousSelectedElement = null;
+		let wsSpecs = JSON.parse(sJson);
+		let globalSpec = wsSpecs[0];
+
+		(globalSpec.exclude||[]).forEach(element => {
+			let rule = createRule(element);
+			if (rule.isError()) {
+				validationResults.exclude.push('bg-danger');
+				validationResults.errors.push(rule._error);
+			}
+			else {
+				validationResults.exclude.push(rule.isValid() ? 'bg-success' : 'bg-warning');
+			}
+		});
+
+		for (let key in globalSpec.metadata) {
+			let element = globalSpec.metadata[key];
+			let rule = createRule(element, key);
+
+			if (rule.isError()) {
+				validationResults.metadata[key] = 'bg-danger';
+				validationResults.errors.push(rule._error);
+			}
+			else {
+				validationResults.metadata[key] = (rule.isValid() ? 'bg-success' : 'bg-warning');
 			}
 		}
-		catch (err) {
-			__previousSelectedElement = null;
-			jsonToSend['return']['__error'] = err;
-		}
 
-		setTimeout(function () {
-			chrome.runtime.sendMessage(jsonToSend);
+		setTimeout(()=>{
+			let payload = {validate: validationResults};
+			chrome.runtime.sendMessage(payload);
 		}, 1);
-	}
-
-	/**
-	 * Gets a xpath string from a node
-	 * https://stackoverflow.com/questions/9197884/how-do-i-get-the-xpath-of-an-element-in-an-x-html-file
-	 *
-	 * @param {element} node
-	 * @returns {string} the xpath string
-	 */
-	function getXPath(node) {
-		var comp, comps = [];
-		var xpath = '';
-		var getPos = function (node) {
-			var position = 1, curNode;
-			if (node.nodeType === Node.ATTRIBUTE_NODE) {
-				return null;
-			}
-			for (curNode = node.previousSibling; curNode; curNode = curNode.previousSibling) {
-				if (curNode.nodeName === node.nodeName) {
-					++position;
-				}
-			}
-			return position;
-		};
-
-		if (node instanceof Document) {
-			return '/';
-		}
-
-		for (; node && !(node instanceof Document); node = node.nodeType === Node.ATTRIBUTE_NODE ? node.ownerElement : node.parentNode) {
-			comp = comps[comps.length] = {};
-			switch (node.nodeType) {
-				case Node.TEXT_NODE:
-					comp.name = 'text()';
-					break;
-				case Node.ATTRIBUTE_NODE:
-					comp.name = '@' + node.nodeName;
-					break;
-				case Node.PROCESSING_INSTRUCTION_NODE:
-					comp.name = 'processing-instruction()';
-					break;
-				case Node.COMMENT_NODE:
-					comp.name = 'comment()';
-					break;
-				case Node.ELEMENT_NODE:
-					comp.name = node.nodeName;
-					break;
-			}
-			comp.position = getPos(node);
-		}
-
-		for (var i = comps.length - 1; i >= 0; i--) {
-			comp = comps[i];
-			xpath += '/' + comp.name;
-			if (comp.position !== null && comp.position > 1) {
-				xpath += '[' + comp.position + ']';
-			}
-		}
-
-		return xpath.toLowerCase();
-
-	}
-
-	function validateJson(jsonToValidate) {
-		let jsonToSend = {
-			validate: {
-				metadata: {},
-				exclude: [],
-				errors: []
-			}
-		};
-
-		jsonToValidate = JSON.parse(jsonToValidate);
-
-		let exludeData = jsonToValidate[0]['exclude'];
-		let metadataData = jsonToValidate[0]['metadata'];
-
-		exludeData.forEach(function (element) {
-			let type = element['type'];
-			let value;
-			if (type === 'CSS') {
-				value = parseCss('exclude', element['path'], false);
-			}
-			else {
-				value = parseXPath('exclude', element['path']);
-			}
-
-			if (value['type'] === '__error') {
-				jsonToSend['validate']['exclude'].push('bg-danger');
-				jsonToSend['validate']['errors'].push(value);
-			}
-			else {
-				if (value['value'].length > 0) {
-					jsonToSend['validate']['exclude'].push('bg-success');
-				}
-				else {
-					jsonToSend['validate']['exclude'].push('bg-warning');
-				}
-			}
-
-		}, this);
-
-		for (let key in metadataData) {
-			let element = metadataData[key];
-			let type = element['type'];
-			let value;
-			if (type === 'CSS') {
-				value = parseCss('metadata', element['path'], true);
-			}
-			else {
-				value = parseXPath('metadata', element['path']);
-			}
-
-			if (value['type'] === '__error') {
-				jsonToSend['validate']['metadata'][key] = 'bg-danger';
-				jsonToSend['validate']['errors'].push(value);
-			}
-			else {
-				if (value['value'].length > 0) {
-					jsonToSend['validate']['metadata'][key] = 'bg-success';
-				}
-				else {
-					jsonToSend['validate']['metadata'][key] = 'bg-warning';
-				}
-			}
-		}
-
-		setTimeout(function () {
-			chrome.runtime.sendMessage(jsonToSend);
-		}, 1);
-	}
+	};
 
 	/**
 	 * Adds a listener to the received messages
 	 *
 	 */
 	chrome.runtime.onMessage.addListener(
-		function (request/*, sender, sendResponse*/) {
+		(request/*, sender, sendResponse*/) => {
 
 			if (request.json) {
 				parseJsonConfig(request.json);
 			}
 
-			if (request.mouse) {
-				__ableToClick = false;
-				__ableToMouseOver = true;
-			}
-
 			if (request.log) {
-				console.log(request.log);
+				console.log('request.log:\n', request.log);
 			}
 
 			if (request.validate) {

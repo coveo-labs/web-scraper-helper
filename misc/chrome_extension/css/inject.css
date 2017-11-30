@@ -1,8 +1,3 @@
-.__highlight{
-	background-color: #004990;
-	border: 4px dashed #F58020;
-}
-
-.__hideElement{
-	display: none !important;
+.web-scraper-helper-exclude {
+	opacity: 0.1 !important;
 }

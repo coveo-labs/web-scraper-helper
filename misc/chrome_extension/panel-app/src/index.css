@@ -1,14 +1,10 @@
-html {
+html, body, .App, #root {
 	height: 100%;
 }
-body {
-	margin: 0;
-	font-size: 16px;
-	font-family: 'Lato', sans-serif;
-	color: #313A45;
+
+body, .App, #root {
 	display: flex;
 	flex-direction: column;
-	height: 100%;
 }
 
 #setup, #rules-and-results > * {
@@ -20,7 +16,13 @@ body {
 	display: flex;
 }
 
-@media only screen and (max-width: 1000px) {
+#storage.form-control {
+	max-width: 200px;
+	display: inline-block;
+	margin-right: 20px;
+}
+
+@media only screen and (max-width: 950px) {
 	#rules-and-results {
 		flex-direction: column;
 	}
@@ -40,8 +42,13 @@ body {
 	flex: 1;
 }
 
-#error, #storageError{
+#error, #storageError {
 	color:red;
+	white-space: pre;
+}
+
+textarea.invalid {
+	color: red;
 }
 
 #log{
@@ -51,37 +58,40 @@ body {
 	display: none;
 }
 /*Result Table*/
-#resultTable{
+#resultTable {
 	background-color: #FAFAFA;
 }
 
-#resultTable th{
+#resultTable tr:nth-child(odd) {
+	background-color: #F0F0F0;
+}
+
+#resultTable th {
 	color: #F58020;
+	padding: 5px;
 }
 
-#resultTable td{
+#resultTable td {
 	color: #313A45;
+	white-space: pre;
+	padding: 5px;
 }
 
-#resultTable td:first-child{
+#resultTable td:first-child {
 	color: #004990;
 }
 
-#resultTable ol{
+#resultTable td.as-boolean {
+	color: green;
+	font-variant: small-caps;
+}
+
+#resultTable ol {
 	padding-right: 0;
 	padding-left: 1em;
 	margin: 0;
 }
 /**************/
-
-#quickAddBorder{
-	border:1px solid black;
-	padding: 5px;
-}
-
-#quickAddContainer{
-	margin-top: 10px;
-}
 
 #storageSuccess{
 	color: green;
@@ -96,58 +106,37 @@ body {
 	overflow-x: hidden;
 	box-sizing: border-box;
 
-	display: flex;
-	flex-direction: columns;
+	/* display: flex;
+	flex-direction: columns; */
 }
 
 #editor-container > * {
 	flex: 1;
-	display: flex;
-	flex-direction: column;
+	/* display: flex;
+	flex-direction: column; */
 }
 
 #text-editor {
-	display: flex;
-	flex-direction: column;
+	height: 100%;
+	position: relative;
 }
+
+#text-editor > button {
+	position: absolute;
+	bottom: 20px;
+	right: 20px;
+}
+
 #json-config {
-	flex: 1;
-	margin-bottom: 8px;
+	width: 100%;
+	height: 100%;
+	resize: none;
 }
 
 #editor > p{
 	margin-bottom: 0;
 }
 
-.button{
-	background-color: #263E55;
-	color: white;
-	padding: 10px;
-	border: none;
-	cursor: pointer;
-	text-decoration: none;
-	border-radius: 2px;
-}
-
-.add-button{
-	background-color: green;
-	height: 28px;
-	width: 28px;
-	color: white;
-	border: none;
-	cursor: pointer;
-	text-decoration: none;
-	border-radius: 28px;
-	margin-top: 5px;
-}
-
-.center-button{
-	text-align: center;
-}
-
-.body-wrapper{
-	padding:10px;
-}
 
 #tab-container{
 	width: 100%;
@@ -177,7 +166,7 @@ body {
 	background-color: white;
 }
 
-.rule > *, .toggle::after {
+.rule > *, .wsh-rule-type::after {
 	line-height: 30px;
 	margin: 0;
 }
@@ -195,6 +184,15 @@ body {
 	text-overflow: ellipsis;
 }
 
+.rule > label {
+	visibility: hidden;
+	white-space: nowrap;
+}
+
+.rule > label.checked {
+	visibility: visible;
+}
+
 .glyphicon-remove {
 	color: #CE3F00;
 	visibility: hidden;
@@ -202,11 +200,11 @@ body {
 	cursor: pointer;
 }
 
-.rule:hover .glyphicon-remove {
+.rule:hover .glyphicon-remove, .rule:hover > label {
 	visibility: visible;
 }
 
-.toggle {
+.wsh-rule-type {
 	-webkit-appearance: inherit;
 	min-width: 60px;
 	text-align: center;
@@ -214,16 +212,16 @@ body {
 	cursor: pointer;
 	border-right: 1px solid silver;
 }
-.toggle::after {
+.wsh-rule-type::after {
 	content: "XPATH";
 }
-.toggle:checked::after {
+.wsh-rule-type:checked::after {
 	content: "CSS"
 }
 
 /*************/
 
-.field-input{
+.wsh-rule-name {
 	width: 20% !important;
 	border-right: 1px solid silver !important;
 }
@@ -242,11 +240,6 @@ body {
 	border-radius: 30px;
 }
 
-button:disabled{
-	background-color: #ddd;
-	cursor: not-allowed;
-}
-
-#copy{
-	margin-top: 3px;
+#messages > div {
+	margin: 5px;
 }
