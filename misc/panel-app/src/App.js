@@ -6,24 +6,31 @@ import Results from './Results';
 import Rules from './Rules';
 import Storage from './Storage';
 
+
 class App extends Component {
 
   constructor(props) {
     super(props);
     this._listenerId = null;
-    this.TAB_ID = chrome.devtools && chrome.devtools.inspectedWindow.tabId;
+    this.TAB_ID = typeof chrome !== 'undefined' && chrome.devtools && chrome.devtools.inspectedWindow.tabId;
 
-    let conn = chrome.runtime.connect({
-      name: 'panel'
-    });
+    let conn = null;
+    try {
+      conn = chrome.runtime.connect({
+        name: 'panel'
+      });
 
-    conn.onMessage.addListener( this.onMessage.bind(this) );
+      conn.onMessage.addListener( this.onMessage.bind(this) );
 
-    // Send a message to background page so that the background page can associate panel to the current host page
-    conn.postMessage({
-      name: 'panel-init',
-      tabId: this.TAB_ID
-    });
+      // Send a message to background page so that the background page can associate panel to the current host page
+      conn.postMessage({
+        name: 'panel-init',
+        tabId: this.TAB_ID
+      });
+    }
+    catch(e) {
+      console.log('NO chrome.runtime.connect()', e);
+    }
     this._backgroundPageConnection = conn;
   }
 
@@ -50,10 +57,16 @@ class App extends Component {
 
   onSpecUpdate(spec) {
     let sSpec = JSON.stringify(spec);
+    console.log('APP::onSpecUpdate ', this.TAB_ID, sSpec !== this._lastSpec, sSpec);
     if (sSpec !== this._lastSpec) {
       this._lastSpec = sSpec;
-      chrome.runtime.sendMessage({ tabId: this.TAB_ID, validate: sSpec });
-      chrome.runtime.sendMessage({ tabId: this.TAB_ID, json: sSpec });
+      try {
+        chrome.runtime.sendMessage({ tabId: this.TAB_ID, validate: sSpec });
+        chrome.runtime.sendMessage({ tabId: this.TAB_ID, json: sSpec });
+      }
+      catch(e) {
+        console.log(e);
+      }
     }
   }
 

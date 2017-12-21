@@ -44,9 +44,11 @@ class Results extends Component {
     return (
       <div id="results">
         <div id="error">{errors}</div>
-        <table id="resultTable" class="table table-condensed table-bordered">
-          <tr><th>Field</th><th>Value(s)</th></tr>
+        <table id="resultTable" className="table table-condensed table-bordered">
+          <thead><tr><th>Field</th><th>Value(s)</th></tr></thead>
+          <tbody>
           {res}
+          </tbody>
         </table>
       </div>
     );

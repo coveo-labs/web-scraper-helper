@@ -209,6 +209,9 @@ window.onload = ()=>{
 		clearPreviousExcludedElements();
 
 		let wsSpecs = JSON.parse(sJson);
+
+		console.log('WSSPEC: ', wsSpecs);
+
 		let globalSpec = wsSpecs[0]; // TODO: update when adding support for subItems
 
 		//Get the metadata field and exclude field from the json
