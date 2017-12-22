@@ -176,7 +176,6 @@ textarea.invalid {
 	overflow: hidden;
 	margin-bottom: 5px;
 	width: 100%;
-	background-color: white;
 }
 
 .rule > *, .wsh-rule-type::after {

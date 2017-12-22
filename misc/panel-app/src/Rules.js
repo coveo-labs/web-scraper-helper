@@ -34,6 +34,7 @@ class TextEditor extends React.Component {
     );
   }
 }
+
 class Rules extends React.Component {
   constructor(props) {
     super(props);
@@ -50,7 +51,7 @@ class Rules extends React.Component {
       }
     }
     this._listenerId = null;
-    this._rules = {};
+    // this._rules = {};
   }
 
   componentDidMount() {
@@ -92,6 +93,8 @@ class Rules extends React.Component {
   onChangeItem(changeSpec) {
     SpecHelper.update(this.state.specs, changeSpec);
     this.setState(this.state);
+
+    Storage.set(JSON.stringify(this.state.specs), this._listenerId);
   }
 
   onTextChange(txtSpec) {
@@ -99,7 +102,7 @@ class Rules extends React.Component {
     this.setState({txt: txtSpec});
 
     try {
-      JSON.parse(txtSpec);
+      JSON.parse(txtSpec);  // for validation, don't want to send an invalid spec
       Storage.set(txtSpec);
     }
     catch(e) {}
@@ -108,7 +111,7 @@ class Rules extends React.Component {
   onRemoveItem(e) {
     let id = Item.getId(e.target);
 
-    delete this._rules[id];
+    // delete this._rules[id];
     SpecHelper.remove(this.state.specs, id);
 
     this.setState(this.state);
@@ -119,7 +122,10 @@ class Rules extends React.Component {
     this.setState({state: this.state, tab: 'editor'});
   }
 
-  onSpecUpdate(specs) {
+  onSpecUpdate(specs, reset) {
+    if (reset) {
+      this.setState({tab: 'editor'});
+    }
     this.setSpecs(specs);
   }
 
@@ -135,45 +141,23 @@ class Rules extends React.Component {
   }
 
   onValidate(validateSpec) {
-    let previousState = JSON.stringify(this.state);
+    if (validateSpec) {
+      this._lastValidationSpec = validateSpec;
+    }
+    else if (this._lastValidationSpec) {
+      validateSpec = this._lastValidationSpec;
+    }
 
-    // let state = {...this.state};
-    let state = JSON.parse(JSON.stringify(this.state));
-    (validateSpec.exclude || []).forEach( (vExcludeState,idx) => {
-      try{
-        state.exclude[idx].validationState = vExcludeState;
-      }
-      catch(e) {
-        console.log('Rules::onValidate(exclude) ', e);
-      }
+    document.querySelectorAll('.bg-danger, .bg-success, .bg-warning').forEach(
+      e=>e.classList.remove('bg-danger', 'bg-success', 'bg-warning')
+    );
+
+    Object.keys(validateSpec.rules).forEach(k=>{
+      let state = validateSpec.rules[k];
+      document.querySelectorAll(`.rule[data-id="${k}"] .wsh-rule-type`).forEach(e=>{
+        e.classList.add( state );
+      });
     });
-    try {
-      let vStates = validateSpec.metadata || {};
-      state.metadata = (state.metadata || []).map(m=>{
-        let vState = vStates[m.name];
-        if (vState) {
-          m.validationState = vState;
-        }
-        return m;
-      });
-    }
-    catch(e) {
-      console.log('Rules::onValidate(metadata) ', e);
-    }
-
-    // skip updates if state has not changed.
-    if (previousState !== JSON.stringify(state)) {
-      this.setState(state, ()=>{
-        let updateRules = e=>{
-          let i = this._rules[e.id];
-          if (i) {
-            i.setState({validationState: e.validationState});
-          }
-        };
-        (this.state.exclude||[]).forEach(updateRules);
-        (this.state.metadata||[]).forEach(updateRules);
-      });
-    }
   }
 
   setSpecs(o) {
@@ -203,10 +187,20 @@ class Rules extends React.Component {
 
     let isTextEditor = (this.state.tab === 'text-editor');
 
-    let subItems = this.state.specs[0].subItems || {};
-    let subItemsTabs = [], subItemsContent = [], currentTabId = this.state.tab;
-    subItemsTabs = Object.keys(subItems).map(s=> {
-      let tabId = s;//'sub-item-' + s;
+    let subItems = this.state.specs[0].subItems || {},
+      subItemsKeys = Object.keys(subItems),
+      subItemsTabs = [],
+      subItemsContent = [],
+      currentTabId = this.state.tab;
+
+    // if ( !( (subItemsKeys.concat(['editor', 'text-editor'])).includes(currentTabId) ) ) {
+    //   // tab id is invalid, resetting to 'editor'.
+    //   this.state.tab = 'editor';
+    //   currentTabId = this.state.tab;
+    // }
+
+    subItemsTabs = subItemsKeys.map(s=> {
+      let tabId = s;
 
       return (
         <li key={tabId} role="presentation" className={currentTabId === tabId ? 'active' : ''}>
@@ -249,6 +243,8 @@ class Rules extends React.Component {
       tabContent = subItemsContent;
     }
 
+    setTimeout(this.onValidate.bind(this), 100);
+
     return (
       <div id="rules">
         <ul className="nav nav-tabs" role="tablist">
@@ -273,12 +269,12 @@ class Rules extends React.Component {
     let onChange = this.onChangeItem.bind(this);
 
     let excludes = (spec.exclude || []).map((e)=>
-      <Item key={e.id} ref={(ref) => { this._rules[e.id] = ref; }} onRemove={onRemove} onChange={onChange} {...e}/>
+      <Item key={e.id} onRemove={onRemove} onChange={onChange} {...e}/>
     );
 
     let metas = SpecHelper.getMetadataAsArray(spec, id);
     metas = metas.map((e)=>
-      <MetaItem key={e.id} ref={(ref) => { this._rules[e.id] = ref; }} onRemove={onRemove} onChange={onChange} {...e}/>
+      <MetaItem key={e.id} onRemove={onRemove} onChange={onChange} {...e}/>
     );
 
     let typeSelector = '';

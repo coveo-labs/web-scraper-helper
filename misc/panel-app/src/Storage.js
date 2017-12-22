@@ -45,7 +45,7 @@ class Storage {
 
   loadSpec(name) {
     this._sCurrentName = name;
-    this.set(this.getSpec(name));
+    this.set(this.getSpec(name), null, true);
   }
 
   newSpec(name) {
@@ -143,7 +143,7 @@ class Storage {
     catch(e) {}
   }
 
-  set(json, id) {
+  set(json, id, reset) {
     try {
       if (typeof json !== 'string') {
         json = JSON.stringify(json);
@@ -152,12 +152,10 @@ class Storage {
       this._sCurrentSpec = json;
       json = JSON.parse(json);
 
-      console.log('SET:', JSON.stringify(json), id);
-
       Object.keys(this._listeners)
         .filter(k => (k !== id))
         .forEach(k => {
-          this._listeners[k](json);
+          this._listeners[k](json, reset);
         });
     }
     catch (e) {

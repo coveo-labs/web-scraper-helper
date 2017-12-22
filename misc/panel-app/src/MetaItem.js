@@ -10,8 +10,8 @@ class MetaItem extends Item {
   render() {
     return (
       <div data-id={this.props.id} className="rule">
-        {this.renderType()}
         <input type="text" className="wsh-rule-name" placeholder="Name" value={this.props.name} onChange={this.onNameChange.bind(this)} />
+        {this.renderType()}
         {this.renderPath(true)}
       </div>
     );

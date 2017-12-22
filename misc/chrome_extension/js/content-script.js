@@ -9,7 +9,10 @@ class RulePath  {
 		if (title !== undefined) {
 			this.title = title;
 		}
-
+		else if (spec.name) {
+			this.title = spec.name;
+		}
+		this.id = spec.id;
 		return this;
 	}
 
@@ -175,6 +178,9 @@ class ErrorRule extends RulePath {
 }
 
 let createRule = (obj, title) => {
+
+	console.log('CR: ', JSON.stringify(obj), title);
+
 	if (obj.type === 'CSS') {
 		return new CssRule(obj, title);
 	}
@@ -184,102 +190,121 @@ let createRule = (obj, title) => {
 	return new ErrorRule(obj, title);
 };
 
+let clearPreviousExcludedElements = ()=> {
+	document.querySelectorAll('.web-scraper-helper-exclude').forEach(e=>{
+		e.classList.remove('web-scraper-helper-exclude');
+	});
+};
+
+/**
+ * Parses the jsonData
+ * Hides the elements on the webpage
+ * Sends back to the panel all the parses xpath and css selectors
+ *
+ * @param {object} jsonData - The json to parse
+ */
+let parseJsonConfig = (sJson) => {
+	clearPreviousExcludedElements();
+
+	let wsSpecs = JSON.parse(sJson);
+
+	console.log('WSSPEC: ', sJson);
+
+	let globalSpec = wsSpecs[0]; // TODO: update when adding support for subItems
+	console.log('GLOAB: ', JSON.stringify(globalSpec));
+
+	//Get the metadata field and exclude field from the json
+	let metadata = globalSpec.metadata;
+	let exclude = globalSpec.exclude;
+
+	console.log('META: ', JSON.stringify(metadata));
+
+	//Grab all the metadata specified in the json
+	//Gets the nodeValue for XPATH
+	//Gets the textContent for CSS
+	let rules = [];
+	for (let key in metadata) {
+		console.log('IN META: ', JSON.stringify(metadata[key]));
+		let rule = createRule(metadata[key], key);
+		rules.push( rule.toJson() );
+	}
+
+	//Adds the elements to exclude in the elementsToHide
+	(exclude||[]).forEach(r=> {
+		let rule = createRule(r);
+		rule.exludeFromPage();
+	});
+
+	//Send back the values found
+	setTimeout(()=>{
+		console.log(' SENDING BACK: ', JSON.stringify(rules));
+		chrome.runtime.sendMessage({return: JSON.stringify(rules)});
+	}, 1);
+};
+
+
+let validateJson = (sJson) => {
+	clearPreviousExcludedElements();
+
+	let validationResults = {
+		rules: {},
+		errors: []
+	};
+
+	let wsSpecs = JSON.parse(sJson);
+	// let globalSpec = wsSpecs[0];
+
+	console.log('V: ', JSON.stringify(wsSpecs));
+
+	let allRules = [];
+	wsSpecs.forEach(subItem=>{
+		// add exclude rules
+		allRules = allRules.concat(subItem.exclude||[]);
+		for (let m in subItem.metadata) {
+			allRules.push(subItem.metadata[m]);
+		}
+	});
+
+	allRules.forEach(element => {
+		let rule = createRule(element);
+		console.log('E: ', JSON.stringify(element));
+		console.log('R: ', JSON.stringify(rule));
+		if (rule.isError()) {
+			validationResults.rules[rule.id] = 'bg-danger';
+			validationResults.errors.push(rule._error);
+		}
+		else {
+			validationResults.rules[rule.id] = (rule.isValid() ? 'bg-success' : 'bg-warning');
+		}
+	});
+
+	// for (let key in globalSpec.metadata) {
+	// 	let element = globalSpec.metadata[key];
+	// 	let rule = createRule(element, key);
+
+	// 	if (rule.isError()) {
+	// 		validationResults.metadata[key] = 'bg-danger';
+	// 		validationResults.errors.push(rule._error);
+	// 	}
+	// 	else {
+	// 		validationResults.metadata[key] = (rule.isValid() ? 'bg-success' : 'bg-warning');
+	// 	}
+	// }
+
+	setTimeout(()=>{
+		console.log('VALIDATION BACK: ', JSON.stringify(validationResults));
+		let payload = {validate: validationResults};
+		chrome.runtime.sendMessage(payload);
+	}, 1);
+};
+
 window.onload = ()=>{
 	// your code
 	setTimeout(()=>{
 		chrome.runtime.sendMessage({reload:1});
 	}, 1);
 
-	let clearPreviousExcludedElements = ()=> {
-		document.querySelectorAll('.web-scraper-helper-exclude').forEach(e=>{
-			e.classList.remove('web-scraper-helper-exclude');
-		});
-	};
-
 	chrome.runtime.connect();
-
-	/**
-	 * Parses the jsonData
-	 * Hides the elements on the webpage
-	 * Sends back to the panel all the parses xpath and css selectors
-	 *
-	 * @param {object} jsonData - The json to parse
-	 */
-	let parseJsonConfig = (sJson) => {
-		clearPreviousExcludedElements();
-
-		let wsSpecs = JSON.parse(sJson);
-
-		console.log('WSSPEC: ', wsSpecs);
-
-		let globalSpec = wsSpecs[0]; // TODO: update when adding support for subItems
-
-		//Get the metadata field and exclude field from the json
-		let metadata = globalSpec.metadata;
-		let exclude = globalSpec.exclude;
-
-		//Grab all the metadata specified in the json
-		//Gets the nodeValue for XPATH
-		//Gets the textContent for CSS
-		let rules = [];
-		for (let key in metadata) {
-			let rule = createRule(metadata[key], key);
-			rules.push( rule.toJson() );
-		}
-
-		//Adds the elements to exclude in the elementsToHide
-		(exclude||[]).forEach(r=> {
-			let rule = createRule(r);
-			rule.exludeFromPage();
-		});
-
-		//Send back the values found
-		setTimeout(()=>{
-			chrome.runtime.sendMessage({return: JSON.stringify(rules)});
-		}, 1);
-	};
-
-	let validateJson = (sJson) => {
-		clearPreviousExcludedElements();
-
-		let validationResults = {
-			metadata: {},
-			exclude: [],
-			errors: []
-		};
-
-		let wsSpecs = JSON.parse(sJson);
-		let globalSpec = wsSpecs[0];
-
-		(globalSpec.exclude||[]).forEach(element => {
-			let rule = createRule(element);
-			if (rule.isError()) {
-				validationResults.exclude.push('bg-danger');
-				validationResults.errors.push(rule._error);
-			}
-			else {
-				validationResults.exclude.push(rule.isValid() ? 'bg-success' : 'bg-warning');
-			}
-		});
-
-		for (let key in globalSpec.metadata) {
-			let element = globalSpec.metadata[key];
-			let rule = createRule(element, key);
-
-			if (rule.isError()) {
-				validationResults.metadata[key] = 'bg-danger';
-				validationResults.errors.push(rule._error);
-			}
-			else {
-				validationResults.metadata[key] = (rule.isValid() ? 'bg-success' : 'bg-warning');
-			}
-		}
-
-		setTimeout(()=>{
-			let payload = {validate: validationResults};
-			chrome.runtime.sendMessage(payload);
-		}, 1);
-	};
 
 	/**
 	 * Adds a listener to the received messages
@@ -303,3 +328,5 @@ window.onload = ()=>{
 		});
 
 };
+
+console.log('\n\n\n - -- - - -- - - - -- - - -- --- --- --- -\n\n\nCONTENT-SCRIPT LOAGEDEDED D\n\n\n');

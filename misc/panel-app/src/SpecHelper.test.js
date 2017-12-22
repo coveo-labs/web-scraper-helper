@@ -3,6 +3,20 @@
 /* globals it, expect */
 import SpecHelper from './SpecHelper';
 
+let removeTimestampsFromGuids = (spec)=>{
+  return JSON.parse( JSON.stringify(spec).replace(/(guid-\d+)(-\d+)/g, '$1') );
+};
+
+let getGuid = (spec, guid)=>{
+  try {
+    let s = JSON.stringify(spec);
+    return s.match( new RegExp(guid+'-\\d+') )[0];
+  }
+  catch(e) {}
+  return null;
+};
+
+
 it('test default', ()=>{
   let s = SpecHelper.getDefault();
   expect(s).toEqual( [{"exclude": [], "for": {"urls": [".*"]}, "metadata": {}}] );
@@ -14,8 +28,8 @@ it('test addExclude', ()=>{
 
   let expected = [{"exclude": [{"id": "guid-1", "path": "", "type": "CSS"}], "for": {"urls": [".*"]}, "metadata": {}}];
 
-  expect(s).toEqual( expected );
-  expect(s2).toEqual( expected );
+  expect( removeTimestampsFromGuids(s) ).toEqual( expected );
+  expect( removeTimestampsFromGuids(s2) ).toEqual( expected );
 
   expect( SpecHelper.toJson(s) ).toEqual( [{"exclude": [{"path": "", "type": "CSS"}], "for": {"urls": [".*"]}, "metadata": {}}] );
 });
@@ -38,8 +52,8 @@ it('test addSubItem', ()=>{
       metadata: {},
     }];
 
-  expect(s).toEqual( expected );
-  expect(s2).toEqual( expected );
+  expect( removeTimestampsFromGuids(s) ).toEqual( expected );
+  expect( removeTimestampsFromGuids(s2) ).toEqual( expected );
 
   expect( SpecHelper.toJson(s) ).toEqual([{
     for: { "urls": [".*"] },
@@ -65,33 +79,34 @@ it('full workflow', ()=>{
   SpecHelper.addMeta(s, 'blogPosts');
   SpecHelper.addExclude(s, 'blogPosts');
 
-  expect(s).toEqual( [{
+  expect( removeTimestampsFromGuids(s) ).toEqual( [{
     "exclude": [{"id": "guid-5", "path": "", "type": "CSS"}],
     "for": {"urls": [".*"]},
-    "metadata": {"guid-4": {"id": "guid-4", "name": "", "path": "", "type": "CSS"}},
+    "metadata": {"": {"id": "guid-4", "name": "", "path": "", "type": "CSS"}},
     "subItems": {"blogPosts": {"id": "guid-3", "path": "", "type": "CSS"}}
   }, {
     "exclude": [{"id": "guid-7", "path": "", "type": "CSS"}],
     "for": {"types": ["blogPosts"]},
-    "metadata": {"guid-6": {"id": "guid-6", "name": "", "path": "", "type": "CSS"}}
+    "metadata": {"": {"id": "guid-6", "name": "", "path": "", "type": "CSS"}}
   }] );
 
-  SpecHelper.update(s, {id: 'guid-6', name: 'author'});
-  SpecHelper.update(s, {id: 'guid-6', path: '.author'});
 
-  SpecHelper.update(s, {id: 'guid-5', type: 'XPATH', path:'//header'});
+  SpecHelper.update(s, {id: getGuid(s,'guid-6'), name: 'author'});
+  SpecHelper.update(s, {id: getGuid(s,'guid-6'), path: '.author'});
 
-  SpecHelper.remove(s, 'guid-7');
+  SpecHelper.update(s, {id: getGuid(s,'guid-5'), type: 'XPATH', path:'//header'});
 
-  expect(s).toEqual( [{
+  SpecHelper.remove(s, getGuid(s,'guid-7'));
+
+  expect( removeTimestampsFromGuids(s) ).toEqual( [{
     "exclude": [{"id": "guid-5", "path": "//header", "type": "XPATH"}],
     "for": {"urls": [".*"]},
-    "metadata": {"guid-4": {"id": "guid-4", "name": "", "path": "", "type": "CSS"}},
+    "metadata": {"": {"id": "guid-4", "name": "", "path": "", "type": "CSS"}},
     "subItems": {"blogPosts": {"id": "guid-3", "path": "", "type": "CSS"}}
   }, {
     "exclude": [],
     "for": {"types": ["blogPosts"]},
-    "metadata": {"guid-6": {"id": "guid-6", "name": "author", "path": ".author", "type": "CSS"}}
+    "metadata": {"author": {"id": "guid-6", "name": "author", "path": ".author", "type": "CSS"}}
   }] );
 
   expect( SpecHelper.toJson(s) ).toEqual([{
@@ -203,25 +218,25 @@ it('test setIds', ()=>{
       {"id": "guid-9", "path": "#copyright", "type": "CSS"}
     ],
     "for": {"urls": ["showthread.php\\/.*"]},
-    "metadata": {"guid-10": {"id": "guid-10", "name": "threadTitle", "path": "//*[@id=\"content\"]/div[1]/span/text()", "type": "XPATH"}},
+    "metadata": {"threadTitle": {"id": "guid-10", "name": "threadTitle", "path": "//*[@id=\"content\"]/div[1]/span/text()", "type": "XPATH"}},
     "subItems": {"post": {"id": "guid-11", "path": "#posts > table", "type": "css"}}
   }, {
     "for": {"types": ["post"]},
     "metadata": {
-      "guid-12": {"id": "guid-12", "name": "postDirectUrl", "isAbsolute": true, "path": "//tbody/tr[1]/td[2]/table/tbody/tr/td/div[1]/span/strong/a/@href", "type": "XPATH"},
-      "guid-13": {"id": "guid-13", "name": "postBody", "path": ".post_body", "type": "CSS"},
-      "guid-14": {"id": "guid-14", "name": "hasBody", "isBoolean": true, "path": ".post_body", "type": "CSS"},
-      "guid-15": {"id": "guid-15", "name": "postAuthor", "path": "//tbody/tr[1]/td[1]/strong/span/a/span/*/text()", "type": "XPATH"},
-      "guid-16": {"id": "guid-16", "name": "postDate", "path": "//tbody/tr[2]/td[1]/span/text()", "type": "XPATH"}}
+      "postDirectUrl": {"id": "guid-12", "name": "postDirectUrl", "isAbsolute": true, "path": "//tbody/tr[1]/td[2]/table/tbody/tr/td/div[1]/span/strong/a/@href", "type": "XPATH"},
+      "postBody": {"id": "guid-13", "name": "postBody", "path": ".post_body", "type": "CSS"},
+      "hasBody": {"id": "guid-14", "name": "hasBody", "isBoolean": true, "path": ".post_body", "type": "CSS"},
+      "postAuthor": {"id": "guid-15", "name": "postAuthor", "path": "//tbody/tr[1]/td[1]/strong/span/a/span/*/text()", "type": "XPATH"},
+      "postDate": {"id": "guid-16", "name": "postDate", "path": "//tbody/tr[2]/td[1]/span/text()", "type": "XPATH"}}
   }];
 
-  expect(specs).toEqual( expected );
+  expect( removeTimestampsFromGuids(specs) ).toEqual( expected );
 
   let a = SpecHelper.getMetadataAsArray(specs);
-  expect(a).toEqual( [{"id": "guid-10", "name": "threadTitle", "path": "//*[@id=\"content\"]/div[1]/span/text()", "type": "XPATH"}]  );
+  expect( removeTimestampsFromGuids(a) ).toEqual( [{"id": "guid-10", "name": "threadTitle", "path": "//*[@id=\"content\"]/div[1]/span/text()", "type": "XPATH"}]  );
 
   a = SpecHelper.getMetadataAsArray(specs, 'post');
-  expect(a).toEqual( [
+  expect( removeTimestampsFromGuids(a) ).toEqual( [
     {"id": "guid-12", "isAbsolute": true, "name": "postDirectUrl", "path": "//tbody/tr[1]/td[2]/table/tbody/tr/td/div[1]/span/strong/a/@href", "type": "XPATH"},
     {"id": "guid-13", "name": "postBody", "path": ".post_body", "type": "CSS"},
     {"id": "guid-14", "isBoolean": true, "name": "hasBody", "path": ".post_body", "type": "CSS"},
@@ -232,7 +247,7 @@ it('test setIds', ()=>{
   // try getMetadataAsArray not from an array of specs.
   let spec = SpecHelper.get(specs, 'post');
   a = SpecHelper.getMetadataAsArray(spec);
-  expect(a).toEqual( [
+  expect( removeTimestampsFromGuids(a) ).toEqual( [
     {"id": "guid-12", "isAbsolute": true, "name": "postDirectUrl", "path": "//tbody/tr[1]/td[2]/table/tbody/tr/td/div[1]/span/strong/a/@href", "type": "XPATH"},
     {"id": "guid-13", "name": "postBody", "path": ".post_body", "type": "CSS"},
     {"id": "guid-14", "isBoolean": true, "name": "hasBody", "path": ".post_body", "type": "CSS"},

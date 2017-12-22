@@ -57,7 +57,6 @@ class App extends Component {
 
   onSpecUpdate(spec) {
     let sSpec = JSON.stringify(spec);
-    console.log('APP::onSpecUpdate ', this.TAB_ID, sSpec !== this._lastSpec, sSpec);
     if (sSpec !== this._lastSpec) {
       this._lastSpec = sSpec;
       try {

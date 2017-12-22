@@ -62,7 +62,7 @@ class SpecHelper {
       if (!spec.metadata) {
         spec.metadata = {};
       }
-      spec.metadata[rule.id] = rule;
+      spec.metadata[rule.name] = rule;
     }
     return specs;
   }
@@ -86,7 +86,11 @@ class SpecHelper {
         spec.exclude = spec.exclude.filter(e=>(e.id!==id));
       }
       if (spec.metadata) {
-        delete spec.metadata[id];
+        for (let k in spec.metadata) {
+          if (spec.metadata[k].id === id) {
+            delete spec.metadata[k];
+          }
+        }
       }
       return spec;
     });
@@ -126,8 +130,8 @@ class SpecHelper {
             let m = spec.metadata[k];
             m.name = k;
             m.id = Guid.get();
-            delete spec.metadata[k];
-            spec.metadata[m.id] = m;
+            // delete spec.metadata[k];
+            // spec.metadata[m.id] = m;
           }
         }
       }
@@ -200,9 +204,17 @@ class SpecHelper {
     specs.map(spec => {
       (spec.exclude || []).map( updateRule );
       if (spec.metadata) {
+        let newMetadatMap = {}; // need a new map, in case the 'name' is changing, need to update the key in the map.
         for (let i in spec.metadata) {
-          spec.metadata[i] = updateRule(spec.metadata[i]);
+          let rule = updateRule(spec.metadata[i]);
+          let name = rule.name;
+          while(newMetadatMap[name]) {
+            // add a space to prevent rules being deleted while typing a name that matches another rule
+            name += ' ';
+          }
+          newMetadatMap[name] = rule;
         }
+        spec.metadata = newMetadatMap;
       }
       if (spec.subItems) {
         for (let i in spec.subItems) {
