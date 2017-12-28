@@ -190,14 +190,7 @@ class Rules extends React.Component {
     let subItems = this.state.specs[0].subItems || {},
       subItemsKeys = Object.keys(subItems),
       subItemsTabs = [],
-      subItemsContent = [],
       currentTabId = this.state.tab;
-
-    // if ( !( (subItemsKeys.concat(['editor', 'text-editor'])).includes(currentTabId) ) ) {
-    //   // tab id is invalid, resetting to 'editor'.
-    //   this.state.tab = 'editor';
-    //   currentTabId = this.state.tab;
-    // }
 
     subItemsTabs = subItemsKeys.map(s=> {
       let tabId = s;
@@ -211,19 +204,6 @@ class Rules extends React.Component {
         </li>
       );
     });
-
-
-    // TODO: subItems are a map, need to change to array!.
-    for (let j = 1; j<this.state.specs.length; j++) {
-      let i = this.state.specs[j];
-      if (!i.name) {
-        i.name = ( (i.for && i.for.types) || []).join('_').replace(/[^\w]/g, '_');
-      }
-
-      subItemsContent.push(
-        this.renderTabContent(i, i.name)
-      );
-    }
 
     let onTextChange = this.onTextChange.bind(this);
 
@@ -240,7 +220,16 @@ class Rules extends React.Component {
       );
     }
     else {
-      tabContent = subItemsContent;
+      tabContent = this.state.specs
+        .filter(s=>{
+          if (!s.name) {
+            s.name = ( (s.for && s.for.types) || []).join('_').replace(/[^\w]/g, '_');
+          }
+          return s.name === this.state.tab;
+        })
+        .map(s=>{
+          return this.renderTabContent(s, s.name);
+        });
     }
 
     setTimeout(this.onValidate.bind(this), 100);

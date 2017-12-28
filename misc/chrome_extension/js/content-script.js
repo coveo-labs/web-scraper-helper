@@ -2,8 +2,18 @@
 // jshint -W110, -W003
 /*global chrome*/
 
+let SendMessageBack = (payload)=>{
+	setTimeout(()=>{
+		try {
+			chrome.runtime.sendMessage(payload);
+		}
+		catch(e) {}
+	}, 1);
+};
+
+
 class RulePath  {
-	constructor(spec, title) {
+	constructor(spec, title, subItemName, container) {
 		this.path = spec.path;
 		this.isBoolean = spec.isBoolean ? true : false;
 		if (title !== undefined) {
@@ -13,6 +23,12 @@ class RulePath  {
 			this.title = spec.name;
 		}
 		this.id = spec.id;
+
+		this.container = container || null;
+
+		if (subItemName) {
+			this.subItemName = subItemName;
+		}
 		return this;
 	}
 
@@ -33,6 +49,9 @@ class RulePath  {
 
 	toJson() {
 		let o = {type:this.type, path: this.path};
+		if (this.subItemName) {
+			o.subItemName = this.subItemName;
+		}
 		if (this.isBoolean) {
 			o.isBoolean = true;
 		}
@@ -70,11 +89,12 @@ class RulePath  {
 }
 
 class CssRule extends RulePath {
-	constructor(spec, title) {
-		super(spec, title);
+	constructor(spec, title, subItemKey, container) {
+		super(spec, title, subItemKey, container);
 		this.type = 'CSS';
 		this.isValid();
 	}
+
 	getElements() {
 		try {
 			let reTextSub = /::text\b/;
@@ -95,8 +115,14 @@ class CssRule extends RulePath {
 				cssSelector = cssSelector.split(reAttrSub)[0];
 			}
 
-			let nodes = document.querySelectorAll(cssSelector),
+			let container = this.container || document;
+			let nodes = [],
 				elements = [];
+
+			let n = container.querySelectorAll(cssSelector);
+			n.forEach(e=>{
+				nodes.push(e);
+			});
 
 			if (this.isBoolean) {
 				return [ (nodes && nodes.length ? true : false) ];
@@ -117,6 +143,7 @@ class CssRule extends RulePath {
 			return elements;
 		}
 		catch (err) {
+			console.error(err);
 			this._error = this.formatError(err);
 			return null;
 		}
@@ -124,14 +151,19 @@ class CssRule extends RulePath {
 }
 
 class XPathRule extends RulePath {
-	constructor(spec, title) {
-		super(spec, title);
+	constructor(spec, title, subItemKey, container) {
+		super(spec, title, subItemKey, container);
 		this.type = 'XPATH';
 		this.isValid();
 	}
-	getElements() {
+
+	/**
+	 *
+	 * @param {*} asIs if true, return the element as is, not as text.
+	 */
+	getElements(asIs) {
 		try {
-			let nodes = document.evaluate(this.path, document);
+			let nodes = document.evaluate(this.path, this.container || document);
 			let e, elements = [];
 
 			switch(nodes.resultType) {
@@ -139,7 +171,10 @@ class XPathRule extends RulePath {
 				case XPathResult.ORDERED_NODE_ITERATOR_TYPE:
 					while ( (e = nodes.iterateNext()) ) {
 						let value = e.nodeValue;
-						if (value === null) {
+						if (asIs) {
+							value = e;
+						}
+						else if(value === null) {
 							value = e.outerHTML;
 						}
 						elements.push(value);
@@ -163,6 +198,7 @@ class XPathRule extends RulePath {
 			return elements;
 		}
 		catch (err) {
+			console.error(err);
 			this._error = this.formatError(err);
 			return null;
 		}
@@ -177,15 +213,12 @@ class ErrorRule extends RulePath {
 	}
 }
 
-let createRule = (obj, title) => {
-
-	console.log('CR: ', JSON.stringify(obj), title);
-
+let createRule = (obj, title, subItemKey, container) => {
 	if (obj.type === 'CSS') {
-		return new CssRule(obj, title);
+		return new CssRule(obj, title, subItemKey, container);
 	}
 	if (obj.type === 'XPATH') {
-		return new XPathRule(obj, title);
+		return new XPathRule(obj, title, subItemKey, container);
 	}
 	return new ErrorRule(obj, title);
 };
@@ -194,6 +227,67 @@ let clearPreviousExcludedElements = ()=> {
 	document.querySelectorAll('.web-scraper-helper-exclude').forEach(e=>{
 		e.classList.remove('web-scraper-helper-exclude');
 	});
+};
+
+let processGlobal = (globalSpec)=>{
+	//Get the metadata field and exclude field from the json
+	let metadata = globalSpec.metadata;
+	let exclude = globalSpec.exclude;
+
+	//Grab all the metadata specified in the json
+	//Gets the nodeValue for XPATH
+	//Gets the textContent for CSS
+	let rules = [];
+	for (let key in metadata) {
+		let rule = createRule(metadata[key], key);
+		rules.push( rule.toJson() );
+	}
+
+	//Adds the elements to exclude in the elementsToHide
+	(exclude||[]).forEach(r=> {
+		let rule = createRule(r);
+		rule.exludeFromPage();
+	});
+
+	return rules;
+};
+
+let findType = (specs, subItemKey)=>{
+	let spec = specs.filter(s=>{
+		return (s && s.for && s.for.types && s.for.types.includes(subItemKey)) ? true : false;
+	});
+
+	return spec.length ? spec[0] : null;
+};
+
+let processSubItems = (specs, subItemKey)=>{
+	let subItems = [];
+
+	let spec = findType(specs, subItemKey);
+	if (!spec) {
+		return subItems;
+	}
+
+	let path = specs[0].subItems[subItemKey];
+	let metadata = spec.metadata;
+	let containers = createRule(path).getElements(true);
+
+	containers.forEach(c=> {
+		let subItemsResults = [];
+		for (let key in metadata) {
+			let rule = createRule(metadata[key], key, subItemKey, c);
+			subItemsResults.push( rule.toJson() );
+		}
+		if (subItemsResults.length) {
+			let {subItemName} = subItemsResults[0];
+			subItems.push({
+				subItemName,
+				values: subItemsResults
+			});
+		}
+	});
+
+	return subItems;
 };
 
 /**
@@ -208,111 +302,89 @@ let parseJsonConfig = (sJson) => {
 
 	let wsSpecs = JSON.parse(sJson);
 
-	console.log('WSSPEC: ', sJson);
-
 	let globalSpec = wsSpecs[0]; // TODO: update when adding support for subItems
-	console.log('GLOAB: ', JSON.stringify(globalSpec));
+	let rules = processGlobal(globalSpec);
 
-	//Get the metadata field and exclude field from the json
-	let metadata = globalSpec.metadata;
-	let exclude = globalSpec.exclude;
-
-	console.log('META: ', JSON.stringify(metadata));
-
-	//Grab all the metadata specified in the json
-	//Gets the nodeValue for XPATH
-	//Gets the textContent for CSS
-	let rules = [];
-	for (let key in metadata) {
-		console.log('IN META: ', JSON.stringify(metadata[key]));
-		let rule = createRule(metadata[key], key);
-		rules.push( rule.toJson() );
+	if (globalSpec.subItems) {
+		Object.keys(globalSpec.subItems).forEach(subItemKey=>{
+			let subItems = processSubItems(wsSpecs, subItemKey);
+			rules = rules.concat(subItems);
+		});
 	}
 
-	//Adds the elements to exclude in the elementsToHide
-	(exclude||[]).forEach(r=> {
-		let rule = createRule(r);
-		rule.exludeFromPage();
-	});
-
-	//Send back the values found
-	setTimeout(()=>{
-		console.log(' SENDING BACK: ', JSON.stringify(rules));
-		chrome.runtime.sendMessage({return: JSON.stringify(rules)});
-	}, 1);
+	SendMessageBack({return: JSON.stringify(rules)});
 };
 
 
 let validateJson = (sJson) => {
 	clearPreviousExcludedElements();
 
-	let validationResults = {
-		rules: {},
-		errors: []
-	};
+	let validationResults = {rules: {}, errors: []},
+		wsSpecs = JSON.parse(sJson),
+		globalRules = [],
+		subItemsRules = [];
 
-	let wsSpecs = JSON.parse(sJson);
-	// let globalSpec = wsSpecs[0];
-
-	console.log('V: ', JSON.stringify(wsSpecs));
-
-	let allRules = [];
-	wsSpecs.forEach(subItem=>{
+	wsSpecs.forEach(spec=>{
 		// add exclude rules
-		allRules = allRules.concat(subItem.exclude||[]);
-		for (let m in subItem.metadata) {
-			allRules.push(subItem.metadata[m]);
+		globalRules = globalRules.concat(spec.exclude||[]);
+		for (let m in spec.metadata) {
+			globalRules.push(spec.metadata[m]);
+		}
+		for (let m in spec.subItems) {
+			let subItem = spec.subItems[m];
+			globalRules.push(subItem);
+
+			let s = findType(wsSpecs, m);
+			if (s) {
+				subItemsRules.push({
+					spec: s,
+					container: subItem
+				});
+			}
 		}
 	});
 
-	allRules.forEach(element => {
-		let rule = createRule(element);
-		console.log('E: ', JSON.stringify(element));
-		console.log('R: ', JSON.stringify(rule));
+	let validate = (element, container)=>{
+		let rule = createRule(element, null, null, container);
 		if (rule.isError()) {
 			validationResults.rules[rule.id] = 'bg-danger';
 			validationResults.errors.push(rule._error);
 		}
-		else {
+		// if rule was found and successful previously, do not update its state to warning.
+		else if (validationResults.rules[rule.id] !== 'bg-success') {
 			validationResults.rules[rule.id] = (rule.isValid() ? 'bg-success' : 'bg-warning');
 		}
+	};
+
+	globalRules.forEach( rule => validate(rule) );
+
+	subItemsRules.forEach(element => {
+		// find eachcontainers.forEach(c=> {
+		let containers = createRule(element.container).getElements(true);
+		containers.forEach(c=> {
+			// for each container found, validate the metadata
+			let meta = element.spec && element.spec.metadata;
+			if (meta) {
+				Object.keys(meta).forEach(key=> validate(meta[key], c) );
+			}
+		});
 	});
 
-	// for (let key in globalSpec.metadata) {
-	// 	let element = globalSpec.metadata[key];
-	// 	let rule = createRule(element, key);
-
-	// 	if (rule.isError()) {
-	// 		validationResults.metadata[key] = 'bg-danger';
-	// 		validationResults.errors.push(rule._error);
-	// 	}
-	// 	else {
-	// 		validationResults.metadata[key] = (rule.isValid() ? 'bg-success' : 'bg-warning');
-	// 	}
-	// }
-
-	setTimeout(()=>{
-		console.log('VALIDATION BACK: ', JSON.stringify(validationResults));
-		let payload = {validate: validationResults};
-		chrome.runtime.sendMessage(payload);
-	}, 1);
+	// console.log('VALIDATION BACK: ', JSON.stringify(validationResults,2,2));
+	SendMessageBack({validate: validationResults});
 };
 
 window.onload = ()=>{
-	// your code
-	setTimeout(()=>{
-		chrome.runtime.sendMessage({reload:1});
-	}, 1);
+	SendMessageBack({reload:1});
 
-	chrome.runtime.connect();
+	try {
+		chrome.runtime.connect();
 
-	/**
-	 * Adds a listener to the received messages
-	 *
-	 */
-	chrome.runtime.onMessage.addListener(
-		(request/*, sender, sendResponse*/) => {
-
+		/**
+		 * Adds a listener to the received messages
+		 *
+		 */
+		chrome.runtime.onMessage.addListener( (request/*, sender, sendResponse*/) => {
 			if (request.json) {
 				parseJsonConfig(request.json);
 			}
@@ -324,9 +396,10 @@ window.onload = ()=>{
 			if (request.validate) {
 				validateJson(request.validate);
 			}
-
 		});
+	}
+	catch(e) {
+		// console.error(e);
+	}
 
 };
-
-console.log('\n\n\n - -- - - -- - - - -- - - -- --- --- --- -\n\n\nCONTENT-SCRIPT LOAGEDEDED D\n\n\n');
