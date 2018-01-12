@@ -272,7 +272,7 @@ let processSubItems = (specs, subItemKey)=>{
 	let metadata = spec.metadata;
 	let containers = createRule(path).getElements(true);
 
-	containers.forEach(c=> {
+	(containers || []).forEach(c=> {
 		let subItemsResults = [];
 		for (let key in metadata) {
 			let rule = createRule(metadata[key], key, subItemKey, c);
@@ -324,7 +324,7 @@ let validateJson = (sJson) => {
 		globalRules = [],
 		subItemsRules = [];
 
-	wsSpecs.forEach(spec=>{
+	(wsSpecs || []).forEach(spec=>{
 		// add exclude rules
 		globalRules = globalRules.concat(spec.exclude||[]);
 		for (let m in spec.metadata) {
@@ -356,12 +356,12 @@ let validateJson = (sJson) => {
 		}
 	};
 
-	globalRules.forEach( rule => validate(rule) );
+	(globalRules || []).forEach( rule => validate(rule) );
 
-	subItemsRules.forEach(element => {
+	(subItemsRules || []).forEach(element => {
 		// find eachcontainers.forEach(c=> {
 		let containers = createRule(element.container).getElements(true);
-		containers.forEach(c=> {
+		(containers || []).forEach(c=> {
 			// for each container found, validate the metadata
 			let meta = element.spec && element.spec.metadata;
 			if (meta) {
