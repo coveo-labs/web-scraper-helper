@@ -370,7 +370,6 @@ let validateJson = (sJson) => {
 		});
 	});
 
-	// console.log('VALIDATION BACK: ', JSON.stringify(validationResults,2,2));
 	SendMessageBack({validate: validationResults});
 };
 

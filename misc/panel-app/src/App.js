@@ -29,9 +29,10 @@ class App extends Component {
       });
     }
     catch(e) {
-      console.log('NO chrome.runtime.connect()', e);
+      // console.log('NO chrome.runtime.connect()', e);
     }
     this._backgroundPageConnection = conn;
+    this._firstRender = true;
   }
 
   componentDidMount() {
@@ -44,6 +45,9 @@ class App extends Component {
   }
 
   onMessage(msg) {
+    if (msg.reload) {
+      document.location.replace('?config=' + Storage._sCurrentName);
+    }
     if (this.results && this.results.setState && (msg.return || msg.errors)) {
       this.results.setState(msg);
     }
@@ -69,10 +73,29 @@ class App extends Component {
     }
   }
 
+  /**
+   * checks if an config is on the URL, and loads it.
+   */
+  preloadSpec() {
+    let url = new URL(window.location.href),
+      configName = url.searchParams.get('config');
+
+    if (configName) {
+      this.refs.library.loadSpec({
+        target:{
+          value:configName
+      }});
+    }
+  }
+
   render() {
+    if (this._firstRender) {
+      this._firstRender = false;
+      setTimeout(this.preloadSpec.bind(this), 200);
+    }
     return (
       <div className="App">
-        <Library />
+        <Library ref="library"/>
         <div id="rules-and-results">
           <Rules ref={(rules) => { this.rules = rules; }}/>
           <Results ref={(res) => { this.results = res; }}/>

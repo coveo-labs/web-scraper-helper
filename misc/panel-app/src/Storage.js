@@ -66,7 +66,7 @@ class Storage {
               }
             }
             catch (e) {
-              console.log('Parse failed for ', k, store[k]);
+              // console.log('Parse failed for ', k, store[k]);
             }
           });
           this.specs = specs;
@@ -75,7 +75,7 @@ class Storage {
           }
         }
         catch (e) {
-          console.log(e);
+          // console.log(e);
           this.specs = {
             'blogs': JSON.stringify([{
               "for": { "urls": [".*"] },
@@ -132,8 +132,6 @@ class Storage {
   }
 
   saveCurrent() {
-    console.log('SaveCurrent: ', this._sCurrentName, this._sCurrentSpec);
-
     this.specs[this._sCurrentName] = this._sCurrentSpec;
     try {
       return chrome.storage.local.set({
@@ -159,7 +157,7 @@ class Storage {
         });
     }
     catch (e) {
-      console.log(e);
+      // console.log(e);
     }
   }
 }

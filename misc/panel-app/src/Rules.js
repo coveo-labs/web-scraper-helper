@@ -47,7 +47,7 @@ class Rules extends React.Component {
         this.state.specs = specs;
       }
       catch(e) {
-        console.log(e);
+        // console.log(e);
       }
     }
     this._listenerId = null;
@@ -86,7 +86,7 @@ class Rules extends React.Component {
       this.setState({txt, txtState: 'valid'});
     }
     catch(e) {
-      console.log(e);
+      // console.log(e);
     }
   }
 
