@@ -76,9 +76,11 @@ class Library extends Component {
   }
 
   deleteConfig() {
-    Storage.remove(this.state.current);
-    let names = this.state.names.filter( n=>(n!==this.state.current) );
-    this.setState({names, current: '__empty'});
+    if (window.confirm('\nAre you sure you want to delete this config?\n\n' + this.state.current + '\n\n')) {
+      Storage.remove(this.state.current);
+      let names = this.state.names.filter( n=>(n!==this.state.current) );
+      this.setState({names, current: '__empty'});
+    }
   }
 
   loadSpec(e) {
