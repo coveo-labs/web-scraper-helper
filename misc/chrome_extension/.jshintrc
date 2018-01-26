@@ -1,6 +1,4 @@
 {
-	"excludePath": "misc/panel-app",
-
 	"bitwise": true,
 	"boss": false,
 	"browser": true,
@@ -22,7 +20,7 @@
 	"node": true,
 	"noempty": true,
 	"nonew": true,
-	"quotmark": true,
+	"quotmark": false,
 	"sub": true,
 	"trailing": true,
 	"undef": true,

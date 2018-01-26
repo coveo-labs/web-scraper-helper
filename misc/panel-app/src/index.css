@@ -47,6 +47,10 @@ body, .App, #root {
 	white-space: pre;
 }
 
+textarea.valid {
+	color: #004990;
+	;
+}
 textarea.invalid {
 	color: red;
 }
@@ -58,35 +62,35 @@ textarea.invalid {
 	display: none;
 }
 /*Result Table*/
-#resultTable {
+#results table {
 	background-color: #FAFAFA;
 }
 
-#resultTable tr:nth-child(odd) {
+#results table tr:nth-child(odd) {
 	background-color: #F0F0F0;
 }
 
-#resultTable th {
+#results table th {
 	color: #F58020;
 	padding: 5px;
 }
 
-#resultTable td {
+#results table td {
 	color: #313A45;
 	white-space: pre;
 	padding: 5px;
 }
 
-#resultTable td:first-child {
+#results table td:first-child {
 	color: #004990;
 }
 
-#resultTable td.as-boolean {
+#results table td.as-boolean {
 	color: green;
 	font-variant: small-caps;
 }
 
-#resultTable ol {
+#results table ol {
 	padding-right: 0;
 	padding-left: 1em;
 	margin: 0;
@@ -127,6 +131,15 @@ textarea.invalid {
 	right: 20px;
 }
 
+#text-editor > textarea {
+	width: 100%;
+	height: 100%;
+	border: 0;
+
+	font-family: monospace;
+	font-size: 12px;
+}
+
 #json-config {
 	width: 100%;
 	height: 100%;
@@ -163,7 +176,6 @@ textarea.invalid {
 	overflow: hidden;
 	margin-bottom: 5px;
 	width: 100%;
-	background-color: white;
 }
 
 .rule > *, .wsh-rule-type::after {
@@ -193,11 +205,28 @@ textarea.invalid {
 	visibility: visible;
 }
 
+.glyphicon-plus {
+	color: #4cae4c;
+}
+
 .glyphicon-remove {
 	color: #CE3F00;
-	visibility: hidden;
 	transition: margin 0.25s;
 	cursor: pointer;
+}
+
+.nav-tabs .glyphicon-remove {
+	margin-left: 5px;
+	vertical-align: text-top;
+	display: none;
+}
+
+.nav-tabs .active .glyphicon-remove {
+	display: inline;
+}
+
+.rule .glyphicon-remove {
+	visibility: hidden;
 }
 
 .rule:hover .glyphicon-remove, .rule:hover > label {

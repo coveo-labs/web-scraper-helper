@@ -2,14 +2,33 @@
 // jshint -W110, -W003
 /*global chrome*/
 
+let SendMessageBack = (payload)=>{
+	setTimeout(()=>{
+		try {
+			chrome.runtime.sendMessage(payload);
+		}
+		catch(e) {}
+	}, 1);
+};
+
+
 class RulePath  {
-	constructor(spec, title) {
+	constructor(spec, title, subItemName, container) {
 		this.path = spec.path;
 		this.isBoolean = spec.isBoolean ? true : false;
 		if (title !== undefined) {
 			this.title = title;
 		}
+		else if (spec.name) {
+			this.title = spec.name;
+		}
+		this.id = spec.id;
 
+		this.container = container || null;
+
+		if (subItemName) {
+			this.subItemName = subItemName;
+		}
 		return this;
 	}
 
@@ -30,6 +49,9 @@ class RulePath  {
 
 	toJson() {
 		let o = {type:this.type, path: this.path};
+		if (this.subItemName) {
+			o.subItemName = this.subItemName;
+		}
 		if (this.isBoolean) {
 			o.isBoolean = true;
 		}
@@ -67,11 +89,12 @@ class RulePath  {
 }
 
 class CssRule extends RulePath {
-	constructor(spec, title) {
-		super(spec, title);
+	constructor(spec, title, subItemKey, container) {
+		super(spec, title, subItemKey, container);
 		this.type = 'CSS';
 		this.isValid();
 	}
+
 	getElements() {
 		try {
 			let reTextSub = /::text\b/;
@@ -92,8 +115,14 @@ class CssRule extends RulePath {
 				cssSelector = cssSelector.split(reAttrSub)[0];
 			}
 
-			let nodes = document.querySelectorAll(cssSelector),
+			let container = this.container || document;
+			let nodes = [],
 				elements = [];
+
+			let n = container.querySelectorAll(cssSelector);
+			n.forEach(e=>{
+				nodes.push(e);
+			});
 
 			if (this.isBoolean) {
 				return [ (nodes && nodes.length ? true : false) ];
@@ -114,6 +143,7 @@ class CssRule extends RulePath {
 			return elements;
 		}
 		catch (err) {
+			console.error(err);
 			this._error = this.formatError(err);
 			return null;
 		}
@@ -121,14 +151,19 @@ class CssRule extends RulePath {
 }
 
 class XPathRule extends RulePath {
-	constructor(spec, title) {
-		super(spec, title);
+	constructor(spec, title, subItemKey, container) {
+		super(spec, title, subItemKey, container);
 		this.type = 'XPATH';
 		this.isValid();
 	}
-	getElements() {
+
+	/**
+	 *
+	 * @param {*} asIs if true, return the element as is, not as text.
+	 */
+	getElements(asIs) {
 		try {
-			let nodes = document.evaluate(this.path, document);
+			let nodes = document.evaluate(this.path, this.container || document);
 			let e, elements = [];
 
 			switch(nodes.resultType) {
@@ -136,7 +171,10 @@ class XPathRule extends RulePath {
 				case XPathResult.ORDERED_NODE_ITERATOR_TYPE:
 					while ( (e = nodes.iterateNext()) ) {
 						let value = e.nodeValue;
-						if (value === null) {
+						if (asIs) {
+							value = e;
+						}
+						else if(value === null) {
 							value = e.outerHTML;
 						}
 						elements.push(value);
@@ -160,6 +198,7 @@ class XPathRule extends RulePath {
 			return elements;
 		}
 		catch (err) {
+			console.error(err);
 			this._error = this.formatError(err);
 			return null;
 		}
@@ -174,117 +213,177 @@ class ErrorRule extends RulePath {
 	}
 }
 
-let createRule = (obj, title) => {
+let createRule = (obj, title, subItemKey, container) => {
 	if (obj.type === 'CSS') {
-		return new CssRule(obj, title);
+		return new CssRule(obj, title, subItemKey, container);
 	}
 	if (obj.type === 'XPATH') {
-		return new XPathRule(obj, title);
+		return new XPathRule(obj, title, subItemKey, container);
 	}
 	return new ErrorRule(obj, title);
 };
 
-window.onload = ()=>{
-	// your code
-	setTimeout(()=>{
-		chrome.runtime.sendMessage({reload:1});
-	}, 1);
+let clearPreviousExcludedElements = ()=> {
+	document.querySelectorAll('.web-scraper-helper-exclude').forEach(e=>{
+		e.classList.remove('web-scraper-helper-exclude');
+	});
+};
 
-	let clearPreviousExcludedElements = ()=> {
-		document.querySelectorAll('.web-scraper-helper-exclude').forEach(e=>{
-			e.classList.remove('web-scraper-helper-exclude');
-		});
-	};
+let processGlobal = (globalSpec)=>{
+	//Get the metadata field and exclude field from the json
+	let metadata = globalSpec.metadata;
+	let exclude = globalSpec.exclude;
 
-	chrome.runtime.connect();
+	//Grab all the metadata specified in the json
+	//Gets the nodeValue for XPATH
+	//Gets the textContent for CSS
+	let rules = [];
+	for (let key in metadata) {
+		let rule = createRule(metadata[key], key);
+		rules.push( rule.toJson() );
+	}
 
-	/**
-	 * Parses the jsonData
-	 * Hides the elements on the webpage
-	 * Sends back to the panel all the parses xpath and css selectors
-	 *
-	 * @param {object} jsonData - The json to parse
-	 */
-	let parseJsonConfig = (sJson) => {
-		clearPreviousExcludedElements();
+	//Adds the elements to exclude in the elementsToHide
+	(exclude||[]).forEach(r=> {
+		let rule = createRule(r);
+		rule.exludeFromPage();
+	});
 
-		let wsSpecs = JSON.parse(sJson);
-		let globalSpec = wsSpecs[0]; // TODO: update when adding support for subItems
+	return rules;
+};
 
-		//Get the metadata field and exclude field from the json
-		let metadata = globalSpec.metadata;
-		let exclude = globalSpec.exclude;
+let findType = (specs, subItemKey)=>{
+	let spec = specs.filter(s=>{
+		return (s && s.for && s.for.types && s.for.types.includes(subItemKey)) ? true : false;
+	});
 
-		//Grab all the metadata specified in the json
-		//Gets the nodeValue for XPATH
-		//Gets the textContent for CSS
-		let rules = [];
+	return spec.length ? spec[0] : null;
+};
+
+let processSubItems = (specs, subItemKey)=>{
+	let subItems = [];
+
+	let spec = findType(specs, subItemKey);
+	if (!spec) {
+		return subItems;
+	}
+
+	let path = specs[0].subItems[subItemKey];
+	let metadata = spec.metadata;
+	let containers = createRule(path).getElements(true);
+
+	(containers || []).forEach(c=> {
+		let subItemsResults = [];
 		for (let key in metadata) {
-			let rule = createRule(metadata[key], key);
-			rules.push( rule.toJson() );
+			let rule = createRule(metadata[key], key, subItemKey, c);
+			subItemsResults.push( rule.toJson() );
 		}
+		if (subItemsResults.length) {
+			let {subItemName} = subItemsResults[0];
+			subItems.push({
+				subItemName,
+				values: subItemsResults
+			});
+		}
+	});
 
-		//Adds the elements to exclude in the elementsToHide
-		(exclude||[]).forEach(r=> {
-			let rule = createRule(r);
-			rule.exludeFromPage();
+	return subItems;
+};
+
+/**
+ * Parses the jsonData
+ * Hides the elements on the webpage
+ * Sends back to the panel all the parses xpath and css selectors
+ *
+ * @param {object} jsonData - The json to parse
+ */
+let parseJsonConfig = (sJson) => {
+	clearPreviousExcludedElements();
+
+	let wsSpecs = JSON.parse(sJson);
+
+	let globalSpec = wsSpecs[0]; // TODO: update when adding support for subItems
+	let rules = processGlobal(globalSpec);
+
+	if (globalSpec.subItems) {
+		Object.keys(globalSpec.subItems).forEach(subItemKey=>{
+			let subItems = processSubItems(wsSpecs, subItemKey);
+			rules = rules.concat(subItems);
 		});
+	}
 
-		//Send back the values found
-		setTimeout(()=>{
-			chrome.runtime.sendMessage({return: JSON.stringify(rules)});
-		}, 1);
+	SendMessageBack({return: JSON.stringify(rules)});
+};
+
+
+let validateJson = (sJson) => {
+	clearPreviousExcludedElements();
+
+	let validationResults = {rules: {}, errors: []},
+		wsSpecs = JSON.parse(sJson),
+		globalRules = [],
+		subItemsRules = [];
+
+	(wsSpecs || []).forEach(spec=>{
+		// add exclude rules
+		globalRules = globalRules.concat(spec.exclude||[]);
+		for (let m in spec.metadata) {
+			globalRules.push(spec.metadata[m]);
+		}
+		for (let m in spec.subItems) {
+			let subItem = spec.subItems[m];
+			globalRules.push(subItem);
+
+			let s = findType(wsSpecs, m);
+			if (s) {
+				subItemsRules.push({
+					spec: s,
+					container: subItem
+				});
+			}
+		}
+	});
+
+	let validate = (element, container)=>{
+		let rule = createRule(element, null, null, container);
+		if (rule.isError()) {
+			validationResults.rules[rule.id] = 'bg-danger';
+			validationResults.errors.push(rule._error);
+		}
+		// if rule was found and successful previously, do not update its state to warning.
+		else if (validationResults.rules[rule.id] !== 'bg-success') {
+			validationResults.rules[rule.id] = (rule.isValid() ? 'bg-success' : 'bg-warning');
+		}
 	};
 
-	let validateJson = (sJson) => {
-		clearPreviousExcludedElements();
+	(globalRules || []).forEach( rule => validate(rule) );
 
-		let validationResults = {
-			metadata: {},
-			exclude: [],
-			errors: []
-		};
-
-		let wsSpecs = JSON.parse(sJson);
-		let globalSpec = wsSpecs[0];
-
-		(globalSpec.exclude||[]).forEach(element => {
-			let rule = createRule(element);
-			if (rule.isError()) {
-				validationResults.exclude.push('bg-danger');
-				validationResults.errors.push(rule._error);
-			}
-			else {
-				validationResults.exclude.push(rule.isValid() ? 'bg-success' : 'bg-warning');
+	(subItemsRules || []).forEach(element => {
+		// find eachcontainers.forEach(c=> {
+		let containers = createRule(element.container).getElements(true);
+		(containers || []).forEach(c=> {
+			// for each container found, validate the metadata
+			let meta = element.spec && element.spec.metadata;
+			if (meta) {
+				Object.keys(meta).forEach(key=> validate(meta[key], c) );
 			}
 		});
+	});
 
-		for (let key in globalSpec.metadata) {
-			let element = globalSpec.metadata[key];
-			let rule = createRule(element, key);
+	SendMessageBack({validate: validationResults});
+};
 
-			if (rule.isError()) {
-				validationResults.metadata[key] = 'bg-danger';
-				validationResults.errors.push(rule._error);
-			}
-			else {
-				validationResults.metadata[key] = (rule.isValid() ? 'bg-success' : 'bg-warning');
-			}
-		}
+window.onload = ()=>{
+	SendMessageBack({reload:1});
 
-		setTimeout(()=>{
-			let payload = {validate: validationResults};
-			chrome.runtime.sendMessage(payload);
-		}, 1);
-	};
+	try {
+		chrome.runtime.connect();
 
-	/**
-	 * Adds a listener to the received messages
-	 *
-	 */
-	chrome.runtime.onMessage.addListener(
-		(request/*, sender, sendResponse*/) => {
-
+		/**
+		 * Adds a listener to the received messages
+		 *
+		 */
+		chrome.runtime.onMessage.addListener( (request/*, sender, sendResponse*/) => {
 			if (request.json) {
 				parseJsonConfig(request.json);
 			}
@@ -296,7 +395,10 @@ window.onload = ()=>{
 			if (request.validate) {
 				validateJson(request.validate);
 			}
-
 		});
+	}
+	catch(e) {
+		// console.error(e);
+	}
 
 };

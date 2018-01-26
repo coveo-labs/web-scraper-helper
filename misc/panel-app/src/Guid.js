@@ -5,7 +5,7 @@ class Guid {
 
   get() {
     this._guid++;
-    return `guid-${this._guid}`;
+    return `guid-${this._guid}-${Date.now()}`;
   }
 }
 
