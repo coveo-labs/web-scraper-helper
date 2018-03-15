@@ -7,7 +7,13 @@ The extension provides both a GUI and a JSON text editor to create, save, and te
 
 ## Installation
 
-The extension is publicly available on the [chrome web store](https://chrome.google.com/webstore/detail/web-scraper-helper-for-co/demelhhhnkocnphihjbhpafjnknknkdf). For now, you must install the web-scraper-helper tool as an unpacked extension.
+The extension is publicly available on the [chrome web store](https://chrome.google.com/webstore/detail/web-scraper-helper-for-co/demelhhhnkocnphihjbhpafjnknknkdf).
+This is the preferred way to install it.
+
+# Build
+
+If you want to contribute, feel free to download the code, build, modify and submit Pull Requests.
+Here are the build steps.
 
 1. Download/clone this Git repo.
 1. Build React app (see next section)
