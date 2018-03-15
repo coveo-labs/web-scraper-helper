@@ -143,7 +143,7 @@ class CssRule extends RulePath {
 			return elements;
 		}
 		catch (err) {
-			console.error(err);
+			// console.error(err);
 			this._error = this.formatError(err);
 			return null;
 		}
@@ -198,7 +198,7 @@ class XPathRule extends RulePath {
 			return elements;
 		}
 		catch (err) {
-			console.error(err);
+			// console.error(err);
 			this._error = this.formatError(err);
 			return null;
 		}

@@ -68,7 +68,7 @@ class App extends Component {
         chrome.runtime.sendMessage({ tabId: this.TAB_ID, json: sSpec });
       }
       catch(e) {
-        console.log(e);
+        // console.log(e);
       }
     }
   }

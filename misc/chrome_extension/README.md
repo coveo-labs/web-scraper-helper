@@ -7,7 +7,7 @@ The extension provides both a GUI and a JSON text editor to create, save, and te
 
 ## Installation
 
-The extension is currently not publicly available on the **chrome web store** (only to Coveo employees under **For coveo.com**). For now, you must install the web-scraper-helper tool as an unpacked extension.
+The extension is publicly available on the [chrome web store](https://chrome.google.com/webstore/detail/web-scraper-helper-for-co/demelhhhnkocnphihjbhpafjnknknkdf). For now, you must install the web-scraper-helper tool as an unpacked extension.
 
 1. Download/clone this Git repo.
 1. Build React app (see next section)
@@ -22,7 +22,7 @@ The extension is currently not publicly available on the **chrome web store** (o
 
 The UI in the Developer tools is done using React. You need to build the React application before installing the Chrome Extension.
 
-1. in folder `chrome_extension/panel-app`
+1. in folder `../panel-app`
 1. do `npm install`
 1. then `npm run build`
 
