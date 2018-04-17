@@ -31,6 +31,9 @@ class App extends Component {
     }
     this._backgroundPageConnection = conn;
     this._firstRender = true;
+
+    let manifest = chrome.runtime.getManifest();
+    document.getElementById('version').innerText = 'v' + manifest.version;
   }
 
   componentDidMount() {

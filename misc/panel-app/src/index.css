@@ -272,3 +272,12 @@ textarea.invalid {
 #messages > div {
 	margin: 5px;
 }
+
+#version {
+	font-family: monospace;
+	color: #94A9BF;
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	padding: 3px 8px;
+}
