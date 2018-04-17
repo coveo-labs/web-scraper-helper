@@ -2,16 +2,6 @@
 // jshint -W110, -W003
 /*global chrome*/
 
-let SendMessageBack = (payload)=>{
-	setTimeout(()=>{
-		try {
-			chrome.runtime.sendMessage(payload);
-		}
-		catch(e) {}
-	}, 1);
-};
-
-
 class RulePath  {
 	constructor(spec, title, subItemName, container) {
 		this.path = spec.path;
@@ -297,7 +287,7 @@ let processSubItems = (specs, subItemKey)=>{
  *
  * @param {object} jsonData - The json to parse
  */
-let parseJsonConfig = (sJson) => {
+let parseJsonConfig = (sJson, port) => {
 	clearPreviousExcludedElements();
 
 	let wsSpecs = JSON.parse(sJson);
@@ -312,11 +302,11 @@ let parseJsonConfig = (sJson) => {
 		});
 	}
 
-	SendMessageBack({return: JSON.stringify(rules)});
+	port.postMessage({return: JSON.stringify(rules)});
 };
 
 
-let validateJson = (sJson) => {
+let validateJson = (sJson, port) => {
 	clearPreviousExcludedElements();
 
 	let validationResults = {rules: {}, errors: []},
@@ -370,32 +360,31 @@ let validateJson = (sJson) => {
 		});
 	});
 
-	SendMessageBack({validate: validationResults});
+	port.postMessage({validate: validationResults});
 };
 
 window.onload = ()=>{
-	SendMessageBack({reload:1});
-
 	try {
-		chrome.runtime.connect();
+		let conn = chrome.runtime.connect({name: "wshpanel"});
+		chrome.runtime.onConnect.addListener((port) => {
+			console.assert(port.name === 'wshpanel');
 
-		/**
-		 * Adds a listener to the received messages
-		 *
-		 */
-		chrome.runtime.onMessage.addListener( (request/*, sender, sendResponse*/) => {
-			if (request.json) {
-				parseJsonConfig(request.json);
-			}
+			port.onMessage.addListener( (request, port) => {
+				if (request.json) {
+					parseJsonConfig(request.json, port);
+				}
 
-			if (request.log) {
-				console.log('request.log:\n', request.log);
-			}
+				if (request.log) {
+					console.log('request.log:\n', request.log);
+				}
 
-			if (request.validate) {
-				validateJson(request.validate);
-			}
+				if (request.validate) {
+					validateJson(request.validate, port);
+				}
+			});
 		});
+
+		conn.postMessage({reload:1});
 	}
 	catch(e) {
 		// console.error(e);

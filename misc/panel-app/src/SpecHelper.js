@@ -81,7 +81,7 @@ class SpecHelper {
   }
 
   static remove(specs, id) {
-    specs.map(spec => {
+    specs = specs.map(spec => {
       if (spec.exclude) {
         spec.exclude = spec.exclude.filter(e=>(e.id!==id));
       }

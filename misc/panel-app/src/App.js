@@ -16,16 +16,14 @@ class App extends Component {
 
     let conn = null;
     try {
-      conn = chrome.runtime.connect({
-        name: 'panel'
+      this.conn = chrome.tabs.connect(this.TAB_ID, {
+        name: 'wshpanel'
       });
 
-      conn.onMessage.addListener( this.onMessage.bind(this) );
-
-      // Send a message to background page so that the background page can associate panel to the current host page
-      conn.postMessage({
-        name: 'panel-init',
-        tabId: this.TAB_ID
+      this.conn.onMessage.addListener( this.onMessage.bind(this) );
+      chrome.runtime.onConnect.addListener(port => {
+        this.conn = port;
+        port.onMessage.addListener(this.onMessage.bind(this));
       });
     }
     catch(e) {
@@ -64,13 +62,17 @@ class App extends Component {
     if (sSpec !== this._lastSpec) {
       this._lastSpec = sSpec;
       try {
-        chrome.runtime.sendMessage({ tabId: this.TAB_ID, validate: sSpec });
-        chrome.runtime.sendMessage({ tabId: this.TAB_ID, json: sSpec });
+        this.postMessage({ tabId: this.TAB_ID, validate: sSpec });
+        this.postMessage({ tabId: this.TAB_ID, json: sSpec });
       }
       catch(e) {
         // console.log(e);
       }
     }
+  }
+
+  postMessage(msg) {
+    this.conn.postMessage(msg);
   }
 
   /**
@@ -84,7 +86,8 @@ class App extends Component {
       this.refs.library.loadSpec({
         target:{
           value:configName
-      }});
+        }
+      });
     }
   }
 

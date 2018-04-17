@@ -51,7 +51,6 @@ class Rules extends React.Component {
       }
     }
     this._listenerId = null;
-    // this._rules = {};
   }
 
   componentDidMount() {
@@ -115,6 +114,7 @@ class Rules extends React.Component {
     SpecHelper.remove(this.state.specs, id);
 
     this.setState(this.state);
+    Storage.set(JSON.stringify(this.state.specs), this._listenerId);
   }
 
   onRemoveSubItems(id) {
@@ -152,7 +152,7 @@ class Rules extends React.Component {
       e=>e.classList.remove('bg-danger', 'bg-success', 'bg-warning')
     );
 
-    Object.keys(validateSpec.rules).forEach(k=>{
+    Object.keys((validateSpec && validateSpec.rules) || {}).forEach(k=>{
       let state = validateSpec.rules[k];
       document.querySelectorAll(`.rule[data-id="${k}"] .wsh-rule-type`).forEach(e=>{
         e.classList.add( state );
