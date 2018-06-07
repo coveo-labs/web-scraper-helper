@@ -27,7 +27,7 @@ class RulePath {
 	}
 
 	exludeFromPage () {
-		let elements = this.getElements();
+		let elements = this.getElements(true);
 		(elements || []).forEach(e => {
 			if (e && e.classList) {
 				e.classList.add('web-scraper-helper-exclude');
