@@ -2,7 +2,7 @@
 // jshint -W110, -W003
 /*global chrome*/
 
-class RulePath  {
+class RulePath {
 	constructor(spec, title, subItemName, container) {
 		this.path = spec.path;
 		this.isBoolean = spec.isBoolean ? true : false;
@@ -22,23 +22,25 @@ class RulePath  {
 		return this;
 	}
 
-	getElements() {
+	getElements () {
 		return null;
 	}
 
-	exludeFromPage() {
+	exludeFromPage () {
 		let elements = this.getElements();
-		(elements || []).forEach(e=> {
-			e.classList.add('web-scraper-helper-exclude');
+		(elements || []).forEach(e => {
+			if (e && e.classList) {
+				e.classList.add('web-scraper-helper-exclude');
+			}
 		});
 	}
 
-	formatError(err) {
+	formatError (err) {
 		return `[${this.title}] Failed to parse ${this.type} "${this.path}"\n${err}`;
 	}
 
-	toJson() {
-		let o = {type:this.type, path: this.path};
+	toJson () {
+		let o = { type: this.type, path: this.path };
 		if (this.subItemName) {
 			o.subItemName = this.subItemName;
 		}
@@ -52,27 +54,27 @@ class RulePath  {
 		if (elements) {
 			o.value = elements;
 		}
-		if (this._error ) {
+		if (this._error) {
 			o.error = this.error;
 		}
 		return o;
 	}
 
-	toString() {
+	toString () {
 		return JSON.stringify(this.toJson());
 	}
 
-	isError() {
+	isError () {
 		return this._error ? true : false;
 	}
 
 	/**
 	 * isValid means some element in the page matches this rule.
 	 */
-	isValid() {
+	isValid () {
 		if (this._isValid === undefined) {
 			this._elements = this.getElements();
-			this._isValid = (this._elements && this._elements.length? true: false);
+			this._isValid = (this._elements && this._elements.length ? true : false);
 		}
 		return this._isValid;
 	}
@@ -85,7 +87,7 @@ class CssRule extends RulePath {
 		this.isValid();
 	}
 
-	getElements() {
+	getElements () {
 		try {
 			let reTextSub = /::text\b/;
 			let reAttrSub = /::attr\b/;
@@ -94,14 +96,14 @@ class CssRule extends RulePath {
 			let shouldReturnText = false;
 
 			let cssSelector = this.path || '';
-			if( reTextSub.test(cssSelector) ){
+			if (reTextSub.test(cssSelector)) {
 				shouldReturnText = true;
 				cssSelector = cssSelector.split(reTextSub)[0];
 			}
 
-			if( reAttrSub.test(cssSelector) ){
+			if (reAttrSub.test(cssSelector)) {
 				shouldReturnAttr = true;
-				attrToGet = cssSelector.split(reAttrSub)[1].slice(1,-1);
+				attrToGet = cssSelector.split(reAttrSub)[1].slice(1, -1);
 				cssSelector = cssSelector.split(reAttrSub)[0];
 			}
 
@@ -110,21 +112,21 @@ class CssRule extends RulePath {
 				elements = [];
 
 			let n = container.querySelectorAll(cssSelector);
-			n.forEach(e=>{
+			n.forEach(e => {
 				nodes.push(e);
 			});
 
 			if (this.isBoolean) {
-				return [ (nodes && nodes.length ? true : false) ];
+				return [(nodes && nodes.length ? true : false)];
 			}
 
-			(nodes||[]).forEach(e => {
+			(nodes || []).forEach(e => {
 				let value = e;
 				if (shouldReturnText) {
 					value = e.textContent;
 				}
 
-				if(shouldReturnAttr){
+				if (shouldReturnAttr) {
 					value = e.getAttribute(attrToGet);
 				}
 
@@ -151,20 +153,20 @@ class XPathRule extends RulePath {
 	 *
 	 * @param {*} asIs if true, return the element as is, not as text.
 	 */
-	getElements(asIs) {
+	getElements (asIs) {
 		try {
 			let nodes = document.evaluate(this.path, this.container || document);
 			let e, elements = [];
 
-			switch(nodes.resultType) {
+			switch (nodes.resultType) {
 				case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
 				case XPathResult.ORDERED_NODE_ITERATOR_TYPE:
-					while ( (e = nodes.iterateNext()) ) {
+					while ((e = nodes.iterateNext())) {
 						let value = e.nodeValue;
 						if (asIs) {
 							value = e;
 						}
-						else if(value === null) {
+						else if (value === null) {
 							value = e.outerHTML;
 						}
 						elements.push(value);
@@ -182,7 +184,7 @@ class XPathRule extends RulePath {
 			}
 
 			if (this.isBoolean) {
-				return [ (elements && elements.length ? true : false) ];
+				return [(elements && elements.length ? true : false)];
 			}
 
 			return elements;
@@ -213,13 +215,15 @@ let createRule = (obj, title, subItemKey, container) => {
 	return new ErrorRule(obj, title);
 };
 
-let clearPreviousExcludedElements = ()=> {
-	document.querySelectorAll('.web-scraper-helper-exclude').forEach(e=>{
-		e.classList.remove('web-scraper-helper-exclude');
+let clearPreviousExcludedElements = () => {
+	document.querySelectorAll('.web-scraper-helper-exclude').forEach(e => {
+		if (e && e.classList) {
+			e.classList.remove('web-scraper-helper-exclude');
+		}
 	});
 };
 
-let processGlobal = (globalSpec)=>{
+let processGlobal = (globalSpec) => {
 	//Get the metadata field and exclude field from the json
 	let metadata = globalSpec.metadata;
 	let exclude = globalSpec.exclude;
@@ -230,11 +234,11 @@ let processGlobal = (globalSpec)=>{
 	let rules = [];
 	for (let key in metadata) {
 		let rule = createRule(metadata[key], key);
-		rules.push( rule.toJson() );
+		rules.push(rule.toJson());
 	}
 
 	//Adds the elements to exclude in the elementsToHide
-	(exclude||[]).forEach(r=> {
+	(exclude || []).forEach(r => {
 		let rule = createRule(r);
 		rule.exludeFromPage();
 	});
@@ -242,15 +246,15 @@ let processGlobal = (globalSpec)=>{
 	return rules;
 };
 
-let findType = (specs, subItemKey)=>{
-	let spec = specs.filter(s=>{
+let findType = (specs, subItemKey) => {
+	let spec = specs.filter(s => {
 		return (s && s.for && s.for.types && s.for.types.includes(subItemKey)) ? true : false;
 	});
 
 	return spec.length ? spec[0] : null;
 };
 
-let processSubItems = (specs, subItemKey)=>{
+let processSubItems = (specs, subItemKey) => {
 	let subItems = [];
 
 	let spec = findType(specs, subItemKey);
@@ -262,14 +266,14 @@ let processSubItems = (specs, subItemKey)=>{
 	let metadata = spec.metadata;
 	let containers = createRule(path).getElements(true);
 
-	(containers || []).forEach(c=> {
+	(containers || []).forEach(c => {
 		let subItemsResults = [];
 		for (let key in metadata) {
 			let rule = createRule(metadata[key], key, subItemKey, c);
-			subItemsResults.push( rule.toJson() );
+			subItemsResults.push(rule.toJson());
 		}
 		if (subItemsResults.length) {
-			let {subItemName} = subItemsResults[0];
+			let { subItemName } = subItemsResults[0];
 			subItems.push({
 				subItemName,
 				values: subItemsResults
@@ -296,27 +300,27 @@ let parseJsonConfig = (sJson, port) => {
 	let rules = processGlobal(globalSpec);
 
 	if (globalSpec.subItems) {
-		Object.keys(globalSpec.subItems).forEach(subItemKey=>{
+		Object.keys(globalSpec.subItems).forEach(subItemKey => {
 			let subItems = processSubItems(wsSpecs, subItemKey);
 			rules = rules.concat(subItems);
 		});
 	}
 
-	port.postMessage({return: JSON.stringify(rules)});
+	port.postMessage({ return: JSON.stringify(rules) });
 };
 
 
 let validateJson = (sJson, port) => {
 	clearPreviousExcludedElements();
 
-	let validationResults = {rules: {}, errors: []},
+	let validationResults = { rules: {}, errors: [] },
 		wsSpecs = JSON.parse(sJson),
 		globalRules = [],
 		subItemsRules = [];
 
-	(wsSpecs || []).forEach(spec=>{
+	(wsSpecs || []).forEach(spec => {
 		// add exclude rules
-		globalRules = globalRules.concat(spec.exclude||[]);
+		globalRules = globalRules.concat(spec.exclude || []);
 		for (let m in spec.metadata) {
 			globalRules.push(spec.metadata[m]);
 		}
@@ -334,7 +338,7 @@ let validateJson = (sJson, port) => {
 		}
 	});
 
-	let validate = (element, container)=>{
+	let validate = (element, container) => {
 		let rule = createRule(element, null, null, container);
 		if (rule.isError()) {
 			validationResults.rules[rule.id] = 'bg-danger';
@@ -346,30 +350,30 @@ let validateJson = (sJson, port) => {
 		}
 	};
 
-	(globalRules || []).forEach( rule => validate(rule) );
+	(globalRules || []).forEach(rule => validate(rule));
 
 	(subItemsRules || []).forEach(element => {
 		// find eachcontainers.forEach(c=> {
 		let containers = createRule(element.container).getElements(true);
-		(containers || []).forEach(c=> {
+		(containers || []).forEach(c => {
 			// for each container found, validate the metadata
 			let meta = element.spec && element.spec.metadata;
 			if (meta) {
-				Object.keys(meta).forEach(key=> validate(meta[key], c) );
+				Object.keys(meta).forEach(key => validate(meta[key], c));
 			}
 		});
 	});
 
-	port.postMessage({validate: validationResults});
+	port.postMessage({ validate: validationResults });
 };
 
-window.onload = ()=>{
+window.onload = () => {
 	try {
-		let conn = chrome.runtime.connect({name: "wshpanel"});
+		let conn = chrome.runtime.connect({ name: "wshpanel" });
 		chrome.runtime.onConnect.addListener((port) => {
 			console.assert(port.name === 'wshpanel');
 
-			port.onMessage.addListener( (request, port) => {
+			port.onMessage.addListener((request, port) => {
 				if (request.json) {
 					parseJsonConfig(request.json, port);
 				}
@@ -384,9 +388,9 @@ window.onload = ()=>{
 			});
 		});
 
-		conn.postMessage({reload:1});
+		conn.postMessage({ reload: 1 });
 	}
-	catch(e) {
+	catch (e) {
 		// console.error(e);
 	}
 
