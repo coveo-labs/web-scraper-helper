@@ -19,22 +19,20 @@
 
 	"devtools_page": "/html/devtools.html",
 
-	"content_scripts": [
-		{
-			"run_at": "document_end",
-			"matches": [
-				"http://*/*",
-				"https://*/*"
-			],
-			"js": [
-				"/js/content-script.js"
-			],
-			"css": [
-				"/css/inject.css"
-			],
-			"all_frames": false
-		}
-	],
+	"content_scripts": [{
+		"run_at": "document_end",
+		"matches": [
+			"http://*/*",
+			"https://*/*"
+		],
+		"js": [
+			"/js/content-script.js"
+		],
+		"css": [
+			"/css/inject.css"
+		],
+		"all_frames": false
+	}],
 
 	"permissions": [
 		"tabs",

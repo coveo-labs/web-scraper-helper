@@ -286,7 +286,7 @@ let processSubItems = (specs, subItemKey) => {
 			let { subItemName } = subItemsResults[0];
 			subItems.push({
 				subItemName,
-				values: subItemsResults
+				values: subItemsResults,
 			});
 		}
 	});
@@ -341,7 +341,7 @@ let validateJson = (sJson, port) => {
 			if (s) {
 				subItemsRules.push({
 					spec: s,
-					container: subItem
+					container: subItem,
 				});
 			}
 		}
