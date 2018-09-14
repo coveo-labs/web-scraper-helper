@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"name": "Web Scraper Helper for Coveo Web Sources",
 	"short_name": "Web Scraper Helper",
-	"version": "1.2.1",
+	"version": "1.2.2",
 
 	"description": "Helper to quickly create and test web scraping configurations for Coveo Cloud V2 sources.",
 	"icons": {
