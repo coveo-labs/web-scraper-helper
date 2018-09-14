@@ -8,8 +8,7 @@ class RulePath {
 		this.isBoolean = spec.isBoolean ? true : false;
 		if (title !== undefined) {
 			this.title = title;
-		}
-		else if (spec.name) {
+		} else if (spec.name) {
 			this.title = spec.name;
 		}
 		this.id = spec.id;
@@ -22,11 +21,11 @@ class RulePath {
 		return this;
 	}
 
-	getElements () {
+	getElements() {
 		return null;
 	}
 
-	exludeFromPage () {
+	exludeFromPage() {
 		let elements = this.getElements(true);
 		(elements || []).forEach(e => {
 			if (e && e.classList) {
@@ -35,11 +34,11 @@ class RulePath {
 		});
 	}
 
-	formatError (err) {
+	formatError(err) {
 		return `[${this.title}] Failed to parse ${this.type} "${this.path}"\n${err}`;
 	}
 
-	toJson () {
+	toJson() {
 		let o = { type: this.type, path: this.path };
 		if (this.subItemName) {
 			o.subItemName = this.subItemName;
@@ -60,21 +59,21 @@ class RulePath {
 		return o;
 	}
 
-	toString () {
+	toString() {
 		return JSON.stringify(this.toJson());
 	}
 
-	isError () {
+	isError() {
 		return this._error ? true : false;
 	}
 
 	/**
 	 * isValid means some element in the page matches this rule.
 	 */
-	isValid () {
+	isValid() {
 		if (this._isValid === undefined) {
 			this._elements = this.getElements();
-			this._isValid = (this._elements && this._elements.length ? true : false);
+			this._isValid = this._elements && this._elements.length ? true : false;
 		}
 		return this._isValid;
 	}
@@ -87,12 +86,22 @@ class CssRule extends RulePath {
 		this.isValid();
 	}
 
-	getElements () {
+	getTextNodes(container) {
+		let aNodes = [];
+		(container.childNodes || []).forEach(c => {
+			if (c.nodeType === 3) {
+				aNodes.push(c);
+			}
+		});
+		return aNodes;
+	}
+
+	getElements() {
 		try {
 			let reTextSub = /::text\b/;
 			let reAttrSub = /::attr\b/;
 			let shouldReturnAttr = false;
-			let attrToGet = "";
+			let attrToGet = '';
 			let shouldReturnText = false;
 
 			let cssSelector = this.path || '';
@@ -117,13 +126,16 @@ class CssRule extends RulePath {
 			});
 
 			if (this.isBoolean) {
-				return [(nodes && nodes.length ? true : false)];
+				return [nodes && nodes.length ? true : false];
 			}
 
 			(nodes || []).forEach(e => {
 				let value = e;
 				if (shouldReturnText) {
-					value = e.textContent;
+					value = this.getTextNodes(e)
+						.map(n => (n.textContent || '').trim())
+						.filter(t => t)
+						.join('\n');
 				}
 
 				if (shouldReturnAttr) {
@@ -133,8 +145,7 @@ class CssRule extends RulePath {
 				elements.push(value);
 			});
 			return elements;
-		}
-		catch (err) {
+		} catch (err) {
 			// console.error(err);
 			this._error = this.formatError(err);
 			return null;
@@ -153,10 +164,11 @@ class XPathRule extends RulePath {
 	 *
 	 * @param {*} asIs if true, return the element as is, not as text.
 	 */
-	getElements (asIs) {
+	getElements(asIs) {
 		try {
 			let nodes = document.evaluate(this.path, this.container || document);
-			let e, elements = [];
+			let e,
+				elements = [];
 
 			switch (nodes.resultType) {
 				case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
@@ -165,8 +177,7 @@ class XPathRule extends RulePath {
 						let value = e.nodeValue;
 						if (asIs) {
 							value = e;
-						}
-						else if (value === null) {
+						} else if (value === null) {
 							value = e.outerHTML;
 						}
 						elements.push(value);
@@ -184,12 +195,11 @@ class XPathRule extends RulePath {
 			}
 
 			if (this.isBoolean) {
-				return [(elements && elements.length ? true : false)];
+				return [elements && elements.length ? true : false];
 			}
 
 			return elements;
-		}
-		catch (err) {
+		} catch (err) {
 			// console.error(err);
 			this._error = this.formatError(err);
 			return null;
@@ -223,7 +233,7 @@ let clearPreviousExcludedElements = () => {
 	});
 };
 
-let processGlobal = (globalSpec) => {
+let processGlobal = globalSpec => {
 	//Get the metadata field and exclude field from the json
 	let metadata = globalSpec.metadata;
 	let exclude = globalSpec.exclude;
@@ -248,7 +258,7 @@ let processGlobal = (globalSpec) => {
 
 let findType = (specs, subItemKey) => {
 	let spec = specs.filter(s => {
-		return (s && s.for && s.for.types && s.for.types.includes(subItemKey)) ? true : false;
+		return s && s.for && s.for.types && s.for.types.includes(subItemKey) ? true : false;
 	});
 
 	return spec.length ? spec[0] : null;
@@ -309,7 +319,6 @@ let parseJsonConfig = (sJson, port) => {
 	port.postMessage({ return: JSON.stringify(rules) });
 };
 
-
 let validateJson = (sJson, port) => {
 	clearPreviousExcludedElements();
 
@@ -346,7 +355,7 @@ let validateJson = (sJson, port) => {
 		}
 		// if rule was found and successful previously, do not update its state to warning.
 		else if (validationResults.rules[rule.id] !== 'bg-success') {
-			validationResults.rules[rule.id] = (rule.isValid() ? 'bg-success' : 'bg-warning');
+			validationResults.rules[rule.id] = rule.isValid() ? 'bg-success' : 'bg-warning';
 		}
 	};
 
@@ -369,8 +378,8 @@ let validateJson = (sJson, port) => {
 
 window.onload = () => {
 	try {
-		let conn = chrome.runtime.connect({ name: "wshpanel" });
-		chrome.runtime.onConnect.addListener((port) => {
+		let conn = chrome.runtime.connect({ name: 'wshpanel' });
+		chrome.runtime.onConnect.addListener(port => {
 			console.assert(port.name === 'wshpanel');
 
 			port.onMessage.addListener((request, port) => {
@@ -389,9 +398,7 @@ window.onload = () => {
 		});
 
 		conn.postMessage({ reload: 1 });
-	}
-	catch (e) {
+	} catch (e) {
 		// console.error(e);
 	}
-
 };
