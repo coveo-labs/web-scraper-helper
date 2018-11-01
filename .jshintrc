@@ -1,6 +1,4 @@
 {
-	"excludePath": "misc/panel-app",
-
 	"bitwise": true,
 	"boss": false,
 	"browser": true,

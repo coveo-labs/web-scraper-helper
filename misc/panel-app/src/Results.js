@@ -23,6 +23,7 @@ class Results extends Component {
       results = (this.state && JSON.parse(this.state.return || null)) || [];
     }
     catch(e) {
+      // results will stay an empty []
     }
 
     let globals = results.filter(r=>!r.subItemName);
@@ -38,6 +39,7 @@ class Results extends Component {
       ));
     }
     catch (e) {
+      // errors will stay an empty []
     }
 
     return (

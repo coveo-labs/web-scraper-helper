@@ -104,7 +104,9 @@ class Rules extends React.Component {
       JSON.parse(txtSpec);  // for validation, don't want to send an invalid spec
       Storage.set(txtSpec);
     }
-    catch(e) {}
+    catch(e) {
+      // empty
+    }
   }
 
   onRemoveItem(e) {

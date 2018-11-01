@@ -12,7 +12,9 @@ let getGuid = (spec, guid)=>{
     let s = JSON.stringify(spec);
     return s.match( new RegExp(guid+'-\\d+') )[0];
   }
-  catch(e) {}
+  catch(e) {
+    // empty
+  }
   return null;
 };
 

@@ -27,7 +27,9 @@ class Storage {
     try {
       return chrome.storage.local.get(attr, callback);
     }
-    catch(e) {}
+    catch(e) {
+      // empty
+    }
   }
 
   getDefault() {
@@ -138,7 +140,9 @@ class Storage {
         [this._sCurrentName]: this._sCurrentSpec
       });
     }
-    catch(e) {}
+    catch(e) {
+      // empty
+    }
   }
 
   set(json, id, reset) {
