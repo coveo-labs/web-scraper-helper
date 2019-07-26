@@ -16,14 +16,16 @@ class App extends Component {
 
     let conn = null;
     try {
-      this.conn = chrome.tabs.connect(this.TAB_ID, {
+      this.conn = chrome.runtime.connect({
         name: 'wshpanel'
       });
 
       this.conn.onMessage.addListener( this.onMessage.bind(this) );
-      chrome.runtime.onConnect.addListener(port => {
-        this.conn = port;
-        port.onMessage.addListener(this.onMessage.bind(this));
+
+      // Create a connection to the background page
+      this.conn.postMessage({
+        name: 'init',
+        tabId: this.TAB_ID
       });
     }
     catch(e) {
@@ -51,8 +53,13 @@ class App extends Component {
   }
 
   onMessage(msg) {
-    if (msg.reload) {
-      document.location.replace('?config=' + Storage._sCurrentName);
+    if (msg && msg.newPage) {
+      this.postSpecToTab(this._lastSpec);
+    }
+    if (msg && msg.reload) {
+      if ( Storage._sCurrentName) {
+        document.location.replace('?config=' + Storage._sCurrentName);
+      }
     }
     if (this.results && this.results.setState && (msg.return || msg.errors)) {
       this.results.setState(msg);
@@ -69,18 +76,26 @@ class App extends Component {
     let sSpec = JSON.stringify(spec);
     if (sSpec !== this._lastSpec) {
       this._lastSpec = sSpec;
-      try {
-        this.postMessage({ tabId: this.TAB_ID, validate: sSpec });
-        this.postMessage({ tabId: this.TAB_ID, json: sSpec });
-      }
-      catch(e) {
-        // console.log(e);
-      }
+      this.postSpecToTab(sSpec);
     }
   }
 
+  postSpecToTab(sSpec) {
+    try {
+      this.postMessage({ tabId: this.TAB_ID, validate: sSpec });
+      this.postMessage({ tabId: this.TAB_ID, json: sSpec });
+    }
+    catch(e) {
+      // console.log(e);
+    }
+}
+
   postMessage(msg) {
-    this.conn.postMessage(msg);
+    chrome.tabs.sendMessage(this.TAB_ID, msg, null, (response)=> {
+      console.log('App-postMessage: ', response);
+      this.onMessage(response);
+    });
+    // this.conn.postMessage(msg);
   }
 
   /**

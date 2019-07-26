@@ -1,3 +1,4 @@
-misc/chrome_extension/panel-app/build
+misc/chrome_extension/panel-app
+misc/chrome_extension/static
 *zip
 tests
