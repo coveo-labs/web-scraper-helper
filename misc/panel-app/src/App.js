@@ -20,7 +20,7 @@ class App extends Component {
         name: 'wshpanel'
       });
 
-      this.conn.onMessage.addListener( this.onMessage.bind(this) );
+      this.conn.onMessage.addListener(this.onMessage.bind(this));
 
       // Create a connection to the background page
       this.conn.postMessage({
@@ -28,7 +28,7 @@ class App extends Component {
         tabId: this.TAB_ID
       });
     }
-    catch(e) {
+    catch (e) {
       // console.log('NO chrome.runtime.connect()', e);
     }
     this._backgroundPageConnection = conn;
@@ -38,7 +38,7 @@ class App extends Component {
       let manifest = chrome.runtime.getManifest();
       document.getElementById('version').innerText = 'v' + manifest.version;
     }
-    catch(e) {
+    catch (e) {
       // 'chrome' is undefined in unit tests.
     }
   }
@@ -57,7 +57,7 @@ class App extends Component {
       this.postSpecToTab(this._lastSpec);
     }
     if (msg && msg.reload) {
-      if ( Storage._sCurrentName) {
+      if (Storage._sCurrentName) {
         document.location.replace('?config=' + Storage._sCurrentName);
       }
     }
@@ -85,17 +85,16 @@ class App extends Component {
       this.postMessage({ tabId: this.TAB_ID, validate: sSpec });
       this.postMessage({ tabId: this.TAB_ID, json: sSpec });
     }
-    catch(e) {
+    catch (e) {
       // console.log(e);
     }
-}
+  }
 
   postMessage(msg) {
-    chrome.tabs.sendMessage(this.TAB_ID, msg, null, (response)=> {
-      console.log('App-postMessage: ', response);
+    chrome.tabs.sendMessage(this.TAB_ID, msg, null, (response) => {
+      // console.log('App-postMessage: ', response);
       this.onMessage(response);
     });
-    // this.conn.postMessage(msg);
   }
 
   /**
@@ -107,8 +106,8 @@ class App extends Component {
 
     if (configName) {
       this.refs.library.loadSpec({
-        target:{
-          value:configName
+        target: {
+          value: configName
         }
       });
     }
