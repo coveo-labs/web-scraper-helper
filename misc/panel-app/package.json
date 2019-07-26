@@ -1,21 +1,21 @@
 {
   "name": "panel-app",
-  "version": "0.2.0",
+  "version": "1.2.2",
   "private": true,
   "dependencies": {
-    "react": "^16.8.1",
-    "react-dom": "^16.8.1",
-    "react-scripts": "^2.1.3"
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-scripts": "^3.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build && rm -rf ../chrome_extension/panel-app/build/ && cp -R ./build ../chrome_extension/panel-app",
+    "build": "react-scripts build && rm -rf ../chrome_extension/panel-app/build/ && cp -R ./build ../chrome_extension/panel-app && cp -R ./build/static ../chrome_extension/",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
   "devDependencies": {
-    "enzyme": "^3.8.0",
-    "enzyme-adapter-react-16": "^1.9.1"
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.14.0"
   },
   "browserslist": [
     "last 2 Chrome versions"
