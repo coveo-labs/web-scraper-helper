@@ -99,7 +99,7 @@ class CssRule extends RulePath {
     return aNodes;
   }
 
-  getElements() {
+  getElements(asIs = false) {
     try {
       let reTextSub = /::text\b/;
       let reAttrSub = /::attr\b/;
@@ -145,6 +145,10 @@ class CssRule extends RulePath {
           value = e.getAttribute(attrToGet);
         }
 
+        if (!asIs && (typeof value === "object") && value.outerHTML) {
+          value = value.outerHTML;
+        }
+
         elements.push(value);
       });
       return elements;
@@ -169,7 +173,11 @@ class XPathRule extends RulePath {
    */
   getElements(asIs) {
     try {
-      let nodes = document.evaluate(this.path, this.container || document);
+      let path = this.path;
+      if (this.container && path && path.startsWith('//')) {
+        path = '.' + this.path;
+      }
+      let nodes = document.evaluate(path, this.container || document);
       let e,
         elements = [];
 
@@ -389,7 +397,7 @@ let validateJson = (sJson, callback) => {
 };
 
 window.onload = () => {
-  chrome.runtime.onMessage.addListener((message,sender,sendResponse) => {
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.json) {
       parseJsonConfig(message.json, sendResponse);
     }
@@ -405,7 +413,7 @@ window.onload = () => {
 
   chrome.runtime.sendMessage({
     newPage: 1
-  }, (res)=>{
+  }, (res) => {
     console.log('RES:', res);
   });
 };

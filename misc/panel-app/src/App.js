@@ -61,14 +61,17 @@ class App extends Component {
         document.location.replace('?config=' + Storage._sCurrentName);
       }
     }
-    if (this.results && this.results.setState && (msg.return || msg.errors)) {
-      this.results.setState(msg);
-    }
-    if (this.results && this.results.onValidate && msg.validate) {
-      this.results.onValidate(msg.validate);
-    }
-    if (this.rules && this.rules.onValidate && msg.validate) {
-      this.rules.onValidate(msg.validate);
+
+    if (msg) {
+      if (this.results && this.results.setState && (msg.return || msg.errors)) {
+        this.results.setState(msg);
+      }
+      if (this.results && this.results.onValidate && msg.validate) {
+        this.results.onValidate(msg.validate);
+      }
+      if (this.rules && this.rules.onValidate && msg.validate) {
+        this.rules.onValidate(msg.validate);
+      }
     }
   }
 
@@ -92,7 +95,6 @@ class App extends Component {
 
   postMessage(msg) {
     chrome.tabs.sendMessage(this.TAB_ID, msg, null, (response) => {
-      // console.log('App-postMessage: ', response);
       this.onMessage(response);
     });
   }
