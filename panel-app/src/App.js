@@ -16,18 +16,21 @@ class App extends Component {
 
     let conn = null;
     try {
-      this.conn = chrome.tabs.connect(this.TAB_ID, {
+      this.conn = chrome.runtime.connect({
         name: 'wshpanel'
       });
 
-      this.conn.onMessage.addListener( this.onMessage.bind(this) );
-      chrome.runtime.onConnect.addListener(port => {
-        this.conn = port;
-        port.onMessage.addListener(this.onMessage.bind(this));
+      this.conn.onMessage.addListener(this.onMessage.bind(this));
+
+      // Create a connection to the background page
+      this.conn.postMessage({
+        name: 'init',
+        tabId: this.TAB_ID
       });
     }
-    catch(e) {
+    catch (e) {
       // console.log('NO chrome.runtime.connect()', e);
+      // console.error(e);
     }
     this._backgroundPageConnection = conn;
     this._firstRender = true;
@@ -36,7 +39,7 @@ class App extends Component {
       let manifest = chrome.runtime.getManifest();
       document.getElementById('version').innerText = 'v' + manifest.version;
     }
-    catch(e) {
+    catch (e) {
       // 'chrome' is undefined in unit tests.
     }
   }
@@ -51,17 +54,25 @@ class App extends Component {
   }
 
   onMessage(msg) {
-    if (msg.reload) {
-      document.location.replace('?config=' + Storage._sCurrentName);
+    if (msg && msg.newPage) {
+      this.postSpecToTab(this._lastSpec);
     }
-    if (this.results && this.results.setState && (msg.return || msg.errors)) {
-      this.results.setState(msg);
+    if (msg && msg.reload) {
+      if (Storage._sCurrentName) {
+        document.location.replace('?config=' + Storage._sCurrentName);
+      }
     }
-    if (this.results && this.results.onValidate && msg.validate) {
-      this.results.onValidate(msg.validate);
-    }
-    if (this.rules && this.rules.onValidate && msg.validate) {
-      this.rules.onValidate(msg.validate);
+
+    if (msg) {
+      if (this.results && this.results.setState && (msg.return || msg.errors)) {
+        this.results.setState(msg);
+      }
+      if (this.results && this.results.onValidate && msg.validate) {
+        this.results.onValidate(msg.validate);
+      }
+      if (this.rules && this.rules.onValidate && msg.validate) {
+        this.rules.onValidate(msg.validate);
+      }
     }
   }
 
@@ -69,18 +80,24 @@ class App extends Component {
     let sSpec = JSON.stringify(spec);
     if (sSpec !== this._lastSpec) {
       this._lastSpec = sSpec;
-      try {
-        this.postMessage({ tabId: this.TAB_ID, validate: sSpec });
-        this.postMessage({ tabId: this.TAB_ID, json: sSpec });
-      }
-      catch(e) {
-        // console.log(e);
-      }
+      this.postSpecToTab(sSpec);
+    }
+  }
+
+  postSpecToTab(sSpec) {
+    try {
+      this.postMessage({ tabId: this.TAB_ID, validate: sSpec });
+      this.postMessage({ tabId: this.TAB_ID, json: sSpec });
+    }
+    catch (e) {
+      // console.log(e);
     }
   }
 
   postMessage(msg) {
-    this.conn.postMessage(msg);
+    chrome.tabs.sendMessage(this.TAB_ID, msg, null, (response) => {
+      this.onMessage(response);
+    });
   }
 
   /**
@@ -91,13 +108,17 @@ class App extends Component {
       configName = url.searchParams.get('config');
 
     if (configName) {
-      this.refs.library.loadSpec({
-        target:{
-          value:configName
+      this.libraryRef.loadSpec({
+        target: {
+          value: configName
         }
       });
     }
   }
+
+  setLibraryRef = element => {
+    this.libraryRef = element;
+  };
 
   render() {
     if (this._firstRender) {
@@ -106,10 +127,10 @@ class App extends Component {
     }
     return (
       <div className="App">
-        <Library ref="library"/>
+        <Library ref={this.setLibraryRef} />
         <div id="rules-and-results">
-          <Rules ref={(rules) => { this.rules = rules; }}/>
-          <Results ref={(res) => { this.results = res; }}/>
+          <Rules ref={(rules) => { this.rules = rules; }} />
+          <Results ref={(res) => { this.results = res; }} />
         </div>
       </div>
     );

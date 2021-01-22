@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 class Item extends Component {
 
@@ -44,7 +45,7 @@ class Item extends Component {
     }
     if (this.props.onRemove) {
       retval.push(
-        <span key={this.props.id + '-remove'} className="glyphicon glyphicon-remove" onClick={this.props.onRemove}></span>
+        <span key={this.props.id + '-remove'} className="bi bi-x-square-fill" onClick={this.props.onRemove}></span>
       );
     }
     return retval;
@@ -68,5 +69,15 @@ class Item extends Component {
     );
   }
 }
+
+Item.propTypes = {
+  id: PropTypes.string,
+  isBoolean: PropTypes.bool,
+  onChange: PropTypes.func,
+  onRemove: PropTypes.func,
+  path: PropTypes.string,
+  type: PropTypes.oneOf(['CSS', 'XPATH']),
+  validationState: PropTypes.string,
+};
 
 export default Item;

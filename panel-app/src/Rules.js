@@ -1,4 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 import Storage from './Storage';
 import Item from './Item';
 import MetaItem from './MetaItem';
@@ -22,7 +24,7 @@ class TextEditor extends React.Component {
       // valid JSON, replace current spec.
       ta.classList.remove('invalid');
     }
-    catch(e) {
+    catch (e) {
       ta.classList.add('invalid');
     }
     this.props.onChange(this.value);
@@ -30,15 +32,20 @@ class TextEditor extends React.Component {
 
   render() {
     return (
-      <textarea value={this.value} onChange={this.onChange}></textarea>
+      <textarea id="json-config" value={this.value} onChange={this.onChange}></textarea>
     );
   }
 }
 
+TextEditor.propTypes = {
+  onChange: PropTypes.func,
+  value: PropTypes.string,
+};
+
 class Rules extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {tab: 'editor'};
+    this.state = { tab: 'editor' };
 
     if (props.specs) {
       try {
@@ -46,7 +53,7 @@ class Rules extends React.Component {
         specs = SpecHelper.setIds(specs);
         this.state.specs = specs;
       }
-      catch(e) {
+      catch (e) {
         // console.log(e);
       }
     }
@@ -62,12 +69,12 @@ class Rules extends React.Component {
   }
 
   addExclude(subItemType) {
-    SpecHelper.addExclude(this.state.specs, subItemType==='editor'?null:subItemType);
+    SpecHelper.addExclude(this.state.specs, subItemType === 'editor' ? null : subItemType);
     this.setState(this.state);
   }
 
   addMeta(subItemType) {
-    SpecHelper.addMeta(this.state.specs, subItemType==='editor'?null:subItemType);
+    SpecHelper.addMeta(this.state.specs, subItemType === 'editor' ? null : subItemType);
     this.setState(this.state);
   }
 
@@ -75,16 +82,16 @@ class Rules extends React.Component {
     let name = prompt('Name?');
     if (name) {
       let specs = SpecHelper.addSubItem(this.state.specs, name);
-      this.setState({specs, tab: name});
+      this.setState({ specs, tab: name });
     }
   }
 
   prettifyJson() {
     try {
-      let txt = JSON.stringify( JSON.parse(this.state.txt), 2, 2 );
-      this.setState({txt, txtState: 'valid'});
+      let txt = JSON.stringify(JSON.parse(this.state.txt), 2, 2);
+      this.setState({ txt, txtState: 'valid' });
     }
-    catch(e) {
+    catch (e) {
       // console.log(e);
     }
   }
@@ -98,13 +105,13 @@ class Rules extends React.Component {
 
   onTextChange(txtSpec) {
     this._lastTextValue = txtSpec;
-    this.setState({txt: txtSpec});
+    this.setState({ txt: txtSpec });
 
     try {
       JSON.parse(txtSpec);  // for validation, don't want to send an invalid spec
       Storage.set(txtSpec);
     }
-    catch(e) {
+    catch (e) {
       // empty
     }
   }
@@ -121,19 +128,19 @@ class Rules extends React.Component {
 
   onRemoveSubItems(id) {
     SpecHelper.removeSubItem(this.state.specs, id);
-    this.setState({state: this.state, tab: 'editor'});
+    this.setState({ state: this.state, tab: 'editor' });
   }
 
   onSpecUpdate(specs, reset) {
     if (reset) {
-      this.setState({tab: 'editor'});
+      this.setState({ tab: 'editor' });
     }
     this.setSpecs(specs);
   }
 
   onTab(id, e) {
-    e.preventDefault();
-    let state = {tab: id};
+    if (e) e.preventDefault();
+    let state = { tab: id };
     if (id === 'text-editor') {
       this._lastTextValue = SpecHelper.toJson(this.state.specs, true);
       state.txt = this._lastTextValue;
@@ -151,13 +158,13 @@ class Rules extends React.Component {
     }
 
     document.querySelectorAll('.bg-danger, .bg-success, .bg-warning').forEach(
-      e=>e.classList.remove('bg-danger', 'bg-success', 'bg-warning')
+      e => e.classList.remove('bg-danger', 'bg-success', 'bg-warning')
     );
 
-    Object.keys((validateSpec && validateSpec.rules) || {}).forEach(k=>{
+    Object.keys((validateSpec && validateSpec.rules) || {}).forEach(k => {
       let state = validateSpec.rules[k];
-      document.querySelectorAll(`.rule[data-id="${k}"] .wsh-rule-type`).forEach(e=>{
-        e.classList.add( state );
+      document.querySelectorAll(`.rule[data-id="${k}"] .wsh-rule-type`).forEach(e => {
+        e.classList.add(state);
       });
     });
   }
@@ -165,12 +172,12 @@ class Rules extends React.Component {
   setSpecs(o) {
     let specs = o;
     SpecHelper.setIds(specs);
-    this.setState( {specs} );
+    this.setState({ specs });
   }
 
   getSubItemsFor(name) {
     let a = [];
-    (this.state.subItems || []).forEach(s=>{
+    (this.state.subItems || []).forEach(s => {
       if (s.name === name) {
         a = s.metadata || [];
       }
@@ -179,7 +186,7 @@ class Rules extends React.Component {
   }
 
   render() {
-    if ( !(this.state && this.state.specs && this.state.specs.length && this.state.specs[0].for) ) {
+    if (!(this.state && this.state.specs && this.state.specs.length && this.state.specs[0].for)) {
       return (<div id="rules">
         <div className="alert alert-warning" role="alert">
           Create or Load a spec.
@@ -194,14 +201,14 @@ class Rules extends React.Component {
       subItemsTabs = [],
       currentTabId = this.state.tab;
 
-    subItemsTabs = subItemsKeys.map(s=> {
+    subItemsTabs = subItemsKeys.map(s => {
       let tabId = s;
 
       return (
-        <li key={tabId} role="presentation" className={currentTabId === tabId ? 'active' : ''}>
-          <a href={'#'+tabId} aria-controls={tabId} role="tab" data-toggle="tab" id={tabId + '-button'} onClick={this.onTab.bind(this,tabId)}>
+        <li key={tabId} role="presentation" className={currentTabId === tabId ? 'nav-link active' : 'nav-link '}>
+          <a href={'#' + tabId} aria-controls={tabId} role="tab" data-toggle="tab" id={tabId + '-button'} onClick={this.onTab.bind(this, tabId)}>
             {s}
-            <span onClick={this.onRemoveSubItems.bind(this,s)} className="glyphicon glyphicon-remove"></span>
+            <span onClick={this.onRemoveSubItems.bind(this, s)} className="bi bi-x-square-fill"></span>
           </a>
         </li>
       );
@@ -209,7 +216,6 @@ class Rules extends React.Component {
 
     let onTextChange = this.onTextChange.bind(this);
 
-    /* eslint-disable jsx-a11y/anchor-has-content */
     let tabContent = null;
     if (this.state.tab === 'editor') {
       tabContent = this.renderTabContent(this.state.specs[0], 'editor');
@@ -223,13 +229,13 @@ class Rules extends React.Component {
     }
     else {
       tabContent = this.state.specs
-        .filter(s=>{
+        .filter(s => {
           if (!s.name) {
-            s.name = ( (s.for && s.for.types) || []).join('_').replace(/[^\w]/g, '_');
+            s.name = ((s.for && s.for.types) || []).join('_').replace(/[^\w]/g, '_');
           }
           return s.name === this.state.tab;
         })
-        .map(s=>{
+        .map(s => {
           return this.renderTabContent(s, s.name);
         });
     }
@@ -239,14 +245,14 @@ class Rules extends React.Component {
     return (
       <div id="rules">
         <ul className="nav nav-tabs" role="tablist">
-          <li key="global-rules" role="presentation" className={this.state.tab === 'editor'? 'active' : ''}><a href="#editor" aria-controls="editor" role="tab" data-toggle="tab" id="editor-button" onClick={this.onTab.bind(this,'editor')}>urls: .*</a></li>
+          <li key="global-rules" role="presentation" className={this.state.tab === 'editor' ? 'nav-link active' : 'nav-link'}><a href="#editor" aria-controls="editor" role="tab" data-toggle="tab" id="editor-button" onClick={this.onTab.bind(this, 'editor')}>urls: .*</a></li>
           {subItemsTabs}
-          <li role="presentation"><a href="#add-sub-item" className="glyphicon glyphicon-plus" title="Add Sub Items" onClick={this.addSubItems.bind(this)}></a></li>
-          <li role="presentation" className={ isTextEditor? 'active' : ''}><a href="#text-editor" aria-controls="text-editor" role="tab" data-toggle="tab" id="text-editor-button" onClick={this.onTab.bind(this,'text-editor')}>Text</a></li>
+          <li role="presentation" className="nav-link"><a href="#add-sub-item" className="bi bi-plus-square-fill" title="Add Sub Items" onClick={this.addSubItems.bind(this)}></a></li>
+          <li role="presentation" className={isTextEditor ? 'nav-link active' : 'nav-link'}><a href="#text-editor" aria-controls="text-editor" role="tab" data-toggle="tab" id="text-editor-button" onClick={this.onTab.bind(this, 'text-editor')}>Text</a></li>
 
         </ul>
         <div id="editor-container" className="tab-content">
-          { tabContent }
+          {tabContent}
         </div>
       </div>
     );
@@ -259,13 +265,13 @@ class Rules extends React.Component {
     let onRemove = this.onRemoveItem.bind(this);
     let onChange = this.onChangeItem.bind(this);
 
-    let excludes = (spec.exclude || []).map((e)=>
-      <Item key={e.id} onRemove={onRemove} onChange={onChange} {...e}/>
+    let excludes = (spec.exclude || []).map((e) =>
+      <Item key={e.id} onRemove={onRemove} onChange={onChange} {...e} />
     );
 
     let metas = SpecHelper.getMetadataAsArray(spec, id);
-    metas = metas.map((e)=>
-      <MetaItem key={e.id} onRemove={onRemove} onChange={onChange} {...e}/>
+    metas = metas.map((e) =>
+      <MetaItem key={e.id} onRemove={onRemove} onChange={onChange} {...e} />
     );
 
     let typeSelector = '';
@@ -276,12 +282,12 @@ class Rules extends React.Component {
 
     let guid = (subItem && subItem.id) || ('subitem-' + id);
 
-    if ( id !== 'editor' ) {
+    if (id !== 'editor') {
       typeSelector = (
         <div>
           <h4>Selector for this Type</h4>
-          <Item data-id={id} key={tabId+'-selector'} onChange={onChange} id={guid} path={subItem && subItem.path} type={subItem && subItem.type} {...spec}/>
-          <br/>
+          <Item data-id={id} key={tabId + '-selector'} onChange={onChange} id={guid} path={subItem && subItem.path} type={subItem && subItem.type} {...spec} />
+          <br />
         </div>
       );
     }
@@ -296,7 +302,7 @@ class Rules extends React.Component {
         </div>
         <button className="btn btn-sm btn-success" onClick={this.addExclude.bind(this, id)}>Add</button>
 
-        <br/><br/>
+        <br /><br />
         <h4>Metadata</h4>
         <div className="metadata-rules">
           {metas}
@@ -307,5 +313,9 @@ class Rules extends React.Component {
     );
   }
 }
+
+Rules.propTypes = {
+  specs: PropTypes.string,
+};
 
 export default Rules;
