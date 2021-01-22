@@ -209,7 +209,6 @@ class Rules extends React.Component {
 
     let onTextChange = this.onTextChange.bind(this);
 
-    /* eslint-disable jsx-a11y/anchor-has-content */
     let tabContent = null;
     if (this.state.tab === 'editor') {
       tabContent = this.renderTabContent(this.state.specs[0], 'editor');

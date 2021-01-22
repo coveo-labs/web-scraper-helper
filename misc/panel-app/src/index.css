@@ -276,7 +276,7 @@ textarea.invalid {
 #version {
 	font-family: monospace;
 	color: #94A9BF;
-	position: absolute;
+	position: fixed;
 	right: 0;
 	bottom: 0;
 	padding: 3px 8px;
