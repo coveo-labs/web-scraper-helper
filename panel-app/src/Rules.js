@@ -139,7 +139,7 @@ class Rules extends React.Component {
   }
 
   onTab(id, e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
     let state = { tab: id };
     if (id === 'text-editor') {
       this._lastTextValue = SpecHelper.toJson(this.state.specs, true);
@@ -315,7 +315,7 @@ class Rules extends React.Component {
 }
 
 Rules.propTypes = {
-  specs: PropTypes.object,
+  specs: PropTypes.string,
 };
 
 export default Rules;
