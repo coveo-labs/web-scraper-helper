@@ -1,3 +1,5 @@
+node_modules
+.eslintcache
 chrome_extension/panel-app
 chrome_extension/static
 *zip

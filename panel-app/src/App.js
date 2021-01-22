@@ -30,6 +30,7 @@ class App extends Component {
     }
     catch (e) {
       // console.log('NO chrome.runtime.connect()', e);
+      // console.error(e);
     }
     this._backgroundPageConnection = conn;
     this._firstRender = true;
@@ -107,13 +108,17 @@ class App extends Component {
       configName = url.searchParams.get('config');
 
     if (configName) {
-      this.refs.library.loadSpec({
+      this.libraryRef.loadSpec({
         target: {
           value: configName
         }
       });
     }
   }
+
+  setLibraryRef = element => {
+    this.libraryRef = element;
+  };
 
   render() {
     if (this._firstRender) {
@@ -122,10 +127,10 @@ class App extends Component {
     }
     return (
       <div className="App">
-        <Library ref="library"/>
+        <Library ref={this.setLibraryRef} />
         <div id="rules-and-results">
-          <Rules ref={(rules) => { this.rules = rules; }}/>
-          <Results ref={(res) => { this.results = res; }}/>
+          <Rules ref={(rules) => { this.rules = rules; }} />
+          <Results ref={(res) => { this.results = res; }} />
         </div>
       </div>
     );
