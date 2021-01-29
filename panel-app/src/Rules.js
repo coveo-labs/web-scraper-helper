@@ -208,9 +208,9 @@ class Rules extends React.Component {
         <li key={tabId} role="presentation" className={currentTabId === tabId ? 'nav-link active' : 'nav-link '}>
           <a href={'#' + tabId} aria-controls={tabId} role="tab" data-toggle="tab" id={tabId + '-button'} onClick={this.onTab.bind(this, tabId)}>
             {s}
-            <span onClick={this.onRemoveSubItems.bind(this, s)} className="bi bi-x-square-fill"></span>
+            <div onClick={this.onRemoveSubItems.bind(this, s)} className="button-icon button-icon-delete" style={{ marginLeft: '4px' }}></div>
           </a>
-        </li>
+        </li >
       );
     });
 
@@ -247,7 +247,7 @@ class Rules extends React.Component {
         <ul className="nav nav-tabs" role="tablist">
           <li key="global-rules" role="presentation" className={this.state.tab === 'editor' ? 'nav-link active' : 'nav-link'}><a href="#editor" aria-controls="editor" role="tab" data-toggle="tab" id="editor-button" onClick={this.onTab.bind(this, 'editor')}>urls: .*</a></li>
           {subItemsTabs}
-          <li role="presentation" className="nav-link"><a href="#add-sub-item" className="bi bi-plus-square-fill" title="Add Sub Items" onClick={this.addSubItems.bind(this)}></a></li>
+          <li role="presentation" className="nav-link"><a href="#add-sub-item" className="button-icon button-icon-add" title="Add Sub Items" onClick={this.addSubItems.bind(this)}></a></li>
           <li role="presentation" className={isTextEditor ? 'nav-link active' : 'nav-link'}><a href="#text-editor" aria-controls="text-editor" role="tab" data-toggle="tab" id="text-editor-button" onClick={this.onTab.bind(this, 'text-editor')}>Text</a></li>
 
         </ul>

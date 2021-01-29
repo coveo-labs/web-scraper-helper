@@ -45,7 +45,7 @@ class Item extends Component {
     }
     if (this.props.onRemove) {
       retval.push(
-        <span key={this.props.id + '-remove'} className="bi bi-x-square-fill" onClick={this.props.onRemove}></span>
+        <div key={this.props.id + '-remove'} className="button-icon button-icon-delete" onClick={this.props.onRemove}></div>
       );
     }
     return retval;

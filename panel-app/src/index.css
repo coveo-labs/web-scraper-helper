@@ -219,33 +219,42 @@ textarea.invalid {
   visibility: visible;
 }
 
-.bi-plus {
-  color: #4cae4c;
-}
-
-.bi-x-square-fill {
-  color: #CE3F00;
-  margin-left: 5px;
-  transition: margin 0.25s;
+.button-icon {
+  background-image: url("./plus.svg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  display: inline-block;
+  min-height: 16px;
+  min-width: 16px;
+  vertical-align: text-bottom;
   cursor: pointer;
 }
 
-.nav-tabs .bi-x-square-fill {
+.button-icon-delete {
+  background-image: url(./delete.svg);
+}
+
+.button-icon-plus {
+  background-image: url(./plus.svg);
+}
+
+.nav-tabs .button-icon-delete {
   display: none;
 }
 
-.nav-tabs .active .bi-x-square-fill {
-  display: inline;
+.nav-tabs .active .button-icon-delete {
+  display: inline-block;
 }
 
-.rule .bi-x-square-fill {
-  color: #CE3F00;
+.rule .button-icon-delete {
   visibility: hidden;
 }
 
-.rule:hover .bi-x-square-fill,
+.rule:hover .button-icon-delete,
 .rule:hover>label {
   visibility: visible;
+  line-height: 38px;
 }
 
 .wsh-rule-type {
