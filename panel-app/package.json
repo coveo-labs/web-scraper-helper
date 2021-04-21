@@ -1,11 +1,11 @@
 {
-  "name": "panel-app",
+  "name": "web-scraper-helper-panel",
   "version": "1.2.4",
   "private": true,
   "dependencies": {
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "react-scripts": "^4.0.1"
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "^4.0.3"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -14,7 +14,7 @@
     "eject": "react-scripts eject"
   },
   "devDependencies": {
-    "@wojtekmaj/enzyme-adapter-react-17": "^0.4.1",
+    "@wojtekmaj/enzyme-adapter-react-17": "^0.6.1",
     "enzyme": "^3.11.0"
   },
   "browserslist": [
