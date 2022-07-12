@@ -27,7 +27,7 @@ class Storage {
     try {
       return chrome.storage.local.get(attr, callback);
     }
-    catch(e) {
+    catch (e) {
       // empty
     }
   }
@@ -61,10 +61,11 @@ class Storage {
         try {
           Object.keys(store).forEach(k => {
             try {
-              let j = JSON.parse(store[k]);
+              const specInStore = store[k];
+              let j = JSON.parse(specInStore);
               j = j && j.length && j[0];
               if (j && j.exclude && j.metadata) {
-                specs[k] = store[k];
+                specs[k] = specInStore;
               }
             }
             catch (e) {
@@ -90,7 +91,7 @@ class Storage {
         }
       });
     }
-    catch(e) {
+    catch (e) {
       this.specs = {
         'blogs2': JSON.stringify([{
           "for": { "urls": [".*"] },
@@ -123,7 +124,7 @@ class Storage {
     try {
       chrome.storage.local.remove(name);
     }
-    catch(e) {
+    catch (e) {
       delete this.specs[name];
     }
 
@@ -140,7 +141,7 @@ class Storage {
         [this._sCurrentName]: this._sCurrentSpec
       });
     }
-    catch(e) {
+    catch (e) {
       // empty
     }
   }
