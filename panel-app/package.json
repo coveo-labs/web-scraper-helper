@@ -3,9 +3,8 @@
   "version": "1.3.0",
   "private": true,
   "dependencies": {
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-scripts": "^4.0.3"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -14,8 +13,9 @@
     "eject": "react-scripts eject"
   },
   "devDependencies": {
-    "@wojtekmaj/enzyme-adapter-react-17": "^0.6.1",
-    "enzyme": "^3.11.0"
+    "@wojtekmaj/enzyme-adapter-react-17": "^0.6.7",
+    "enzyme": "^3.11.0",
+    "react-scripts": "^5.0.1"
   },
   "browserslist": [
     "last 2 Chrome versions"
