@@ -4,7 +4,7 @@ class SpecHelper {
 
   static getDefault() {
     return [{
-      for: {urls: ['.*']},
+      for: { urls: ['.*'] },
       exclude: [],
       metadata: {},
     }];
@@ -73,7 +73,7 @@ class SpecHelper {
     }
     specs[0].subItems[name] = { id: Guid.get(), type: 'CSS', path: '' };
     specs.push({
-      'for': {types: [name]},
+      'for': { types: [name] },
       exclude: [],
       metadata: {},
     });
@@ -83,7 +83,7 @@ class SpecHelper {
   static remove(specs, id) {
     specs = specs.map(spec => {
       if (spec.exclude) {
-        spec.exclude = spec.exclude.filter(e=>(e.id!==id));
+        spec.exclude = spec.exclude.filter(e => (e.id !== id));
       }
       if (spec.metadata) {
         for (let k in spec.metadata) {
@@ -99,10 +99,10 @@ class SpecHelper {
   }
 
   static removeSubItem(specs, name) {
-    for (let i=0; i<specs.length; i++) {
+    for (let i = 0; i < specs.length; i++) {
       if (specs[i]) {
         if (specs[i].for && specs[i].for.types && specs[i].for.types.includes(name)) {
-          specs.splice(i,1);
+          specs.splice(i, 1);
           i--;
         }
         if (specs[i].subItems) {
@@ -117,7 +117,7 @@ class SpecHelper {
   static setIds(specs) {
     (specs || []).forEach(spec => {
       if (spec.exclude) {
-        spec.exclude = spec.exclude.map(e=>{
+        spec.exclude = spec.exclude.map(e => {
           if (!e.id) {
             e.id = Guid.get();
           }
@@ -150,21 +150,21 @@ class SpecHelper {
   // get a clean spec
   static toJson(_specs, asText) {
 
-    let cleanItem = (item)=>{
+    let cleanItem = (item) => {
       delete item.id;
       delete item.name;
-      if ( !item.isAbsolute ) {
+      if (!item.isAbsolute) {
         delete item.isAbsolute;
       }
-      if ( !item.isBoolean ) {
+      if (!item.isBoolean) {
         delete item.isBoolean;
       }
       return item;
     };
 
     let specs = JSON.parse(JSON.stringify(_specs));
-    specs = specs.map( (spec)=>{
-      spec.exclude = (spec.exclude || []).map( e=>cleanItem(e) );
+    specs = specs.map((spec) => {
+      spec.exclude = (spec.exclude || []).map(e => cleanItem(e));
 
       let metadata = {};
       for (let i in spec.metadata) {
@@ -185,30 +185,28 @@ class SpecHelper {
       return spec;
     });
 
-    return asText ? JSON.stringify(specs,2,2) : specs;
+    return asText ? JSON.stringify(specs, 2, 2) : specs;
   }
 
   static update(specs, changeSpec) {
     let id = changeSpec.id;
     delete changeSpec.id;
 
-    let updateRule = e=>{
+    let updateRule = e => {
       if (e.id === id) {
-        for (let k in changeSpec) {
-          e[k] = changeSpec[k];
-        }
+        return { ...e, ...changeSpec };
       }
       return e;
     };
 
     specs.map(spec => {
-      (spec.exclude || []).map( updateRule );
+      (spec.exclude || []).map(updateRule);
       if (spec.metadata) {
         let newMetadatMap = {}; // need a new map, in case the 'name' is changing, need to update the key in the map.
         for (let i in spec.metadata) {
           let rule = updateRule(spec.metadata[i]);
           let name = rule.name;
-          while(newMetadatMap[name]) {
+          while (newMetadatMap[name]) {
             // add a space to prevent rules being deleted while typing a name that matches another rule
             name += ' ';
           }
