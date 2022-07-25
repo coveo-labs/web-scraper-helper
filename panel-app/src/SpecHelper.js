@@ -200,7 +200,9 @@ class SpecHelper {
     };
 
     specs.map(spec => {
-      (spec.exclude || []).map(updateRule);
+      if (spec.exclude) {
+        spec.exclude = (spec.exclude || []).map(updateRule);
+      }
       if (spec.metadata) {
         let newMetadatMap = {}; // need a new map, in case the 'name' is changing, need to update the key in the map.
         for (let i in spec.metadata) {
