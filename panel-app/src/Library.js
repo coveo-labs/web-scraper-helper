@@ -8,12 +8,12 @@ class Library extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {names: Storage.getNames()};
+    this.state = { names: Storage.getNames() };
   }
 
   componentDidMount() {
-    Storage.reload(()=>{
-      this.setState({names: Storage.getNames()});
+    Storage.reload(() => {
+      this.setState({ names: Storage.getNames() });
     });
   }
 
@@ -23,11 +23,11 @@ class Library extends Component {
   render() {
     let currentSpec = this.state.current || '__empty';
 
-    let savedSpecs = this.state.names.map(name=>
+    let savedSpecs = this.state.names.map(name =>
       <option key={name} value={name}>{name}</option>
     );
 
-    let saveDisabled = (currentSpec==='__empty');
+    let saveDisabled = (currentSpec === '__empty');
 
     return (
       <div id="setup">
@@ -35,7 +35,7 @@ class Library extends Component {
         <select id="storage" className="form-control" value={currentSpec} onChange={this.loadSpec.bind(this)}>
           <option value="__empty" disabled>Select a file to work on</option>
           <option disabled>------------------------------</option>
-          { savedSpecs }
+          {savedSpecs}
           <option value="__create">Create new file...</option>
         </select>
 
@@ -43,9 +43,9 @@ class Library extends Component {
         &nbsp; &nbsp;
         <button id="storageDelete" className="btn btn-danger" onClick={this.deleteConfig.bind(this)} disabled={saveDisabled}>Delete</button>
         &nbsp; &nbsp; &nbsp; &nbsp;
-        <button id="clear" className="btn btn-default" onClick={this.clear.bind(this)}>Clear page</button>
+        <button id="clear" className="btn btn-light" onClick={this.clear.bind(this)}>Clear page</button>
         &nbsp; &nbsp;
-        <button id="copy" className="btn btn-default" onClick={this.copyConfigToClipboard.bind(this)}>Copy to clipboard</button>
+        <button id="copy" className="btn btn-light" onClick={this.copyConfigToClipboard.bind(this)}>Copy to clipboard</button>
 
         <div id="messages"></div>
       </div>
@@ -54,12 +54,12 @@ class Library extends Component {
 
   clear() {
     Storage.remove(Guid.get());
-    this.setState({current: '__empty'});
+    this.setState({ current: '__empty' });
   }
 
   copyConfigToClipboard() {
     document.getElementById('text-editor-button').click();
-    setTimeout(()=>{
+    setTimeout(() => {
       let textAreaElement = document.getElementById('json-config');
       textAreaElement.focus();
       textAreaElement.select();
@@ -78,8 +78,8 @@ class Library extends Component {
   deleteConfig() {
     if (window.confirm('\nAre you sure you want to delete this config?\n\n' + this.state.current + '\n\n')) {
       Storage.remove(this.state.current);
-      let names = this.state.names.filter( n=>(n!==this.state.current) );
-      this.setState({names, current: '__empty'});
+      let names = this.state.names.filter(n => (n !== this.state.current));
+      this.setState({ names, current: '__empty' });
     }
   }
 
@@ -96,7 +96,7 @@ class Library extends Component {
       state.names = Storage.getNames();
     }
 
-    this.setState(state, ()=>{
+    this.setState(state, () => {
       Storage.loadSpec(name);
     });
   }
@@ -109,7 +109,7 @@ class Library extends Component {
   showMessage(message) {
     let guid = Guid.get();
     document.getElementById('messages').innerHTML += `<div id="${guid}" class="alert alert-info" role="alert">${message}</div>`;
-    setTimeout(()=> {
+    setTimeout(() => {
       let msg = document.getElementById(guid);
       msg.classList.add('fade');
       setTimeout(msg.remove.bind(msg), 200);
