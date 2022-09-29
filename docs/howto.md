@@ -10,7 +10,7 @@ _To install this extension in your Chrome browser, follow these [installation st
 
    ![Developer Tools](./devtools.png)
 
-1. Find a Web Scraping tab (like show on the screenshot above)
+1. Find a Web Scraping tab (like shown on the screenshot below)
 
    ![Web Scraper panel](./panel.png)
 
