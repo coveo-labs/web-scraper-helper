@@ -34,3 +34,23 @@ _To install this extension in your Chrome browser, follow these [installation st
 1. Fill in your desired Exclusion filters and Metadata accordingly. When done, copy your configuration to clipboard and paste it in Coveo Administration Console - Web Source Web Scraping field.
 
    ![Copy to Clipboard](./copy_clipboard.png)
+
+## Validation states
+
+For each selector, you can toggle the selector type between `CSS` and `XPATH`:
+
+  <img src="./selector_validation/toggle.gif" height="90" alt="Selector toggle button">
+
+The color of the toggle button is a validation of the selector:
+
+- `Red`, the selector is _invalid_ (here, `/` can't be used in a CSS selector)
+
+  <img src="./selector_validation/invalid.png" height="30" alt="Valid, not found">
+
+- `Yellow`, the selector is _valid_, but no element matching this selector was found in the page.
+
+  <img src="./selector_validation/valid_notfound.png" height="30" alt="Valid, not found">
+
+- `Green`, the selector is _valid_, but at least element matching this selector was found in the page.
+
+  <img src="./selector_validation/valid_found.png" height="30" alt="Valid, found">

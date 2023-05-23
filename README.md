@@ -8,17 +8,13 @@ The web-scraper-helper works directly in your browser allowing you to easily cre
 
 ## Description
 
-This project started with a [Tampermonkey](https://tampermonkey.net/) script but was later converted to a Google Chrome extension.
+Information about the project is in the [README](chrome_extension/README.md).
 
-- Google Chrome extension
-
-  It is recommended to use the Chrome extension, as it offers the latest improvements and is simpler to use (see the Chrome extension [README](chrome_extension/README.md)).
-
-- Tampermonkey script
-
-  Use the Tampermonkey script only when you want to go back and customize the early version of the tool (see the Tampermonkey script [README](misc/Tampermonkey/README.md)).
+The [How-To Guide](docs/howto.md) is also useful.
 
 ## Contribution
+
+If you want to contribute:
 
 1. Fork the repo.
 1. Make desired changes in your fork.
