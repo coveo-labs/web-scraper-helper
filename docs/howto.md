@@ -43,7 +43,7 @@ For each selector, you can toggle the selector type between `CSS` and `XPATH`:
 
 The color of the toggle button is a validation of the selector:
 
-- `Red`, the selector is _invalid_ (here, `/` can't be used in a CSS selector)
+- `Red`, the selector is _invalid_ (For example, in the following, `/` can't be used in a CSS selector)
 
   <img src="./selector_validation/invalid.png" height="30" alt="Valid, not found">
 
@@ -51,6 +51,6 @@ The color of the toggle button is a validation of the selector:
 
   <img src="./selector_validation/valid_notfound.png" height="30" alt="Valid, not found">
 
-- `Green`, the selector is _valid_, but at least element matching this selector was found in the page.
+- `Green`, the selector is _valid_, and at least one element matching this selector was found in the page.
 
   <img src="./selector_validation/valid_found.png" height="30" alt="Valid, found">
