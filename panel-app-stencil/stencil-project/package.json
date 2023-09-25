@@ -1,0 +1,43 @@
+{
+  "name": "stencil-project",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Stencil App Starter",
+  "scripts": {
+    "build": "stencil build",
+    "start": "stencil build --dev --watch --serve",
+    "test": "stencil test --spec --e2e",
+    "test.watch": "stencil test --spec --e2e --watchAll",
+    "generate": "stencil generate"
+  },
+  "devDependencies": {
+    "@stencil-community/router": "^1.0.2",
+    "@stencil/core": "4.3.0",
+    "@types/jest": "^27.0.3",
+    "jest": "^27.4.5",
+    "jest-cli": "^27.4.5",
+    "puppeteer": "^10.0.0"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@coveord/plasma-mantine": "^52.17.2",
+    "@emotion/react": "11.11.1",
+    "@mantine/carousel": "6.0.19",
+    "@mantine/core": "6.0.19",
+    "@mantine/dates": "6.0.19",
+    "@mantine/form": "6.0.19",
+    "@mantine/hooks": "6.0.19",
+    "@mantine/modals": "6.0.19",
+    "@mantine/next": "6.0.19",
+    "@mantine/notifications": "6.0.19",
+    "@mantine/prism": "6.0.19",
+    "embla-carousel-react": "7.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@types/babel__traverse": "^7.17.1"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}

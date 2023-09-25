@@ -4,3 +4,5 @@ chrome_extension/panel-app
 chrome_extension/static
 *zip
 tests
+panel-app-original
+panel-app-v2
