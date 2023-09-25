@@ -1,0 +1,45 @@
+[
+  {
+    "for": {
+      "urls": [
+        ".*"
+      ]
+    },
+    "exclude": [
+      {
+        "type": "CSS",
+        "path": "body .ft-container"
+      },
+      {
+        "type": "CSS",
+        "path": "body #cb-container .cb-row"
+      },
+      {
+        "type": "CSS",
+        "path": "body #header"
+      },
+      {
+        "type": "CSS",
+        "path": "body #footer"
+      },
+      {
+        "type": "CSS",
+        "path": "noscript, cx-skip-link"
+      }
+    ],
+    "metadata": {
+      "blogtitle": {
+        "type": "CSS",
+        "path": "body h2:first-child::text"
+      },
+      "blogcontent": {
+        "type": "CSS",
+        "path": "body .blog-content-container div:last-child::text"
+      },
+      "image": {
+        "type": "CSS",
+        "path": "body .blog-image-container img:first-child::attr(src)"
+      }
+    }
+  }
+]

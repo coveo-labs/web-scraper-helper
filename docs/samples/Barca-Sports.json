@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Configuration 1",
+    "for": {
+      "urls": [
+        ".*"
+      ]
+    },
+    "exclude": [
+      {
+        "type": "CSS",
+        "path": "#marketingbar"
+      },
+      {
+        "type": "CSS",
+        "path": "header"
+      },
+      {
+        "type": "CSS",
+        "path": "footer"
+      },
+      {
+        "type": "CSS",
+        "path": ".wp-block-template-part"
+      },
+      {
+        "type": "CSS",
+        "path": "#jp-post-flair"
+      }
+    ],
+    "metadata": {
+      "image": {
+        "type": "XPATH",
+        "path": "//meta[@property='og:image']/@content"
+      }
+    }
+  }
+]

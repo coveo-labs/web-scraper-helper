@@ -1,0 +1,21 @@
+[
+  {
+    "name": "Configuration 1",
+    "exclude": [
+      {
+        "type": "CSS",
+        "path": "header"
+      },
+      {
+        "type": "CSS",
+        "path": "footer"
+      }
+    ],
+    "for": {
+      "urls": [
+        ".*"
+      ]
+    },
+    "metadata": {}
+  }
+]

@@ -1,0 +1,29 @@
+[
+  {
+    "for": {
+      "urls": [
+        ".*"
+      ]
+    },
+    "exclude": [
+      {
+        "type": "CSS",
+        "path": "header"
+      },
+      {
+        "type": "CSS",
+        "path": "footer"
+      }
+    ],
+    "metadata": {
+      "script": {
+        "type": "XPATH",
+        "path": "//div/@data-code"
+      },
+      "blog_image": {
+        "type": "CSS",
+        "path": "div[style*=\"background-image\"]::attr(style)"
+      }
+    }
+  }
+]
