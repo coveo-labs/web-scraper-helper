@@ -1,3 +1,94 @@
-:host {
-  display: block;
+#file-explorer .header-section {
+  padding: 24px 32px;
+  border-bottom: 1px solid #E5E8E8;
+  height: 110px;
+}
+
+.header_title-text {
+  color:  #282829;
+  font-family: Gibson;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px;
+  margin-bottom: 4px;
+}
+
+.header_sub-text {
+  color: #565B66;
+  font-family: Gibson;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: 20px; /* 142.857% */
+  letter-spacing: 0.042px;
+}
+
+.header_file-picker .select-fill-outline {
+  border-radius: 8px;
+  --border-color: #E5E8E8;
+  width: 315px;
+  min-height: 35px !important;
+  height: 35px;
+  margin-top: 16px;
+}
+
+.header_file-picker ion-select::part(container){
+  width: 300px;
+}
+
+.header_file-picker ion-select::part(placeholder) {
+  color:  #6C727B;
+  font-family: Gibson;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: 21px; /* 150% */
+  letter-spacing: 0.042px;
+} 
+
+ion-select.never-flip::part(icon) {
+  transform: none;
+}
+
+#file-explorer .content-section {
+  background-color: #FCFCFC;
+  padding: 24px 32px;
+}
+
+#file-explorer .content-section .no-file-container {
+  display: flex;
+  padding: 24px;
+  border-radius: 8px;
+  border: 1px solid #E5E8E8;
+  background: #FFF;
+  box-shadow: 0px 4px 8px 0px rgba(4, 8, 31, 0.08), 0px 0px 0px 1px #E5E8E8 inset;
+  width: 500px;
+  height: 285px;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.content-section .no-file-container .info-text {
+  margin-bottom: 32px;
+  color:  #6C727B;
+  font-family: Gibson;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px; 
+}
+
+.content-section .no-file-container .create-file-btn .button-native {
+  border-radius: 8px;
+  background:#1372EC;
+  width: 140px;
+  height: 32px;
+  font-family: Gibson;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: 21px;
+  letter-spacing: 0.042px;
+  text-transform: lowercase !important;
 }

@@ -1,4 +1,5 @@
 import { Component, h } from '@stencil/core';
+import logo from '../../assets/icon/CoveoLogo.svg';
 
 @Component({
   tag: 'app-root',
@@ -9,16 +10,20 @@ export class AppRoot {
   render() {
     return (
       <div>
-        <header>
-          <h1>Stencil App Starter</h1>
+        <header id="top-bar">
+          <div class="header-container">
+            <ion-img id="coveo-logo-img" src={logo}></ion-img>
+            <div id="header-separator"></div>
+            <div class="top-bar-text">Web Scrapper</div>
+          </div>
         </header>
 
         <main>
           <stencil-router>
-            <stencil-route-switch scrollTopOffset={0}>
-              <stencil-route url="/" component="app-home" exact={true} />
-              <stencil-route url="/profile/:name" component="app-profile" />
-            </stencil-route-switch>
+            {/* <stencil-route-switch scrollTopOffset={0}> */}
+            <stencil-route url="/" component="file-explorer" exact={true} />
+            <stencil-route url="/createConfig" component="create-config" />
+            {/* </stencil-route-switch> */}
           </stencil-router>
         </main>
       </div>
