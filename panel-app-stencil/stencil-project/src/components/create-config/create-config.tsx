@@ -1,4 +1,6 @@
 import { Component, h } from '@stencil/core';
+import state, { addExcludedItem, addMetadataItem } from '../store';
+import copyToClipboardIcon from '../../assets/icon/CopyToClipboard.svg';
 
 @Component({
   tag: 'create-config',
@@ -6,6 +8,18 @@ import { Component, h } from '@stencil/core';
   shadow: true,
 })
 export class CreateConfig {
+  renderExcludedItems() {
+    return state.exclude.map(item => {
+      return <select-element-item type="excludeItem" selectorType={item.type} selector={item.path}></select-element-item>;
+    });
+  }
+
+  renderMetadataItems() {
+    return state.metadata.map(item => {
+      return <select-element-item type="metadataItem" name={item.name} selectorType={item.type} selector={item.path}></select-element-item>;
+    });
+  }
+
   render() {
     return (
       <div id="create-config">
@@ -38,63 +52,8 @@ export class CreateConfig {
                     <ion-input class="global-section-input" fill="outline" placeholder="Name your global section"></ion-input>
                     <div>Select page elements to exclude</div>
                     <div class="select-element__container">
-                      <div class="select-element-item">
-                        <div>
-                          <ion-select class="never-flip" toggleIcon="caret-down-sharp" aria-label="Selector" interface="popover" fill="outline" value="CSS">
-                            <ion-select-option value="CSS">CSS</ion-select-option>
-                            <ion-select-option value="Xpath">XPath</ion-select-option>
-                          </ion-select>
-                        </div>
-                        <div>
-                          <ion-input class="selector-input" fill="outline" placeholder="header .header"></ion-input>
-                        </div>
-                        <div>
-                          <ion-icon name="remove-circle-outline" size="small" color="primary"></ion-icon>
-                        </div>
-                      </div>
-                      <div class="select-element-item">
-                        <div>
-                          <ion-select class="never-flip" toggleIcon="caret-down-sharp" aria-label="Selector" interface="popover" fill="outline" value="CSS">
-                            <ion-select-option value="CSS">CSS</ion-select-option>
-                            <ion-select-option value="Xpath">XPath</ion-select-option>
-                          </ion-select>
-                        </div>
-                        <div>
-                          <ion-input class="selector-input" fill="outline" placeholder="header .header"></ion-input>
-                        </div>
-                        <div>
-                          <ion-icon name="remove-circle-outline" size="small" color="primary"></ion-icon>
-                        </div>
-                      </div>
-                      <div class="select-element-item">
-                        <div>
-                          <ion-select class="never-flip" toggleIcon="caret-down-sharp" aria-label="Selector" interface="popover" fill="outline" value="CSS">
-                            <ion-select-option value="CSS">CSS</ion-select-option>
-                            <ion-select-option value="Xpath">XPath</ion-select-option>
-                          </ion-select>
-                        </div>
-                        <div>
-                          <ion-input class="selector-input" fill="outline" placeholder="header .header"></ion-input>
-                        </div>
-                        <div>
-                          <ion-icon name="remove-circle-outline" size="small" color="primary"></ion-icon>
-                        </div>
-                      </div>
-                      <div class="select-element-item">
-                        <div>
-                          <ion-select class="never-flip" toggleIcon="caret-down-sharp" aria-label="Selector" interface="popover" fill="outline" value="CSS">
-                            <ion-select-option value="CSS">CSS</ion-select-option>
-                            <ion-select-option value="Xpath">XPath</ion-select-option>
-                          </ion-select>
-                        </div>
-                        <div>
-                          <ion-input class="selector-input" fill="outline" placeholder="header .header"></ion-input>
-                        </div>
-                        <div>
-                          <ion-icon name="remove-circle-outline" size="small" color="primary"></ion-icon>
-                        </div>
-                      </div>
-                      <div class="add-rule">
+                      {this.renderExcludedItems()}
+                      <div class="add-rule" onClick={() => addExcludedItem({ type: 'CSS', path: '' })}>
                         <ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
                         <span>Add Rule</span>
                       </div>
@@ -107,93 +66,45 @@ export class CreateConfig {
                     <ion-input class="global-section-input" fill="outline" placeholder="Name your global section"></ion-input>
                     <div>Select metadata to extract</div>
                     <div class="select-element__container">
-                      <div class="select-element-item">
-                        <div>
-                          <ion-select class="never-flip" toggleIcon="caret-down-sharp" aria-label="Selector" interface="popover" fill="outline" value="CSS">
-                            <ion-select-option value="CSS">CSS</ion-select-option>
-                            <ion-select-option value="Xpath">XPath</ion-select-option>
-                          </ion-select>
-                        </div>
-                        <div>
-                          <ion-input class="expression-input" fill="outline" placeholder="header .header"></ion-input>
-                        </div>
-                        <div>
-                          <ion-icon name="remove-circle-outline" size="small" color="primary"></ion-icon>
-                        </div>
-                      </div>
-                      <div class="select-element-item">
-                        <div>
-                          <ion-select class="never-flip" toggleIcon="caret-down-sharp" aria-label="Selector" interface="popover" fill="outline" value="CSS">
-                            <ion-select-option value="CSS">CSS</ion-select-option>
-                            <ion-select-option value="Xpath">XPath</ion-select-option>
-                          </ion-select>
-                        </div>
-                        <div>
-                          <ion-input class="expression-input" fill="outline" placeholder="header .header"></ion-input>
-                        </div>
-                        <div>
-                          <ion-icon name="remove-circle-outline" size="small" color="primary"></ion-icon>
-                        </div>
-                      </div>
-                      <div class="select-element-item">
-                        <div>
-                          <ion-select class="never-flip" toggleIcon="caret-down-sharp" aria-label="Selector" interface="popover" fill="outline" value="CSS">
-                            <ion-select-option value="CSS">CSS</ion-select-option>
-                            <ion-select-option value="Xpath">XPath</ion-select-option>
-                          </ion-select>
-                        </div>
-                        <div>
-                          <ion-input class="expression-input" fill="outline" placeholder="header .header"></ion-input>
-                        </div>
-                        <div>
-                          <ion-icon name="remove-circle-outline" size="small" color="primary"></ion-icon>
-                        </div>
-                      </div>
-
-                      <div class="add-rule">
+                      {this.renderMetadataItems()}
+                      <div class="add-rule" onClick={() => addMetadataItem({ name: '', type: 'CSS', path: '' })}>
                         <ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
                         <span>Add Rule</span>
                       </div>
                     </div>
                     <div style={{ marginTop: '24px' }}>Results</div>
                     <div class="result-container">
-                      <div class="result-column">
-                        <ion-list lines="full">
-                          <ion-list-header lines="full">
-                            <ion-label>Metadata</ion-label>
-                          </ion-list-header>
-                          <ion-item>
-                            <ion-label>Full Lines</ion-label>
-                          </ion-item>
-                          <ion-item>
-                            <ion-label>Full Lines</ion-label>
-                          </ion-item>
-                          <ion-item>
-                            <ion-label>Full Lines</ion-label>
-                          </ion-item>
-                        </ion-list>
-                      </div>
-                      <div class="result-column">
-                        <ion-list lines="full">
-                          <ion-list-header lines="full">
-                            <ion-label>Value (s)</ion-label>
-                          </ion-list-header>
-                          <ion-item>
-                            <ion-label>Full Lines</ion-label>
-                          </ion-item>
-                          <ion-item>
-                            <ion-label>Full Lines</ion-label>
-                          </ion-item>
-                          <ion-item>
-                            <ion-label>Full Lines</ion-label>
-                          </ion-item>
-                        </ion-list>
-                      </div>
+                      <table id="resultGlobalTable" class="table table-condensed table-bordered">
+                        <thead>
+                          <tr>
+                            <th>Field</th>
+                            <th>Value(s)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr></tr>
+                          <tr></tr>
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 </ion-tab>
                 <ion-tab tab="sub-items">SI</ion-tab>
-                <ion-tab tab="json">JSON</ion-tab>
+                <ion-tab tab="json">
+                  <div class="code-view-wrapper">
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <div>Code View</div>
+                      <div class="copy-to-clipboard">
+                        <ion-img id="coveo-logo-img" src={copyToClipboardIcon}></ion-img>
+                        <span></span>
+                        <span>Copy to clipboard</span>
+                      </div>
+                    </div>
+                    <div class="code-view">
+                      <pre>{JSON.stringify(state, null, 2)}</pre>
+                    </div>
+                  </div>
+                </ion-tab>
               </ion-tabs>
             </div>
           </div>

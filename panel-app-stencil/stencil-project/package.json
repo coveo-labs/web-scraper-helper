@@ -14,6 +14,7 @@
     "@ionic/core": "^7.4.2",
     "@stencil-community/router": "^1.0.2",
     "@stencil/core": "4.3.0",
+    "@stencil/store": "^2.0.10",
     "@types/jest": "^27.0.3",
     "jest": "^27.4.5",
     "jest-cli": "^27.4.5",

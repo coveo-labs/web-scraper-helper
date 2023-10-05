@@ -12,6 +12,12 @@ export namespace Components {
     }
     interface FileExplorer {
     }
+    interface SelectElementItem {
+        "name": string;
+        "selector": string;
+        "selectorType": string;
+        "type": string;
+    }
 }
 declare global {
     interface HTMLAppRootElement extends Components.AppRoot, HTMLStencilElement {
@@ -32,10 +38,17 @@ declare global {
         prototype: HTMLFileExplorerElement;
         new (): HTMLFileExplorerElement;
     };
+    interface HTMLSelectElementItemElement extends Components.SelectElementItem, HTMLStencilElement {
+    }
+    var HTMLSelectElementItemElement: {
+        prototype: HTMLSelectElementItemElement;
+        new (): HTMLSelectElementItemElement;
+    };
     interface HTMLElementTagNameMap {
         "app-root": HTMLAppRootElement;
         "create-config": HTMLCreateConfigElement;
         "file-explorer": HTMLFileExplorerElement;
+        "select-element-item": HTMLSelectElementItemElement;
     }
 }
 declare namespace LocalJSX {
@@ -45,10 +58,17 @@ declare namespace LocalJSX {
     }
     interface FileExplorer {
     }
+    interface SelectElementItem {
+        "name"?: string;
+        "selector"?: string;
+        "selectorType"?: string;
+        "type"?: string;
+    }
     interface IntrinsicElements {
         "app-root": AppRoot;
         "create-config": CreateConfig;
         "file-explorer": FileExplorer;
+        "select-element-item": SelectElementItem;
     }
 }
 export { LocalJSX as JSX };
@@ -58,6 +78,7 @@ declare module "@stencil/core" {
             "app-root": LocalJSX.AppRoot & JSXBase.HTMLAttributes<HTMLAppRootElement>;
             "create-config": LocalJSX.CreateConfig & JSXBase.HTMLAttributes<HTMLCreateConfigElement>;
             "file-explorer": LocalJSX.FileExplorer & JSXBase.HTMLAttributes<HTMLFileExplorerElement>;
+            "select-element-item": LocalJSX.SelectElementItem & JSXBase.HTMLAttributes<HTMLSelectElementItemElement>;
         }
     }
 }

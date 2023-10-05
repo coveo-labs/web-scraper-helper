@@ -90,5 +90,8 @@ ion-select.never-flip::part(icon) {
   font-weight: 300;
   line-height: 21px;
   letter-spacing: 0.042px;
-  text-transform: lowercase !important;
+}
+
+.content-section .no-file-container .create-file-btn::part(native) {
+  text-transform: none;
 }

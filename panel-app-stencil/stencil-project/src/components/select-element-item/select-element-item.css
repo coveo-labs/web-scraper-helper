@@ -1,0 +1,45 @@
+.select-element-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.select-element-item ion-select {
+  width: 88px;
+  height: 36px;
+  min-height: unset;
+  color:  #565B66;
+  font-family: Gibson;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: 21px; /* 150% */
+  letter-spacing: 0.042px;
+  --border-radius: 8px;
+}
+
+.select-element-item ion-input.selector-input,
+.select-element-item ion-input.name-input,
+.select-element-item ion-input.metadata-selector-input {
+  width: 230px;
+  min-height: unset;
+  height: 36px;
+  padding: 0px 16px;
+  color: #565B66;
+  font-family: Gibson;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: 21px; /* 150% */
+  letter-spacing: 0.042px;
+  --border-radius: 8px;
+}
+
+.select-element-item ion-input.name-input {
+  width: 70px;
+}
+
+.select-element-item ion-input.metadata-selector-input {
+  width: 150px;
+}
