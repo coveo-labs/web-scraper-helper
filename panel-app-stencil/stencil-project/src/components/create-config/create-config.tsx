@@ -1,6 +1,5 @@
-import { Component, h } from '@stencil/core';
-import state, { addExcludedItem, addMetadataItem } from '../store';
-import copyToClipboardIcon from '../../assets/icon/CopyToClipboard.svg';
+import { Component, Listen, State, h } from '@stencil/core';
+import state, { addExcludedItem, addMetadataItem, addSubItem, removeSubItem } from '../store';
 
 @Component({
   tag: 'create-config',
@@ -8,6 +7,14 @@ import copyToClipboardIcon from '../../assets/icon/CopyToClipboard.svg';
   shadow: true,
 })
 export class CreateConfig {
+  @State() showSubItemConfig: boolean;
+  @State() subItem: {};
+
+  @Listen('updateSubItemState')
+  hideSubItemConfig() {
+    this.showSubItemConfig = !this.showSubItemConfig;
+  }
+
   renderExcludedItems() {
     return state.exclude.map(item => {
       return <select-element-item type="excludeItem" selectorType={item.type} selector={item.path}></select-element-item>;
@@ -15,8 +22,10 @@ export class CreateConfig {
   }
 
   renderMetadataItems() {
-    return state.metadata.map(item => {
-      return <select-element-item type="metadataItem" name={item.name} selectorType={item.type} selector={item.path}></select-element-item>;
+    const metadata = state.metadata;
+    return Object.keys(metadata).map(key => {
+      const item = metadata[key];
+      return <select-element-item type="metadataItem" name={key} selectorType={item.type} selector={item.path}></select-element-item>;
     });
   }
 
@@ -34,79 +43,132 @@ export class CreateConfig {
         </div>
         <div class="content-section">
           <div class="content-container">
-            <div class="content-text">Create a Web Scraping configuration</div>
-            <div class="content-tabs">
-              <ion-tabs>
-                <ion-tab-bar selectedTab="elements-to-exclude">
-                  <ion-tab-button tab="elements-to-exclude" selected>
-                    Elements to exclude
-                  </ion-tab-button>
-                  <ion-tab-button tab="metadata-to-extract">Metadata to extract</ion-tab-button>
-                  <ion-tab-button tab="sub-items">Sub-items</ion-tab-button>
-                  <ion-tab-button tab="json">JSON</ion-tab-button>
-                </ion-tab-bar>
+            {!this.showSubItemConfig ? (
+              <div>
+                <div class="content-text">Create a Web Scraping configuration</div>
+                <div class="content-tabs">
+                  <ion-tabs>
+                    <ion-tab-bar selectedTab="elements-to-exclude">
+                      <ion-tab-button tab="elements-to-exclude" selected>
+                        Elements to exclude
+                      </ion-tab-button>
+                      <ion-tab-button tab="metadata-to-extract">Metadata to extract</ion-tab-button>
+                      <ion-tab-button tab="sub-items">Sub-items</ion-tab-button>
+                      <ion-tab-button tab="json">JSON</ion-tab-button>
+                    </ion-tab-bar>
 
-                <ion-tab tab="elements-to-exclude" id="collection-container">
-                  <div>
-                    <div>Global section name</div>
-                    <ion-input class="global-section-input" fill="outline" placeholder="Name your global section"></ion-input>
-                    <div>Select page elements to exclude</div>
-                    <div class="select-element__container">
-                      {this.renderExcludedItems()}
-                      <div class="add-rule" onClick={() => addExcludedItem({ type: 'CSS', path: '' })}>
-                        <ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
-                        <span>Add Rule</span>
+                    <ion-tab tab="elements-to-exclude" id="collection-container">
+                      <div>
+                        <div>Global section name</div>
+                        <ion-input class="global-section-input" fill="outline" placeholder="Name your global section"></ion-input>
+                        <div>Select page elements to exclude</div>
+                        <div class="select-element__container">
+                          {this.renderExcludedItems()}
+                          <div class="add-rule" onClick={() => addExcludedItem({ type: 'CSS', path: '' })}>
+                            <ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
+                            <span>Add Rule</span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </ion-tab>
-                <ion-tab tab="metadata-to-extract" id="collection-container">
-                  <div>
-                    <div>Global section name</div>
-                    <ion-input class="global-section-input" fill="outline" placeholder="Name your global section"></ion-input>
-                    <div>Select metadata to extract</div>
-                    <div class="select-element__container">
-                      {this.renderMetadataItems()}
-                      <div class="add-rule" onClick={() => addMetadataItem({ name: '', type: 'CSS', path: '' })}>
-                        <ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
-                        <span>Add Rule</span>
+                    </ion-tab>
+                    <ion-tab tab="metadata-to-extract" id="collection-container">
+                      <div>
+                        <div>Global section name</div>
+                        <ion-input class="global-section-input" fill="outline" placeholder="Name your global section"></ion-input>
+                        <div>Select metadata to extract</div>
+                        <div class="select-element__container">
+                          {this.renderMetadataItems()}
+                          <div class="add-rule" onClick={() => addMetadataItem({ name: '', type: 'CSS', path: '' })}>
+                            <ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
+                            <span>Add Rule</span>
+                          </div>
+                        </div>
+                        <div style={{ marginTop: '24px' }}>Results</div>
+                        <div class="result-container">
+                          <table id="resultGlobalTable" class="table table-condensed table-bordered">
+                            <thead>
+                              <tr>
+                                <th>Field</th>
+                                <th>Value(s)</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr></tr>
+                              <tr></tr>
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                    </div>
-                    <div style={{ marginTop: '24px' }}>Results</div>
-                    <div class="result-container">
-                      <table id="resultGlobalTable" class="table table-condensed table-bordered">
-                        <thead>
-                          <tr>
-                            <th>Field</th>
-                            <th>Value(s)</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr></tr>
-                          <tr></tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </ion-tab>
-                <ion-tab tab="sub-items">SI</ion-tab>
-                <ion-tab tab="json">
-                  <div class="code-view-wrapper">
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <div>Code View</div>
-                      <div class="copy-to-clipboard">
-                        <ion-img id="coveo-logo-img" src={copyToClipboardIcon}></ion-img>
-                        <span></span>
-                        <span>Copy to clipboard</span>
-                      </div>
-                    </div>
-                    <div class="code-view">
-                      <pre>{JSON.stringify(state, null, 2)}</pre>
-                    </div>
-                  </div>
-                </ion-tab>
-              </ion-tabs>
-            </div>
+                    </ion-tab>
+                    <ion-tab tab="sub-items">
+                      {state.subItems.length == 0 ? (
+                        <div class="empty-subItem-container">
+                          <div class="subItem-text-container">
+                            <div class="subItem-text">Sub-items</div>
+                            <div class="subItem-subtext">
+                              Define specific elements on the page that must be indexed as separate documents. You may want to do this when a page contains different types of
+                              content that you want to be individually searchable.
+                            </div>
+                            <div>
+                              <ion-button fill="outline" class="add-subItem-btn" onClick={() => addSubItem()}>
+                                <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+                                Add sub-item
+                              </ion-button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ padding: '32px 24px' }}>
+                          <table class="subItem-container">
+                            <thead class="subItem-header">
+                              <th>
+                                <div class="add-subItem" onClick={() => addSubItem()}>
+                                  <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+                                  <span>Add sub-item</span>
+                                </div>
+                              </th>
+                            </thead>
+                            <tbody>
+                              {state.subItems.map((item, idx) => (
+                                <tr>
+                                  <div
+                                    key={item.name}
+                                    class="subItem"
+                                    onClick={() => {
+                                      this.subItem = item;
+                                      this.showSubItemConfig = true;
+                                    }}
+                                  >
+                                    <span>
+                                      Sub Item {idx + 1} : {item.name}
+                                    </span>
+                                    <span>
+                                      <ion-icon
+                                        slot="start"
+                                        name="trash"
+                                        onClick={event => {
+                                          removeSubItem(item.name);
+                                          event.stopPropagation();
+                                        }}
+                                      ></ion-icon>
+                                    </span>
+                                  </div>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </ion-tab>
+                    <ion-tab tab="json">
+                      <code-viewer></code-viewer>
+                    </ion-tab>
+                  </ion-tabs>
+                </div>
+              </div>
+            ) : (
+              <subitem-edit-config subItem={this.subItem}></subitem-edit-config>
+            )}
           </div>
         </div>
       </div>

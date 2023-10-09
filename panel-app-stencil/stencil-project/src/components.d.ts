@@ -8,6 +8,8 @@ import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 export namespace Components {
     interface AppRoot {
     }
+    interface CodeViewer {
+    }
     interface CreateConfig {
     }
     interface FileExplorer {
@@ -18,6 +20,13 @@ export namespace Components {
         "selectorType": string;
         "type": string;
     }
+    interface SubitemEditConfig {
+        "subItem": {};
+    }
+}
+export interface SubitemEditConfigCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLSubitemEditConfigElement;
 }
 declare global {
     interface HTMLAppRootElement extends Components.AppRoot, HTMLStencilElement {
@@ -25,6 +34,12 @@ declare global {
     var HTMLAppRootElement: {
         prototype: HTMLAppRootElement;
         new (): HTMLAppRootElement;
+    };
+    interface HTMLCodeViewerElement extends Components.CodeViewer, HTMLStencilElement {
+    }
+    var HTMLCodeViewerElement: {
+        prototype: HTMLCodeViewerElement;
+        new (): HTMLCodeViewerElement;
     };
     interface HTMLCreateConfigElement extends Components.CreateConfig, HTMLStencilElement {
     }
@@ -44,15 +59,25 @@ declare global {
         prototype: HTMLSelectElementItemElement;
         new (): HTMLSelectElementItemElement;
     };
+    interface HTMLSubitemEditConfigElement extends Components.SubitemEditConfig, HTMLStencilElement {
+    }
+    var HTMLSubitemEditConfigElement: {
+        prototype: HTMLSubitemEditConfigElement;
+        new (): HTMLSubitemEditConfigElement;
+    };
     interface HTMLElementTagNameMap {
         "app-root": HTMLAppRootElement;
+        "code-viewer": HTMLCodeViewerElement;
         "create-config": HTMLCreateConfigElement;
         "file-explorer": HTMLFileExplorerElement;
         "select-element-item": HTMLSelectElementItemElement;
+        "subitem-edit-config": HTMLSubitemEditConfigElement;
     }
 }
 declare namespace LocalJSX {
     interface AppRoot {
+    }
+    interface CodeViewer {
     }
     interface CreateConfig {
     }
@@ -64,11 +89,17 @@ declare namespace LocalJSX {
         "selectorType"?: string;
         "type"?: string;
     }
+    interface SubitemEditConfig {
+        "onUpdateSubItemState"?: (event: SubitemEditConfigCustomEvent<any>) => void;
+        "subItem"?: {};
+    }
     interface IntrinsicElements {
         "app-root": AppRoot;
+        "code-viewer": CodeViewer;
         "create-config": CreateConfig;
         "file-explorer": FileExplorer;
         "select-element-item": SelectElementItem;
+        "subitem-edit-config": SubitemEditConfig;
     }
 }
 export { LocalJSX as JSX };
@@ -76,9 +107,11 @@ declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
             "app-root": LocalJSX.AppRoot & JSXBase.HTMLAttributes<HTMLAppRootElement>;
+            "code-viewer": LocalJSX.CodeViewer & JSXBase.HTMLAttributes<HTMLCodeViewerElement>;
             "create-config": LocalJSX.CreateConfig & JSXBase.HTMLAttributes<HTMLCreateConfigElement>;
             "file-explorer": LocalJSX.FileExplorer & JSXBase.HTMLAttributes<HTMLFileExplorerElement>;
             "select-element-item": LocalJSX.SelectElementItem & JSXBase.HTMLAttributes<HTMLSelectElementItemElement>;
+            "subitem-edit-config": LocalJSX.SubitemEditConfig & JSXBase.HTMLAttributes<HTMLSubitemEditConfigElement>;
         }
     }
 }

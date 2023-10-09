@@ -1,5 +1,5 @@
 #create-config .header-section {
-  padding: 24px 32px;
+  padding: 32px 24px;
   border-bottom: 1px solid #E5E8E8;
   height: 60px;
   display: flex;
@@ -28,7 +28,7 @@
 
 .content-section {
   background-color: #FCFCFC;
-  padding: 24px 32px;
+  padding: 32px 24px;
 }
 
 .content-section .content-container {
@@ -36,13 +36,19 @@
   border: 1px solid #E5E8E8;
   box-shadow: 0px 4px 8px 0px rgba(4, 8, 31, 0.08), 0px 0px 0px 0px #E5E8E8 inset;
   background-color: #fff;
-  width: 552px;
-  height: 620px; 
-  /* height: 820px; */
+  width: 530px;
+  /* height: 620px;  */
+  height: 820px;
 }
 
 .content-section .content-container .content-text {
-  padding: 24px 32px;
+  padding: 32px 24px;
+  color: #282829;
+  font-family: Gibson;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px; /* 125% */
 }
 
 .content-section .content-container ion-tabs {
@@ -77,7 +83,7 @@
 }
 
 .content-section .content-container #collection-container > div {
-  padding: 24px 32px;
+  padding: 32px 24px;
   color:  #282829;
   font-family: Gibson;
   font-size: 14px;
@@ -146,8 +152,97 @@
   width: inherit;
 }
 
-.content-section .content-container .code-view-wrapper {
-  padding: 24px 32px;
+.content-section .content-container .empty-subItem-container {
+  padding: 32px 24px;
+}
+
+.content-section .content-container .empty-subItem-container .subItem-text-container {
+  font-family: Gibson;
+  font-style: normal;
+  font-weight: 300;
+  line-height: 20px; /* 125% */
+  letter-spacing: 0.042px;
+  text-align: justify;
+}
+
+.content-section .content-container .empty-subItem-container .subItem-text {
+  color: #282829;
+  font-size: 16px;
+  margin-bottom: 8px;
+
+}
+
+.content-section .content-container .empty-subItem-container .subItem-subtext {
+  color: #565B66;
+  font-size: 14px;
+}
+
+.content-section .content-container .empty-subItem-container .add-subItem-btn::part(native) {
+  margin-top: 32px;
+  border-radius: 8px;
+  border: 1px solid #1372EC;
+  background: #FFF;
+  width: 124px;
+  height: 32px;
+  min-height: unset;
+  color: #1372EC;
+  font-family: Gibson;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: 21px;
+  letter-spacing: 0.042px;
+  text-transform: capitalize;
+}
+
+.content-section .content-container .empty-subItem-container .add-subItem-btn:hover {
+  --background-hover: white;
+}
+
+.content-section .content-container .subItem-container {
+  border-radius: 8px;
+  border: 1px solid #E5E8E8;
+  width: 100%;
+  border-spacing: 0px;
+}
+
+.content-section .content-container .subItem-container .subItem-header {
+  height: 64px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-bottom: 1px solid #E5E8E8;
+  background: #F9F9F9;
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  padding-right: 24px;
+}
+
+.content-section .content-container .subItem-container th {
+  border-radius: 8px;
+  display: flex;
+  color: #1372EC;
+  font-family: Gibson;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: 21px;
+  letter-spacing: 0.042px;
+}
+
+.content-section .content-container .subItem-container th .add-subItem {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.content-section .content-container .subItem-container th .add-subItem ion-icon {
+  margin-right: 6px;
+  margin-top: -2px;
+}
+
+.content-section .content-container .subItem-container .subItem {
+  padding: 16px 24px;
   color: #282829;
   font-family: Gibson;
   font-size: 14px;
@@ -155,45 +250,22 @@
   font-weight: 500;
   line-height: 21px; /* 150% */
   letter-spacing: 0.154px;
-}
-
-.content-section .content-container .code-view-wrapper .copy-to-clipboard {
-  color: #1372EC;
-  font-weight: 300;
-  letter-spacing: 0.042px;
+  border-bottom: 1px solid #E5E8E8;
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
 }
 
-.content-section .content-container .code-view-wrapper .copy-to-clipboard ion-img::part(image) {
-  width: 12.5px;
-  margin-right: 8px;
+.content-section .content-container .subItem-container .subItem:hover {
+  background: #F9F9F9;
 }
 
-.content-section .content-container .code-view-wrapper .code-view {
-  margin-top: 16px;
-  border-radius: 8px;
-  padding: 24px 24px 24px 8px;
-  border: 1px solid #E5E8E8;
-  background: #FCFCFC;
-  color: #282829;
-  font-family: Menlo;
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 14px; /* 116.667% */
-  letter-spacing: 0.036px;
+.content-section .content-container .subItem-container .subItem ion-icon {
+  color: #1372EC;
+  cursor: pointer;
 }
 
-.content-section .content-container .code-view-wrapper .code-view pre {
-  height: 225px;
-  overflow-y: scroll;
+.content-section .content-container .subItem-container tr:last-child .subItem {
+  border-bottom: none !important;
 }
-
-/* .content-section .content-container .code-view-wrapper .code-view pre::-webkit-scrollbar {
-  width: 1px;
-}
-
-.content-section .content-container .code-view-wrapper .code-view pre::-webkit-scrollbar-track {
-  background: #F3F3F3;
-  width: 1px;
-} */
