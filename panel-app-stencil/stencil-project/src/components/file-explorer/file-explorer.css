@@ -63,7 +63,7 @@ ion-select.never-flip::part(icon) {
   border: 1px solid #E5E8E8;
   background: #FFF;
   box-shadow: 0px 4px 8px 0px rgba(4, 8, 31, 0.08), 0px 0px 0px 1px #E5E8E8 inset;
-  width: 500px;
+  max-width: 500px;
   height: 285px;
   justify-content: space-around;
   align-items: center;

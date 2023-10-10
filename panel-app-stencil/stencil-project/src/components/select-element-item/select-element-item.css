@@ -43,3 +43,7 @@
 .select-element-item ion-input.metadata-selector-input {
   width: 150px;
 }
+
+.select-element-item .remove-icon {
+  cursor: pointer;
+}

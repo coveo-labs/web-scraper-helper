@@ -9,15 +9,19 @@ import noFileImage from '../../assets/icon/NotFoundImage.svg';
 })
 export class FileExplorer {
   @State() showModal = false;
+  @State() redirectToConfig = false;
   @State() fileName = ''; // new state variable to keep track of input value
 
-  onSaveClick() {
-    console.log(`File name: ${this.fileName}`);
+  async onSaveClick() {
     this.showModal = false;
+    const modal = document.querySelector('ion-modal');
+    await modal.dismiss();
+    this.redirectToConfig = true;
   }
 
   render() {
-    return (
+    console.log('render');
+    return this.redirectToConfig === false ? (
       <div id="file-explorer">
         <div class="header-section">
           <div class="header_text-container">
@@ -64,15 +68,15 @@ export class FileExplorer {
               <ion-button fill="outline" onClick={() => (this.showModal = false)}>
                 Cancel
               </ion-button>
-              <stencil-route-link url="/createConfig">
-                <ion-button fill="outline" onClick={() => this.onSaveClick()} disabled={!this.fileName}>
-                  Save
-                </ion-button>
-              </stencil-route-link>
+              <ion-button fill="outline" onClick={() => this.onSaveClick()} disabled={!this.fileName}>
+                Save
+              </ion-button>
             </div>
           </ion-modal>
         </div>
       </div>
+    ) : (
+      <create-config fileName={this.fileName}></create-config>
     );
   }
 }

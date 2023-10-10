@@ -74,7 +74,7 @@ export class SelectElementItem {
             onIonChange={this.handleSelectorChange}
           ></ion-input>
         </div>
-        <div onClick={this.removeItem}>
+        <div class="remove-icon" onClick={this.removeItem}>
           <ion-icon name="remove-circle-outline" size="small" color="primary"></ion-icon>
         </div>
       </div>

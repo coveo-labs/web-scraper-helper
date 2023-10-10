@@ -109,7 +109,7 @@ function removeExcludedItem(item: ElementsToExclude) {
 }
 
 function addMetadataItem(item: { name: string; type: string; path: string }) {
-  state.metadata = { ...state.metadata, [item.name]: item };
+  state.metadata = { ...state.metadata, [item.name]: { type: item.type, path: item.path } };
   console.log(state.metadata);
 }
 

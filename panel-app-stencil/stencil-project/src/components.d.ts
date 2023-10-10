@@ -11,6 +11,7 @@ export namespace Components {
     interface CodeViewer {
     }
     interface CreateConfig {
+        "fileName": any;
     }
     interface FileExplorer {
     }
@@ -80,6 +81,7 @@ declare namespace LocalJSX {
     interface CodeViewer {
     }
     interface CreateConfig {
+        "fileName"?: any;
     }
     interface FileExplorer {
     }

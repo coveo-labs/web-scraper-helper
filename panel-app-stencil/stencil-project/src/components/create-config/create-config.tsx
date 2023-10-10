@@ -1,4 +1,4 @@
-import { Component, Listen, State, h } from '@stencil/core';
+import { Component, Listen, Prop, State, h } from '@stencil/core';
 import state, { addExcludedItem, addMetadataItem, addSubItem, removeSubItem } from '../store';
 
 @Component({
@@ -7,6 +7,7 @@ import state, { addExcludedItem, addMetadataItem, addSubItem, removeSubItem } fr
   shadow: true,
 })
 export class CreateConfig {
+  @Prop() fileName;
   @State() showSubItemConfig: boolean;
   @State() subItem: {};
 
@@ -34,7 +35,7 @@ export class CreateConfig {
       <div id="create-config">
         <div class="header-section">
           <div class="header_text-container">
-            <div class="header_title-text">Web Scraper files name ( TEST )</div>
+            <div class="header_title-text">Web Scraper file name: {this.fileName}</div>
             <div class="header_sub-text">Start creating Web Scraper configuration for this file.</div>
           </div>
           <div class="header_btn">

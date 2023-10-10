@@ -4,7 +4,7 @@ import logo from '../../assets/icon/CoveoLogo.svg';
 @Component({
   tag: 'app-root',
   styleUrl: 'app-root.css',
-  shadow: true,
+  shadow: false,
 })
 export class AppRoot {
   render() {
@@ -19,12 +19,7 @@ export class AppRoot {
         </header>
 
         <main>
-          <stencil-router>
-            {/* <stencil-route-switch scrollTopOffset={0}> */}
-            <stencil-route url="/" component="file-explorer" exact={true} />
-            <stencil-route url="/createConfig" component="create-config" />
-            {/* </stencil-route-switch> */}
-          </stencil-router>
+          <file-explorer></file-explorer>
         </main>
       </div>
     );
