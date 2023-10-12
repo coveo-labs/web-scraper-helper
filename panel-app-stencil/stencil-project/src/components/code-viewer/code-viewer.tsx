@@ -12,17 +12,19 @@ export class CodeViewer {
 
   formatState() {
     const { exclude, metadata, subItems } = state;
-    const formattedSubItems = subItems.map(item => {
-      const { name, exclude, metadata } = item;
-      return {
-        for: {
-          types: [name],
-        },
-        exclude,
-        metadata,
-        name,
-      };
-    });
+    const formattedSubItems =
+      subItems &&
+      subItems.map(item => {
+        const { name, exclude, metadata } = item;
+        return {
+          for: {
+            types: [name],
+          },
+          exclude,
+          metadata,
+          name,
+        };
+      });
 
     const formattedState = [
       {
@@ -31,13 +33,15 @@ export class CodeViewer {
         },
         exclude,
         metadata,
-        subItems: subItems.reduce((acc, curr) => {
-          acc[curr.name] = {
-            type: curr.type,
-            path: curr.path,
-          };
-          return acc;
-        }, {}),
+        subItems:
+          subItems &&
+          subItems.reduce((acc, curr) => {
+            acc[curr.name] = {
+              type: curr.type,
+              path: curr.path,
+            };
+            return acc;
+          }, {}),
         name: '',
       },
       ...formattedSubItems,
@@ -53,29 +57,33 @@ export class CodeViewer {
   handleTextareaInput = (event: Event) => {
     const textarea = event.target as HTMLTextAreaElement;
     try {
-      const parsedValue = JSON.parse(textarea.value);
-      const { name, exclude, metadata, subItems } = parsedValue[0];
+      const parsedValue = textarea.value && JSON.parse(textarea.value);
+      if (parsedValue) {
+        const { name, exclude, metadata, subItems } = parsedValue[0];
 
-      const formattedSubItems = Object.keys(subItems).map(key => {
-        const { exclude, metadata } = this.getSubItemValues(parsedValue, key);
-        return {
-          name: key,
-          type: subItems[key].type,
-          path: subItems[key].path,
+        const formattedSubItems =
+          subItems &&
+          Object.keys(subItems).map(key => {
+            const { exclude, metadata } = this.getSubItemValues(parsedValue, key);
+            return {
+              name: key,
+              type: subItems[key].type,
+              path: subItems[key].path,
+              exclude,
+              metadata,
+            };
+          });
+
+        const formattedValue = {
+          name,
           exclude,
           metadata,
+          subItems: subItems ? formattedSubItems : [],
         };
-      });
 
-      const formattedValue = {
-        name,
-        exclude,
-        metadata,
-        subItems: formattedSubItems,
-      };
-
-      setState(formattedValue);
-      this.invalidJSON = false;
+        setState(formattedValue);
+        this.invalidJSON = false;
+      }
     } catch (error) {
       this.invalidJSON = true;
       console.error(error);
