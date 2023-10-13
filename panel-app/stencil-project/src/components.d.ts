@@ -16,6 +16,8 @@ export namespace Components {
     }
     interface FileExplorer {
     }
+    interface MetadataResults {
+    }
     interface SelectElementItem {
         "name": string;
         "selector": string;
@@ -55,6 +57,12 @@ declare global {
         prototype: HTMLFileExplorerElement;
         new (): HTMLFileExplorerElement;
     };
+    interface HTMLMetadataResultsElement extends Components.MetadataResults, HTMLStencilElement {
+    }
+    var HTMLMetadataResultsElement: {
+        prototype: HTMLMetadataResultsElement;
+        new (): HTMLMetadataResultsElement;
+    };
     interface HTMLSelectElementItemElement extends Components.SelectElementItem, HTMLStencilElement {
     }
     var HTMLSelectElementItemElement: {
@@ -72,6 +80,7 @@ declare global {
         "code-viewer": HTMLCodeViewerElement;
         "create-config": HTMLCreateConfigElement;
         "file-explorer": HTMLFileExplorerElement;
+        "metadata-results": HTMLMetadataResultsElement;
         "select-element-item": HTMLSelectElementItemElement;
         "subitem-edit-config": HTMLSubitemEditConfigElement;
     }
@@ -86,6 +95,8 @@ declare namespace LocalJSX {
         "triggerType"?: any;
     }
     interface FileExplorer {
+    }
+    interface MetadataResults {
     }
     interface SelectElementItem {
         "name"?: string;
@@ -102,6 +113,7 @@ declare namespace LocalJSX {
         "code-viewer": CodeViewer;
         "create-config": CreateConfig;
         "file-explorer": FileExplorer;
+        "metadata-results": MetadataResults;
         "select-element-item": SelectElementItem;
         "subitem-edit-config": SubitemEditConfig;
     }
@@ -114,6 +126,7 @@ declare module "@stencil/core" {
             "code-viewer": LocalJSX.CodeViewer & JSXBase.HTMLAttributes<HTMLCodeViewerElement>;
             "create-config": LocalJSX.CreateConfig & JSXBase.HTMLAttributes<HTMLCreateConfigElement>;
             "file-explorer": LocalJSX.FileExplorer & JSXBase.HTMLAttributes<HTMLFileExplorerElement>;
+            "metadata-results": LocalJSX.MetadataResults & JSXBase.HTMLAttributes<HTMLMetadataResultsElement>;
             "select-element-item": LocalJSX.SelectElementItem & JSXBase.HTMLAttributes<HTMLSelectElementItemElement>;
             "subitem-edit-config": LocalJSX.SubitemEditConfig & JSXBase.HTMLAttributes<HTMLSubitemEditConfigElement>;
         }

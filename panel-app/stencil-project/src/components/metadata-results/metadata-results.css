@@ -1,0 +1,20 @@
+.result-container {
+  margin-top: 8px;
+  width: 484px;
+  /* height: 207px; */
+  border-radius: 8px;
+  border: 1px solid #E5E8E8;
+  display: flex;
+}
+
+.result-container table {
+  width: inherit;
+}
+
+.result-container table th {
+  width: 50%;
+}
+
+.result-container table td {
+  text-align: center;
+}

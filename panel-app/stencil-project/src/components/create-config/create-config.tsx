@@ -115,20 +115,7 @@ export class CreateConfig {
                           </div>
                         </div>
                         <div style={{ marginTop: '24px' }}>Results</div>
-                        <div class="result-container">
-                          <table id="resultGlobalTable" class="table table-condensed table-bordered">
-                            <thead>
-                              <tr>
-                                <th>Field</th>
-                                <th>Value(s)</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr></tr>
-                              <tr></tr>
-                            </tbody>
-                          </table>
-                        </div>
+                        <metadata-results></metadata-results>
                       </div>
                     </ion-tab>
                     <ion-tab tab="sub-items">

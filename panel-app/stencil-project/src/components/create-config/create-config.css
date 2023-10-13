@@ -144,19 +144,6 @@
   margin-left: 8px;
 }
 
-.content-section .content-container .result-container {
-  margin-top: 8px;
-  width: 484px;
-  /* height: 207px; */
-  border-radius: 8px;
-  border: 1px solid #E5E8E8;
-  display: flex;
-}
-
-.content-section .content-container .result-container table {
-  width: inherit;
-}
-
 .content-section .content-container .empty-subItem-container {
   padding: 32px 24px;
 }

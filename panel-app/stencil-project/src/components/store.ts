@@ -42,7 +42,7 @@ const { state, onChange }: { state: ConfigState; onChange: Function } = createSt
   metadata: {
     Title: {
       type: 'CSS',
-      path: 'head > title',
+      path: '.title',
     },
   },
   subItems: [
@@ -63,7 +63,7 @@ const { state, onChange }: { state: ConfigState; onChange: Function } = createSt
       metadata: {
         Title: {
           type: 'CSS',
-          path: 'head > title',
+          path: '.title',
         },
       },
     },
@@ -128,6 +128,12 @@ function updateState(newState): boolean {
       state.exclude = formattedValue.exclude;
       state.metadata = formattedValue.metadata;
       state.subItems = formattedValue.subItems && formattedValue.subItems;
+
+      // add opacity to the elements onLoad
+      chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+        chrome.tabs.sendMessage(tabs[0].id, { type: 'update-excludeItem-onLoad', payload: { exclude: formattedValue.exclude } });
+      });
+
       return false;
     }
   } catch (error) {
@@ -201,6 +207,18 @@ function removeMetadataItem(item: { name: string; type: string; path: string }) 
   console.log(state.metadata);
 }
 
+async function getMetadataResults() {
+  const response = await new Promise(resolve => {
+    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+      chrome.tabs.sendMessage(tabs[0].id, { type: 'metadata-results', payload: { metadata: state.metadata } }, response => {
+        resolve(response);
+      });
+    });
+  });
+  console.log('response', response);
+  return response;
+}
+
 function addSubItem() {
   state.subItems = [...state.subItems, { name: 'subItem', type: 'CSS', path: '', exclude: [], metadata: {} }];
   console.log(state.subItems);
@@ -266,4 +284,5 @@ export {
   updateMetadataItem,
   updateSubItem,
   formatState,
+  getMetadataResults,
 };
