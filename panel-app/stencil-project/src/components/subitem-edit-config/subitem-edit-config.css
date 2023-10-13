@@ -1,0 +1,129 @@
+.subItem-edit-container {
+  color: #282829;
+  font-family: Gibson;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px; /* 125% */
+}
+
+.subItem-edit-titleText {
+  padding: 32px 24px;
+  font-size: 16px;
+  border-bottom: 1px solid #E5E8E8;
+}
+
+.subItem-selector-container, .subItem-exclude-container, .subItem-metadata-container {
+  padding: 32px 24px;
+}
+
+.subItem-box {
+  padding: 24px 24px 0 24px;
+  margin-top: 8px;
+  border-radius: 8px;
+  border: 1px solid #E5E8E8;
+  background: #FCFCFC;
+  box-shadow: 0px 4px 2px -2px rgba(55, 55, 55, 0.03) inset, 0px 1px 0px -1px #E5E8E8 inset;
+}
+
+.subItem-edit-text {
+  font-size: 14px;
+}
+
+.action-btn-container {
+  padding: 0 24px;
+  display: flex;
+  justify-content: end;
+}
+
+.action-btn-container ion-button::part(native) {
+  border-radius: 8px;
+  border: 1px solid #1372EC;
+  margin-right: 8px;
+  width: 70px;
+  font-family: Gibson;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 300;
+  text-transform: capitalize;
+  --background-hover: #1372EC;
+  --background-hover-opacity: 1;
+}
+
+.action-btn-container ion-button::part(native):hover {
+  color: #FFF;
+}
+
+.add-rule {
+  display: flex;
+  align-items: center;
+  color: #1372EC;
+  font-family: Gibson;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: 21px; /* 150% */
+  letter-spacing: 0.042px;
+  cursor: pointer;
+  width: fit-content;
+  margin-bottom: 12px;
+}
+
+.add-rule > ion-icon {
+  margin: -2px 8px 0 0;
+}
+
+.subItem-select-element {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.subItem-select-element ion-select {
+  width: 88px;
+  height: 36px;
+  min-height: unset;
+  color:  #565B66;
+  font-family: Gibson;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: 21px; /* 150% */
+  letter-spacing: 0.042px;
+  --border-radius: 8px;
+}
+
+.subItem-select-element ion-input.selector-input,
+.subItem-select-element ion-input.name-input,
+.subItem-select-element ion-input.metadata-selector-input,
+.subItem-select-element ion-input.subItem-selector-input {
+  width: 230px;
+  min-height: unset;
+  height: 36px;
+  padding: 0px 16px;
+  color: #565B66;
+  font-family: Gibson;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: 21px; /* 150% */
+  letter-spacing: 0.042px;
+  --border-radius: 8px;
+}
+
+.subItem-select-element ion-input.name-input {
+  width: 100px;
+}
+
+.subItem-select-element ion-input.metadata-selector-input {
+  width: 150px;
+}
+
+.subItem-select-element ion-input.subItem-selector-input {
+  width: 200px;
+}
+
+.subItem-select-element ion-select::part(container) {
+  width: 100%;
+  justify-content: space-between;
+}
