@@ -1,4 +1,6 @@
-import { Component, h, Prop } from '@stencil/core';
+/*global chrome*/
+
+import { Component, h, Prop, State } from '@stencil/core';
 import { removeExcludedItem, removeMetadataItem, updateExcludedItem, updateMetadataItem } from '../store';
 
 @Component({
@@ -11,22 +13,84 @@ export class SelectElementItem {
   @Prop() name: string;
   @Prop() selectorType: string;
   @Prop() selector: string;
+  @State() selectorValidity;
+
+  async validateSelector(selector: string, selectorType: string) {
+    this.selectorValidity = 'Valid';
+    try {
+      switch (selectorType) {
+        case 'Xpath':
+          this.selectorValidity = this.checkForElement(selectorType, selector);
+          break;
+        case 'CSS':
+          if (!this.isValidCssSelector(selector)) {
+            this.selectorValidity = 'Invalid';
+          }
+          console.log('before', this.selectorValidity);
+          this.selectorValidity = await this.checkForElement(selectorType, selector);
+          console.log('after', this.selectorValidity);
+          break;
+      }
+    } catch (error) {
+      this.selectorValidity = 'Invalid';
+    }
+  }
+
+  async checkForElement(type, selector) {
+    let isValid = 'Valid';
+    await chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+      chrome.tabs.sendMessage(tabs[0].id, { type: 'validate-selector', payload: { type: type, selector: selector } }, null, response => {
+        console.log('response', response);
+        isValid = response;
+        this.selectorValidity = response;
+      });
+    });
+    return isValid;
+  }
+
+  isValidCssSelector(selector: string): boolean {
+    const regex = /^([a-z0-9_-]+|\*|\.[a-z0-9_-]+|#([a-z0-9_-]+|\[[\w-]+\]))+$/i;
+    return regex.test(selector);
+  }
+
+  isValidXpathSelector(selector: string): boolean {
+    try {
+      const result = document.evaluate(selector, document, null, XPathResult.ANY_TYPE, null);
+      const node = result.iterateNext();
+      return node !== null;
+    } catch (error) {
+      return false;
+    }
+  }
 
   handleSelectorTypeChange = (event: CustomEvent) => {
     const newSelectorType = event.detail.value;
-    if (this.type === 'excludeItem') {
-      updateExcludedItem({ type: newSelectorType, path: this.selector }, { type: this.selectorType, path: this.selector });
-    } else {
-      updateMetadataItem({ name: this.name, type: newSelectorType, path: this.selector }, { name: this.name, type: this.selectorType, path: this.selector });
+    this.validateSelector(this.selector, newSelectorType);
+
+    if (this.selectorValidity === 'Valid') {
+      if (this.type === 'excludeItem') {
+        updateExcludedItem({ type: newSelectorType, path: this.selector }, { type: this.selectorType, path: this.selector });
+      } else {
+        updateMetadataItem({ name: this.name, type: newSelectorType, path: this.selector }, { name: this.name, type: this.selectorType, path: this.selector });
+      }
     }
   };
 
   handleSelectorChange = (event: CustomEvent) => {
     const newSelector = event.detail.value;
-    if (this.type === 'excludeItem') {
-      updateExcludedItem({ type: this.selectorType, path: newSelector }, { type: this.selectorType, path: this.selector });
-    } else {
-      updateMetadataItem({ name: this.name, type: this.selectorType, path: newSelector }, { name: this.name, type: this.selectorType, path: this.selector });
+    this.validateSelector(newSelector, this.selectorType);
+
+    if (this.selectorValidity === 'Valid') {
+      if (this.type === 'excludeItem') {
+        updateExcludedItem({ type: this.selectorType, path: newSelector }, { type: this.selectorType, path: this.selector });
+
+        // add opacity to the element
+        chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+          chrome.tabs.sendMessage(tabs[0].id, { type: 'exclude-selector', payload: { selector: newSelector } });
+        });
+      } else {
+        updateMetadataItem({ name: this.name, type: this.selectorType, path: newSelector }, { name: this.name, type: this.selectorType, path: this.selector });
+      }
     }
   };
 
@@ -53,7 +117,15 @@ export class SelectElementItem {
         )}
         <div>
           <ion-select
-            class="never-flip"
+            class={
+              this.selectorValidity === 'No element found'
+                ? 'no-element-found-selector'
+                : this.selectorValidity === 'Invalid'
+                ? 'invalid-selector'
+                : this.selectorValidity === 'Valid'
+                ? 'valid-selector'
+                : 'never-flip'
+            }
             toggleIcon="caret-down-sharp"
             aria-label="Selector"
             interface="popover"

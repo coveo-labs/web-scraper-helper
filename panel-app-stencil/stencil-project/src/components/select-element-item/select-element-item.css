@@ -47,3 +47,15 @@
 .select-element-item .remove-icon {
   cursor: pointer;
 }
+
+.select-element-item .valid-selector {
+  --background : lightgreen;
+}
+
+.select-element-item .invalid-selector {
+  --background : #ffcccb !important;
+}
+
+.select-element-item .no-element-found-selector {
+  --background: yellow;
+}

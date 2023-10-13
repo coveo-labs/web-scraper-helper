@@ -1,6 +1,7 @@
 import { Component, State, h } from '@stencil/core';
 import '@ionic/core';
 import noFileImage from '../../assets/icon/NotFoundImage.svg';
+import state from '../store';
 
 @Component({
   tag: 'file-explorer',
@@ -9,19 +10,57 @@ import noFileImage from '../../assets/icon/NotFoundImage.svg';
 })
 export class FileExplorer {
   @State() showModal = false;
-  @State() redirectToConfig = false;
-  @State() fileName = ''; // new state variable to keep track of input value
+  @State() fileName = '';
+  @State() triggerType = 'new-file'; // keeps track whether a new file is created or loaded
+  @State() fileList = [];
 
   async onSaveClick() {
     this.showModal = false;
     const modal = document.querySelector('ion-modal');
     await modal.dismiss();
-    this.redirectToConfig = true;
+
+    state.redirectToConfig = true;
+  }
+
+  async componentWillRender() {
+    try {
+      const items = await new Promise(resolve => {
+        chrome.storage.local.get(null, items => resolve(items));
+      });
+      this.fileList = Object.keys(items);
+    } catch (e) {
+      console.log(e);
+      this.fileList = [];
+    }
+  }
+
+  renderFileList() {
+    if (this.fileList.length) {
+      return (
+        <div>
+          {this.fileList.map((item, idx) => {
+            return (
+              <ion-select-option class="file-list-names" key={idx} value={item}>
+                {item}
+              </ion-select-option>
+            );
+          })}
+        </div>
+      );
+    } else {
+      return <ion-select-option class="no-files-option">Sorry, you haven’t created any files yet.</ion-select-option>;
+    }
+  }
+
+  handleFileSelection(event) {
+    this.fileName = event.target.value;
+    this.triggerType = 'load-file';
+    state.redirectToConfig = true;
   }
 
   render() {
     console.log('render');
-    return this.redirectToConfig === false ? (
+    return state.redirectToConfig === false ? (
       <div id="file-explorer">
         <div class="header-section">
           <div class="header_text-container">
@@ -29,9 +68,16 @@ export class FileExplorer {
             <div class="header_sub-text">Choose an existing file or create a new one to work on.</div>
           </div>
           <div class="header_file-picker">
-            <ion-select class="never-flip" toggleIcon="caret-down-sharp" aria-label="Files" interface="popover" placeholder="File name" fill="outline">
-              <ion-select-option value="File 1">File 1</ion-select-option>
-              <ion-select-option value="File 2">File 2</ion-select-option>
+            <ion-select
+              class="never-flip"
+              toggleIcon="caret-down-sharp"
+              aria-label="Files"
+              interface="popover"
+              placeholder="File name"
+              fill="outline"
+              onIonChange={event => this.handleFileSelection(event)}
+            >
+              {this.renderFileList()}
             </ion-select>
           </div>
         </div>
@@ -60,7 +106,7 @@ export class FileExplorer {
               <ion-input
                 fill="outline"
                 placeholder="Name"
-                onIonInput={event => (this.fileName = (event.target as HTMLIonInputElement).value as string)}
+                onIonChange={event => (this.fileName = (event.target as HTMLIonInputElement).value as string)}
                 value={this.fileName}
               ></ion-input>
             </div>
@@ -76,7 +122,7 @@ export class FileExplorer {
         </div>
       </div>
     ) : (
-      <create-config fileName={this.fileName}></create-config>
+      <create-config fileName={this.fileName} triggerType={this.triggerType}></create-config>
     );
   }
 }

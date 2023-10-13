@@ -12,6 +12,7 @@ export namespace Components {
     }
     interface CreateConfig {
         "fileName": any;
+        "triggerType": any;
     }
     interface FileExplorer {
     }
@@ -82,6 +83,7 @@ declare namespace LocalJSX {
     }
     interface CreateConfig {
         "fileName"?: any;
+        "triggerType"?: any;
     }
     interface FileExplorer {
     }

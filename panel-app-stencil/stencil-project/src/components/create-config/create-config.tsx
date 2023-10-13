@@ -1,5 +1,5 @@
 import { Component, Listen, Prop, State, h } from '@stencil/core';
-import state, { addExcludedItem, addMetadataItem, addSubItem, removeSubItem } from '../store';
+import state, { addExcludedItem, addMetadataItem, addSubItem, formatState, removeSubItem, updateState } from '../store';
 
 @Component({
   tag: 'create-config',
@@ -8,6 +8,7 @@ import state, { addExcludedItem, addMetadataItem, addSubItem, removeSubItem } fr
 })
 export class CreateConfig {
   @Prop() fileName;
+  @Prop() triggerType;
   @State() showSubItemConfig: boolean;
   @State() subItem: {};
 
@@ -28,6 +29,35 @@ export class CreateConfig {
       const item = metadata[key];
       return <select-element-item type="metadataItem" name={key} selectorType={item.type} selector={item.path}></select-element-item>;
     });
+  }
+
+  onCancel() {
+    state.redirectToConfig = false;
+  }
+
+  onSave() {
+    try {
+      chrome.storage.local.set({
+        [this.fileName]: JSON.stringify(formatState(), null, 2),
+      });
+    } catch (e) {
+      console.log(e);
+    }
+    state.redirectToConfig = false;
+  }
+
+  async componentWillLoad() {
+    if (this.triggerType === 'load-file') {
+      try {
+        const fileItem = await new Promise(resolve => {
+          chrome.storage.local.get(this.fileName, items => resolve(items));
+        });
+
+        updateState(fileItem[this.fileName]);
+      } catch (e) {
+        console.log(e);
+      }
+    }
   }
 
   render() {
@@ -171,6 +201,16 @@ export class CreateConfig {
               <subitem-edit-config subItem={this.subItem}></subitem-edit-config>
             )}
           </div>
+          {!this.showSubItemConfig && (
+            <div class="config-action-btns">
+              <ion-button onClick={() => this.onCancel()} fill="outline" class="cancel-btn">
+                Cancel
+              </ion-button>
+              <ion-button onClick={() => this.onSave()} fill="outline" class="save-btn">
+                Save
+              </ion-button>
+            </div>
+          )}
         </div>
       </div>
     );

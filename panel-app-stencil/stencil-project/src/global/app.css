@@ -20,6 +20,27 @@ ion-popover {
   margin-left: 2rem;
 }
 
+ion-popover .no-files-option{
+  color: #565B66;
+  font-family: Gibson;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: 21px; /* 150% */
+  letter-spacing: 0.042px;
+  padding: 0px 16px !important;
+}
+
+ion-popover .file-list-names {
+  color: #565B66;
+  font-family: Gibson;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: 21px; /* 150% */
+  letter-spacing: 0.042px;
+}
+
 ion-modal#create-file-modal {
   --height: 280px;
   --width: 430px;

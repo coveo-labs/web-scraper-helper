@@ -1,3 +1,5 @@
+/*global chrome*/
+
 import { Component, h } from '@stencil/core';
 import logo from '../../assets/icon/CoveoLogo.svg';
 

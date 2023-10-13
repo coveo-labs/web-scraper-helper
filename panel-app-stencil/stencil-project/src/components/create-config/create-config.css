@@ -26,6 +26,11 @@
   letter-spacing: 0.042px;
 }
 
+.header_btn ion-button::part(native) {
+  border-radius: 8px;
+  background: #1372EC;
+}
+
 .content-section {
   background-color: #FCFCFC;
   padding: 32px 24px;
@@ -268,4 +273,29 @@
 
 .content-section .content-container .subItem-container tr:last-child .subItem {
   border-bottom: none !important;
+}
+
+.config-action-btns {
+  max-width: 530px;
+  display: flex;
+  justify-content: end;
+  padding: 8px 0px;
+}
+
+ion-button.cancel-btn::part(native), ion-button.save-btn::part(native) {
+  border-radius: 8px;
+  border: 1px solid #1372EC;
+  margin-right: 8px;
+  width: 70px;
+  font-family: Gibson;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 300;
+  text-transform: capitalize;
+  --background-hover: #1372EC;
+  --background-hover-opacity: 1;
+}
+
+.config-action-btns ion-button::part(native):hover {
+  color: #FFF;
 }
