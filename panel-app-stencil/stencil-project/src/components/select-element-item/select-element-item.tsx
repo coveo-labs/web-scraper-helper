@@ -67,7 +67,7 @@ export class SelectElementItem {
     const newSelectorType = event.detail.value;
     this.validateSelector(this.selector, newSelectorType);
 
-    if (this.selectorValidity === 'Valid') {
+    if (this.selectorValidity !== 'Invalid') {
       if (this.type === 'excludeItem') {
         updateExcludedItem({ type: newSelectorType, path: this.selector }, { type: this.selectorType, path: this.selector });
       } else {
@@ -80,14 +80,9 @@ export class SelectElementItem {
     const newSelector = event.detail.value;
     this.validateSelector(newSelector, this.selectorType);
 
-    if (this.selectorValidity === 'Valid') {
+    if (this.selectorValidity !== 'Invalid') {
       if (this.type === 'excludeItem') {
         updateExcludedItem({ type: this.selectorType, path: newSelector }, { type: this.selectorType, path: this.selector });
-
-        // add opacity to the element
-        chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-          chrome.tabs.sendMessage(tabs[0].id, { type: 'exclude-selector', payload: { selector: newSelector } });
-        });
       } else {
         updateMetadataItem({ name: this.name, type: this.selectorType, path: newSelector }, { name: this.name, type: this.selectorType, path: this.selector });
       }

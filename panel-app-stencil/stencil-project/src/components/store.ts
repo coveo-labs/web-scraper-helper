@@ -229,6 +229,11 @@ function updateMetadataItem(newItem: { name: string; type: string; path: string 
 }
 
 function updateExcludedItem(newItem: ElementsToExclude, oldItem: ElementsToExclude) {
+  // add opacity to the element
+  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+    console.log(newItem.path, oldItem.path);
+    chrome.tabs.sendMessage(tabs[0].id, { type: 'exclude-selector', payload: { newSelector: newItem.path, oldSelector: oldItem.path } });
+  });
   state.exclude = state.exclude.map(excludedItem => {
     if (excludedItem.type === oldItem.type && excludedItem.path === oldItem.path) {
       return newItem;
