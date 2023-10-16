@@ -112,7 +112,38 @@ function getElements(type, selector) {
       }
       break;
     case 'XPath':
-      // xpath validation
+      try {
+        let path = selector;
+        let nodes = document.evaluate(path, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        let elements = [];
+
+        switch (nodes.resultType) {
+          case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
+          case XPathResult.ORDERED_NODE_ITERATOR_TYPE:
+            let e;
+            while ((e = nodes.iterateNext())) {
+              let value = e.nodeValue;
+              if (value === null) {
+                value = e.outerHTML;
+              }
+              elements.push(value);
+            }
+            break;
+          case XPathResult.NUMBER_TYPE:
+            elements.push(nodes.numberValue);
+            break;
+          case XPathResult.STRING_TYPE:
+            elements.push(nodes.stringValue);
+            break;
+          case XPathResult.BOOLEAN_TYPE:
+            elements.push(nodes.booleanValue);
+            break;
+        }
+        return elements;
+      } catch (err) {
+        console.error(err);
+        return null;
+      }
       break;
   }
 }

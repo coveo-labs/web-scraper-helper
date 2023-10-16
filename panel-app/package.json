@@ -1,0 +1,31 @@
+{
+	"name": "stencil-project",
+	"private": true,
+	"version": "0.0.1",
+	"description": "Stencil App Starter",
+	"scripts": {
+		"build": "stencil build && rm -rf ../chrome_extension/www && cp -R www ../chrome_extension/www && cp index.html ../chrome_extension/www/index.html",
+		"start": "stencil build --dev --watch --serve",
+		"test": "stencil test --spec --e2e",
+		"test.watch": "stencil test --spec --e2e --watchAll",
+		"generate": "stencil generate"
+	},
+	"devDependencies": {
+		"@ionic/core": "^7.4.2",
+		"@stencil-community/router": "^1.0.2",
+		"@stencil/core": "4.3.0",
+		"@stencil/store": "^2.0.10",
+		"@types/chrome": "^0.0.246",
+		"@types/jest": "^27.0.3",
+		"jest": "^27.4.5",
+		"jest-cli": "^27.4.5",
+		"puppeteer": "^10.0.0"
+	},
+	"license": "MIT",
+	"dependencies": {
+		"@types/babel__traverse": "^7.17.1"
+	},
+	"browserslist": [
+		"last 2 Chrome versions"
+	]
+}

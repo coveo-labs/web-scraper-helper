@@ -2,3 +2,5 @@ node_modules
 .eslintcache
 *zip
 tests
+www
+.stencil
