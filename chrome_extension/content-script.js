@@ -1,78 +1,89 @@
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'exclude-selector') {
-    const { newSelector, oldSelector } = message.payload;
-    applyStylesToItems(newSelector, oldSelector)
+    const { newItem, oldItem } = message.payload;
+    applyStylesToElements(newItem, oldItem)
   }
   if (message.type === 'validate-selector') {
     let response = 'Invalid';
     const { type, selector } = message.payload;
 
-    switch (type) {
-      case 'XPath':
-        try {
-          const result = document.evaluate(selector, document, null, XPathResult.ANY_TYPE, null);
-          const node = result.iterateNext();
-          response = node === null ? 'No element found' : 'Valid';
-        } catch (error) {
-          response = 'Invalid';
-        }
-        break;
-      case 'CSS':
-        try {
-          const node = document.querySelector(selector);
-          response = node === null ? 'No element found' : 'Valid';
-        } catch {
-          response = 'Invalid';
-        }
-        break;
+    try {
+      const elements = getElements(type, selector);
+
+      if (elements && elements.length > 0) {
+        response = 'Valid';
+      } else {
+        response = 'No element found';
+      }
+    } catch (e) {
+      response = 'Invalid';
     }
     sendResponse(response);
   }
   if (message.type === 'update-excludeItem-onLoad') {
     const { exclude } = message.payload;
     exclude.length && exclude.map((element) => {
-      return applyStylesToItems(element.path, '')
+      return applyStylesToElements(element)
     })
   }
-  if (message.type === 'metadata-results') {
-    const { metadata } = message.payload;
-    const results = [];
-    for (const [key, value] of Object.entries(metadata)) {
-      const { type, path } = value;
+  // if (message.type === 'metadata-results') {
+  //   const { metadata } = message.payload;
+  //   const results = [];
+  //   for (const [key, value] of Object.entries(metadata)) {
+  //     const { type, path } = value;
 
-      const result = getMetadataFieldValue(key, type, path);
-      console.log('result', result)
-      results.push(result);
-    }
-    sendResponse(results);
-  }
+  //     const result = getMetadataFieldValue(key, type, path);
+  //     console.log('result', result)
+  //     results.push(result);
+  //   }
+  //   sendResponse(results);
+  // }
 });
 
-function applyStylesToItems(newSelector, oldSelector = '') {
-  const newElement = document.querySelector(newSelector);
-  newElement.classList.add('web-scraper-helper-exclude');
+function applyStylesToElements(newItem, oldItem = null) {
+  try {
+    const newElements = getElements(newItem.type, newItem.path);
 
-  if (oldSelector && oldSelector !== newSelector) {
-    const oldElement = document.querySelector(oldSelector);
-    oldElement.classList.remove('web-scraper-helper-exclude');
+    console.log('newElements', newElements)
+
+    newElements.forEach(element => {
+      element.classList.add('web-scraper-helper-exclude');
+    });
+
+    if (oldSelector && oldSelector !== newSelector) {
+      const oldElements = getElements(oldItem.type, oldItem.path);
+
+      oldElements.forEach(element => {
+        element.classList.remove('web-scraper-helper-exclude');
+      });
+    }
+  } catch (error) {
+    console.error(error);
   }
 }
 
-function getMetadataFieldValue(key, type, path) {
-  let resObject;
-  switch (type) {
-    case 'CSS':
-      let elements = getElements(type, path)
-      resObject = { name: key, value: elements }
-      break;
-    case 'XPath':
-      break;
-  }
-  return resObject;
+function removePreviouslyExcludedStyles() {
+  document.querySelectorAll('.web-scraper-helper-exclude').forEach(e => {
+    if (e && e.classList) {
+      e.classList.remove('web-scraper-helper-exclude');
+    }
+  });
 }
+
+// function getMetadataFieldValue(key, type, path) {
+//   let resObject;
+//   switch (type) {
+//     case 'CSS':
+//       let elements = getElements(type, path)
+//       resObject = { name: key, value: elements }
+//       break;
+//     case 'XPath':
+//       break;
+//   }
+//   return resObject;
+// }
 
 function getElements(type, selector) {
-
   switch (type) {
     case 'CSS':
       let reTextSub = /::text\b/;
@@ -92,7 +103,6 @@ function getElements(type, selector) {
         selector = selector.replace(reTextSub, '');
       }
 
-      console.log('selector', selector)
       let elements = document.querySelectorAll(selector);
       if (shouldReturnAttr) {
         let attrValues = [];
@@ -107,7 +117,7 @@ function getElements(type, selector) {
         });
         return textValues;
       } else {
-        console.log('list', Array.from(elements))
+        console.log('list', Array.from(elements));
         return Array.from(elements);
       }
       break;
@@ -138,12 +148,18 @@ function getElements(type, selector) {
           case XPathResult.BOOLEAN_TYPE:
             elements.push(nodes.booleanValue);
             break;
+          default:
+            console.error(`Unsupported selector type: ${type}`);
+            return null;
         }
         return elements;
-      } catch (err) {
-        console.error(err);
+      } catch (error) {
+        console.error(error);
         return null;
       }
       break;
+    default:
+      console.error(`Unsupported selector type: ${type}`);
+      return null;
   }
 }
