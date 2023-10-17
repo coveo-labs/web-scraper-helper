@@ -26,8 +26,8 @@ export class MetadataResults {
             </tr>
           </thead>
           <tbody>
-            {this.results.length &&
-              this.results.map(item => {
+            {this.results?.length &&
+              this.results.map((item) => {
                 return (
                   <tr>
                     <td>{item.name}</td>
