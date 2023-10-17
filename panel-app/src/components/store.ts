@@ -184,27 +184,25 @@ function formatState() {
 
 function addExcludedItem(item: ElementsToExclude) {
 	state.exclude = [...state.exclude, item];
-	console.log(state.exclude);
 }
 
 function removeExcludedItem(item: ElementsToExclude) {
-	console.log('func called', item);
 	state.exclude = state.exclude.filter((excludedItem) => {
 		return excludedItem.type !== item.type || excludedItem.path !== item.path;
 	});
-	console.log(state.exclude);
+
+	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+		chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-exclude-selector', payload: { item: item } });
+	});
 }
 
 function addMetadataItem(item: { name: string; type: string; path: string }) {
 	state.metadata = { ...state.metadata, [item.name]: { type: item.type, path: item.path } };
-	console.log(state.metadata);
 }
 
 function removeMetadataItem(item: { name: string; type: string; path: string }) {
-	console.log('func called', item);
 	const { [item.name]: _, ...metadata } = state.metadata;
 	state.metadata = metadata;
-	console.log(state.metadata);
 }
 
 async function getMetadataResults() {
@@ -221,14 +219,12 @@ async function getMetadataResults() {
 
 function addSubItem() {
 	state.subItems = [...state.subItems, { name: 'subItem', type: 'CSS', path: '', exclude: [], metadata: {} }];
-	console.log(state.subItems);
 }
 
 function removeSubItem(itemName: string) {
 	state.subItems = state.subItems.filter((subItem) => {
 		return subItem.name !== itemName;
 	});
-	console.log(state.subItems);
 }
 
 function updateMetadataItem(newItem: { name: string; type: string; path: string }, oldItem: { name: string; type: string; path: string }) {

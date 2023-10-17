@@ -45,33 +45,6 @@ export class SelectElementItem {
 		this.selectorValidity = response;
 	}
 
-	async checkForElement(type, selector) {
-		let isValid = 'Valid';
-		await chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-			chrome.tabs.sendMessage(tabs[0].id, { type: 'validate-selector', payload: { type: type, selector: selector } }, null, (response) => {
-				console.log('response', response);
-				isValid = response;
-				this.selectorValidity = response;
-			});
-		});
-		return isValid;
-	}
-
-	// isValidCssSelector(selector: string): boolean {
-	//   const regex = /^([a-z0-9_-]+|\*|\.[a-z0-9_-]+|#([a-z0-9_-]+|\[[\w-]+\]))+$/i;
-	//   return regex.test(selector);
-	// }
-
-	// isValidXpathSelector(selector: string): boolean {
-	//   try {
-	//     const result = document.evaluate(selector, document, null, XPathResult.ANY_TYPE, null);
-	//     const node = result.iterateNext();
-	//     return node !== null;
-	//   } catch (error) {
-	//     return false;
-	//   }
-	// }
-
 	handleSelectorTypeChange = (event: CustomEvent) => {
 		const newSelectorType = event.detail.value;
 		this.validateSelector(this.selector, newSelectorType);
@@ -147,7 +120,7 @@ export class SelectElementItem {
 						fill="outline"
 						value={this.selector}
 						placeholder="expression"
-						onIonChange={this.handleSelectorChange}
+						onIonInput={this.handleSelectorChange}
 					></ion-input>
 				</div>
 				<div class="remove-icon" onClick={this.removeItem}>

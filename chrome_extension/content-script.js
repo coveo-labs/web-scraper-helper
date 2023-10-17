@@ -26,6 +26,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return applyStylesToElements(element)
     })
   }
+  if (message.type === 'remove-exclude-selector') {
+    const { item } = message.payload;
+    try {
+      const elements = getElements(item.type, item.path);
+      elements.forEach(element => {
+        element.classList.remove('web-scraper-helper-exclude');
+      });
+    } catch (e) {
+      console.log(e)
+    }
+  }
   // if (message.type === 'metadata-results') {
   //   const { metadata } = message.payload;
   //   const results = [];
@@ -44,13 +55,11 @@ function applyStylesToElements(newItem, oldItem = null) {
   try {
     const newElements = getElements(newItem.type, newItem.path);
 
-    console.log('newElements', newElements)
-
-    newElements.forEach(element => {
+    newElements && newElements.forEach(element => {
       element.classList.add('web-scraper-helper-exclude');
     });
 
-    if (oldSelector && oldSelector !== newSelector) {
+    if (oldItem && oldItem.path !== newItem.path) {
       const oldElements = getElements(oldItem.type, oldItem.path);
 
       oldElements.forEach(element => {
@@ -58,7 +67,7 @@ function applyStylesToElements(newItem, oldItem = null) {
       });
     }
   } catch (error) {
-    console.error(error);
+    console.log(error);
   }
 }
 
@@ -86,39 +95,44 @@ function removePreviouslyExcludedStyles() {
 function getElements(type, selector) {
   switch (type) {
     case 'CSS':
-      let reTextSub = /::text\b/;
-      let reAttrSub = /::attr\b/;
-      let shouldReturnAttr = false;
-      let attrToGet = '';
-      let shouldReturnText = false;
+      try {
+        let reTextSub = /::text\b/;
+        let reAttrSub = /::attr\b/;
+        let shouldReturnAttr = false;
+        let attrToGet = '';
+        let shouldReturnText = false;
 
-      if (reAttrSub.test(selector)) {
-        shouldReturnAttr = true;
-        attrToGet = selector.match(/::attr\((.*?)\)/)[1];
-        selector = selector.replace(reAttrSub, '');
-      }
+        if (reAttrSub.test(selector)) {
+          shouldReturnAttr = true;
+          attrToGet = selector.match(/::attr\((.*?)\)/)[1];
+          selector = selector.replace(reAttrSub, '');
+        }
 
-      if (reTextSub.test(selector)) {
-        shouldReturnText = true;
-        selector = selector.replace(reTextSub, '');
-      }
+        if (reTextSub.test(selector)) {
+          shouldReturnText = true;
+          selector = selector.replace(reTextSub, '');
+        }
 
-      let elements = document.querySelectorAll(selector);
-      if (shouldReturnAttr) {
-        let attrValues = [];
-        elements.forEach(element => {
-          attrValues.push(element.getAttribute(attrToGet));
-        });
-        return attrValues;
-      } else if (shouldReturnText) {
-        let textValues = [];
-        elements.forEach(element => {
-          textValues.push(element.textContent);
-        });
-        return textValues;
-      } else {
-        console.log('list', Array.from(elements));
-        return Array.from(elements);
+        let elements = document.querySelectorAll(selector);
+        if (shouldReturnAttr) {
+          let attrValues = [];
+          elements.forEach(element => {
+            attrValues.push(element.getAttribute(attrToGet));
+          });
+          return attrValues;
+        } else if (shouldReturnText) {
+          let textValues = [];
+          elements.forEach(element => {
+            textValues.push(element.textContent);
+          });
+          return textValues;
+        } else {
+          // console.log('list', Array.from(elements));
+          return Array.from(elements);
+        }
+      } catch (error) {
+        console.log(error);
+        return null;
       }
       break;
     case 'XPath':
@@ -154,7 +168,7 @@ function getElements(type, selector) {
         }
         return elements;
       } catch (error) {
-        console.error(error);
+        console.log(error);
         return null;
       }
       break;
