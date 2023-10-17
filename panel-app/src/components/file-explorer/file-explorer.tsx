@@ -95,14 +95,14 @@ export class FileExplorer {
 							<ion-img id="coveo-logo-img" src={noFileImage}></ion-img>
 						</div>
 					</div>
-					<ion-modal id="create-file-modal" isOpen={this.showModal}>
+					<ion-modal id="create-file-modal" isOpen={this.showModal} backdropDismiss={false}>
 						<div class="modal-header">
 							<div>Create new file</div>
 							<ion-icon name="close-outline" onClick={() => (this.showModal = false)}></ion-icon>
 						</div>
 						<div class="modal-content">
 							<div>Enter a name for your Web Scraper file.</div>
-							<ion-input fill="outline" placeholder="Name" onIonChange={(event) => (this.fileName = (event.target as HTMLIonInputElement).value as string)} value={this.fileName}></ion-input>
+							<ion-input fill="outline" placeholder="Name" onIonInput={(event) => (this.fileName = (event.target as HTMLIonInputElement).value as string)} value={this.fileName}></ion-input>
 						</div>
 						<div class="modal-footer">
 							<ion-button fill="outline" onClick={() => (this.showModal = false)}>
