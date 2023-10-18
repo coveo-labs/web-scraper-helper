@@ -10,7 +10,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     try {
       const elements = getElements(type, selector);
 
-      if (elements && elements.length > 0) {
+      if (!elements) {
+        response = 'Invalid';
+      }
+      else if (elements && elements.length > 0) {
         response = 'Valid';
       } else {
         response = 'No element found';
@@ -43,21 +46,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   //   for (const [key, value] of Object.entries(metadata)) {
   //     const { type, path } = value;
 
-  //     const result = getMetadataFieldValue(key, type, path);
+  //     const result = getElements(type, path);
+  //     const modifiedResult = result && result.map((e) => e.outerHTML)
   //     console.log('result', result)
-  //     results.push(result);
+  //     results.push({ [key]: modifiedResult });
   //   }
+  //   console.log(results[0])
   //   sendResponse(results);
   // }
 });
 
 function applyStylesToElements(newItem, oldItem = null) {
   try {
-    const newElements = getElements(newItem.type, newItem.path);
-
-    newElements && newElements.forEach(element => {
-      element.classList.add('web-scraper-helper-exclude');
-    });
 
     if (oldItem && oldItem.path !== newItem.path) {
       const oldElements = getElements(oldItem.type, oldItem.path);
@@ -66,6 +66,18 @@ function applyStylesToElements(newItem, oldItem = null) {
         element.classList.remove('web-scraper-helper-exclude');
       });
     }
+
+    let newElements = [];
+    if (newItem.type === 'CSS' && newItem.path.indexOf(',') !== -1) {
+      newElements = newItem.path.split(',').flatMap((i) => getElements('CSS', i));
+    } else {
+      newElements = getElements(newItem.type, newItem.path);
+    }
+
+    newElements && newElements.forEach(element => {
+      element.classList.add('web-scraper-helper-exclude');
+    });
+
   } catch (error) {
     console.log(error);
   }
@@ -79,18 +91,6 @@ function removePreviouslyExcludedStyles() {
   });
 }
 
-// function getMetadataFieldValue(key, type, path) {
-//   let resObject;
-//   switch (type) {
-//     case 'CSS':
-//       let elements = getElements(type, path)
-//       resObject = { name: key, value: elements }
-//       break;
-//     case 'XPath':
-//       break;
-//   }
-//   return resObject;
-// }
 
 function getElements(type, selector) {
   switch (type) {
