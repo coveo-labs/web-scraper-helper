@@ -59,7 +59,7 @@
 }
 
 .select-element-item .no-element-found-selector {
-  --border-color: yellow;
+  --border-color: #8F7000;
   color: #8F7000;
 }
 
