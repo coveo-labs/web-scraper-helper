@@ -49,15 +49,18 @@
 }
 
 .select-element-item .valid-selector {
-  --background : lightgreen;
+  --border-color : #12A344;
+  color: #12A344;
 }
 
 .select-element-item .invalid-selector {
-  --background : #ffcccb !important;
+  --border-color : #CD2113 !important;
+  color: #CD2113;
 }
 
 .select-element-item .no-element-found-selector {
-  --background: yellow;
+  --border-color: yellow;
+  color: #8F7000;
 }
 
 .select-element-item ion-select::part(container) {

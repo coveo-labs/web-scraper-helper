@@ -42,7 +42,7 @@ const { state }: { state: ConfigState } = createStore({
 	metadata: {
 		Title: {
 			type: 'CSS',
-			path: '.title',
+			path: '.title::text',
 		},
 	},
 	subItems: [

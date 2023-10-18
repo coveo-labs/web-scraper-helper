@@ -40,20 +40,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       console.log(e)
     }
   }
-  // if (message.type === 'metadata-results') {
-  //   const { metadata } = message.payload;
-  //   const results = [];
-  //   for (const [key, value] of Object.entries(metadata)) {
-  //     const { type, path } = value;
+  if (message.type === 'metadata-results') {
+    const { metadata } = message.payload;
+    const results = [];
+    for (const [key, value] of Object.entries(metadata)) {
+      const { type, path } = value;
 
-  //     const result = getElements(type, path);
-  //     const modifiedResult = result && result.map((e) => e.outerHTML)
-  //     console.log('result', result)
-  //     results.push({ [key]: modifiedResult });
-  //   }
-  //   console.log(results[0])
-  //   sendResponse(results);
-  // }
+      const result = getElements(type, path);
+      const modifiedResult = result && result.map((e) => typeof (e) === 'object' ? e.outerHTML : e)
+      console.log('result', result)
+      results.push({ "name": key, "values": modifiedResult });
+    }
+    console.log(results[0])
+    sendResponse(results);
+  }
 });
 
 function applyStylesToElements(newItem, oldItem = null) {

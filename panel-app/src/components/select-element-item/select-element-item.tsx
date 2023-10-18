@@ -62,12 +62,12 @@ export class SelectElementItem {
 		const newSelector = event.detail.value;
 		this.validateSelector(newSelector, this.selectorType);
 
-		if (this.selectorValidity !== 'Invalid') {
-			if (this.type === 'excludeItem') {
-				updateExcludedItem({ type: this.selectorType, path: newSelector }, { type: this.selectorType, path: this.selector });
-			} else {
-				updateMetadataItem({ name: this.name, type: this.selectorType, path: newSelector }, { name: this.name, type: this.selectorType, path: this.selector });
-			}
+		// if (this.selectorValidity !== 'Invalid') {
+		if (this.type === 'excludeItem') {
+			updateExcludedItem({ type: this.selectorType, path: newSelector }, { type: this.selectorType, path: this.selector });
+		} else {
+			updateMetadataItem({ name: this.name, type: this.selectorType, path: newSelector }, { name: this.name, type: this.selectorType, path: this.selector });
+			// }
 		}
 	};
 
