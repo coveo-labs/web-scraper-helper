@@ -10,7 +10,7 @@
 
 .result-container table {
   width: inherit;
-  padding: 12px 0px;
+  border-collapse: collapse !important;
 }
 
 .result-container .table-header {
@@ -25,6 +25,11 @@
 
 .result-container table th {
   width: 50%;
+  padding: 12px 0px;
+}
+
+.result-container table tr {
+  border-bottom: 1px solid #E5E8E8;
 }
 
 .result-container table td {
@@ -36,6 +41,7 @@
   font-weight: 300;
   line-height: 21px;
   letter-spacing: 0.042px;
+  padding: 6px 0px;
 }
 
 .result-container table td.values-section {

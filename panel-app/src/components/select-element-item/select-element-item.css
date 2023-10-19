@@ -51,16 +51,22 @@
 .select-element-item .valid-selector {
   --border-color : #12A344;
   color: #12A344;
+  border-radius: 8px;
+  box-shadow: 0px 0px 3px 2px rgba(0, 136, 67, 0.12), 0px 0px 0px 1px rgba(0, 136, 67, 0.60);
 }
 
 .select-element-item .invalid-selector {
   --border-color : #CD2113 !important;
   color: #CD2113;
+  border-radius: 8px;
+  box-shadow: 0px 0px 3px 2px rgba(205, 33, 19, 0.12), 0px 0px 0px 1px rgba(205, 33, 19, 0.60);
 }
 
 .select-element-item .no-element-found-selector {
   --border-color: #8F7000;
   color: #8F7000;
+  box-shadow: 0px 0px 3px 2px rgba(226, 177, 4, 0.12), 0px 0px 0px 1px rgba(226, 177, 4, 0.60);
+  border-radius: 8px;
 }
 
 .select-element-item ion-select::part(container) {
