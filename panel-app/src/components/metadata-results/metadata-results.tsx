@@ -1,4 +1,4 @@
-import { Component, State, h } from '@stencil/core';
+import { Component, Prop, State, h } from '@stencil/core';
 import { getMetadataResults } from '../store';
 @Component({
 	tag: 'metadata-results',
@@ -6,12 +6,17 @@ import { getMetadataResults } from '../store';
 	shadow: true,
 })
 export class MetadataResults {
+	@Prop() metadata: any;
 	@State() results: any;
 
 	async componentWillRender() {
-		// needs to be fixed
-		this.results = await getMetadataResults();
-		console.log('results', this.results);
+		try {
+			this.results = await getMetadataResults();
+			console.log('results', this.results);
+		} catch (e) {
+			console.log(e);
+			this.results = [];
+		}
 	}
 
 	render() {

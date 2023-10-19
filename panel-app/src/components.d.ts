@@ -17,6 +17,7 @@ export namespace Components {
     interface FileExplorer {
     }
     interface MetadataResults {
+        "metadata": any;
     }
     interface SelectElementItem {
         "name": string;
@@ -97,6 +98,7 @@ declare namespace LocalJSX {
     interface FileExplorer {
     }
     interface MetadataResults {
+        "metadata"?: any;
     }
     interface SelectElementItem {
         "name"?: string;

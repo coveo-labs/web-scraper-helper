@@ -48,10 +48,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       const result = getElements(type, path);
       const modifiedResult = result && result.map((e) => typeof (e) === 'object' ? e.outerHTML : e)
-      console.log('result', result)
       results.push({ "name": key, "values": modifiedResult });
     }
-    console.log(results[0])
+    console.log(results)
     sendResponse(results);
   }
 });
