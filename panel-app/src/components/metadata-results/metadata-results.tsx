@@ -25,14 +25,13 @@ export class MetadataResults {
 						</tr>
 					</thead>
 					<tbody>
-						{this.results &&
-							this.results.length &&
+						{this.results?.length &&
 							this.results.map((item) => {
 								return (
 									<tr>
 										<td class="metadata-name-section">{item.name}</td>
-										<td class="values-section" colSpan={item.values && item.values.length}>
-											{item.values.length &&
+										<td class="values-section" colSpan={item.values?.length}>
+											{item.values?.length &&
 												item.values.map((val, idx) => {
 													return <div key={idx}>{val}</div>;
 												})}
