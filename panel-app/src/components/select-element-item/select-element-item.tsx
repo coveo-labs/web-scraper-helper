@@ -59,6 +59,7 @@ export class SelectElementItem {
 	};
 
 	handleSelectorChange = (event: CustomEvent) => {
+		console.log('handleSelectorChange: ', event);
 		const newSelector = event.detail.value;
 		this.validateSelector(newSelector, this.selectorType);
 
@@ -85,6 +86,13 @@ export class SelectElementItem {
 	};
 
 	render() {
+		const cssClassForValidity =
+			{
+				'No element found': 'no-element-found-selector',
+				Invalid: 'invalid-selector',
+				Valid: 'valid-selector',
+			}[this.selectorValidity] || 'never-flip';
+
 		return (
 			<div class="select-element-item">
 				{this.type === 'metadataItem' && (
@@ -94,15 +102,7 @@ export class SelectElementItem {
 				)}
 				<div>
 					<ion-select
-						class={
-							this.selectorValidity === 'No element found'
-								? 'no-element-found-selector'
-								: this.selectorValidity === 'Invalid'
-								? 'invalid-selector'
-								: this.selectorValidity === 'Valid'
-								? 'valid-selector'
-								: 'never-flip'
-						}
+						class={cssClassForValidity}
 						toggleIcon="caret-down-sharp"
 						aria-label="Selector"
 						interface="popover"

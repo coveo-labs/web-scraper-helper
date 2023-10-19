@@ -27,7 +27,7 @@ type ConfigState = {
 	subItems: SubItems[];
 };
 
-const { state }: { state: ConfigState } = createStore({
+const { state }: { state: ConfigState; } = createStore({
 	redirectToConfig: false,
 	exclude: [
 		{
@@ -196,11 +196,11 @@ function removeExcludedItem(item: ElementsToExclude) {
 	});
 }
 
-function addMetadataItem(item: { name: string; type: string; path: string }) {
+function addMetadataItem(item: { name: string; type: string; path: string; }) {
 	state.metadata = { ...state.metadata, [item.name]: { type: item.type, path: item.path } };
 }
 
-function removeMetadataItem(item: { name: string; type: string; path: string }) {
+function removeMetadataItem(item: { name: string; type: string; path: string; }) {
 	const { [item.name]: _, ...metadata } = state.metadata;
 	state.metadata = metadata;
 }
@@ -227,7 +227,7 @@ function removeSubItem(itemName: string) {
 	});
 }
 
-function updateMetadataItem(newItem: { name: string; type: string; path: string }, oldItem: { name: string; type: string; path: string }) {
+function updateMetadataItem(newItem: { name: string; type: string; path: string; }, oldItem: { name: string; type: string; path: string; }) {
 	if (newItem.name !== oldItem.name) {
 		const metadata = {};
 		for (const key in state.metadata) {
@@ -245,7 +245,7 @@ function updateMetadataItem(newItem: { name: string; type: string; path: string 
 function updateExcludedItem(newItem: ElementsToExclude, oldItem: ElementsToExclude) {
 	// add opacity to the element
 	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-		console.log(newItem.path, oldItem.path);
+		console.log('updateExcludedItem: ', newItem.path, oldItem.path);
 		chrome.tabs.sendMessage(tabs[0].id, { type: 'exclude-selector', payload: { newItem: newItem, oldItem: oldItem } });
 	});
 	state.exclude = state.exclude.map((excludedItem) => {
