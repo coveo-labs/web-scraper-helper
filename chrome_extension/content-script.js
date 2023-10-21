@@ -8,7 +8,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const { type, selector } = message.payload;
 
     try {
-      const elements = getElements(type, selector);
+      const elements = getElements(false, type, selector);
 
       if (!elements) {
         response = 'Invalid';
@@ -32,7 +32,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'remove-exclude-selector') {
     const { item } = message.payload;
     try {
-      const elements = getElements(item.type, item.path);
+      const elements = getElements(false, item.type, item.path);
       elements.forEach(element => {
         element.classList.remove('web-scraper-helper-exclude');
       });
@@ -46,20 +46,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     for (const [key, value] of Object.entries(metadata)) {
       const { type, path } = value;
 
-      const result = getElements(type, path);
+      const result = getElements(false, type, path);
       const modifiedResult = result && result.map((e) => typeof (e) === 'object' ? e.outerHTML : e)
       results.push({ "name": key, "values": modifiedResult });
     }
-    console.log(results)
+    console.log('metadata-result-array', results)
     sendResponse(results);
   }
 });
 
 function applyStylesToElements(newItem, oldItem = null) {
   try {
-
     if (oldItem && oldItem.path !== newItem.path) {
-      const oldElements = getElements(oldItem.type, oldItem.path);
+      const oldElements = getElements(newItem.type === 'XPath', oldItem.type, oldItem.path) ?? [];
 
       oldElements.forEach(element => {
         element.classList.remove('web-scraper-helper-exclude');
@@ -68,12 +67,12 @@ function applyStylesToElements(newItem, oldItem = null) {
 
     let newElements = [];
     if (newItem.type === 'CSS' && newItem.path.indexOf(',') !== -1) {
-      newElements = newItem.path.split(',').flatMap((i) => getElements('CSS', i));
+      newElements = newItem.path.split(',').flatMap((i) => getElements(false, 'CSS', i)) ?? [];
     } else {
-      newElements = getElements(newItem.type, newItem.path);
+      newElements = getElements(newItem.type === 'XPath', newItem.type, newItem.path) ?? [];
     }
 
-    newElements && newElements.forEach(element => {
+    newElements.forEach(element => {
       element.classList.add('web-scraper-helper-exclude');
     });
 
@@ -91,7 +90,7 @@ function removePreviouslyExcludedStyles() {
 }
 
 
-function getElements(type, selector) {
+function getElements(asIs = false, type, selector) {
   switch (type) {
     case 'CSS':
       try {
@@ -126,7 +125,6 @@ function getElements(type, selector) {
           });
           return textValues;
         } else {
-          // console.log('list', Array.from(elements));
           return Array.from(elements);
         }
       } catch (error) {
@@ -137,16 +135,17 @@ function getElements(type, selector) {
     case 'XPath':
       try {
         let path = selector;
-        let nodes = document.evaluate(path, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        let nodes = document.evaluate(path, document);
         let elements = [];
-
         switch (nodes.resultType) {
           case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
           case XPathResult.ORDERED_NODE_ITERATOR_TYPE:
             let e;
             while ((e = nodes.iterateNext())) {
               let value = e.nodeValue;
-              if (value === null) {
+              if (asIs) {
+                value = e;
+              } else if (value === null) {
                 value = e.outerHTML;
               }
               elements.push(value);
@@ -161,9 +160,6 @@ function getElements(type, selector) {
           case XPathResult.BOOLEAN_TYPE:
             elements.push(nodes.booleanValue);
             break;
-          default:
-            console.error(`Unsupported selector type: ${type}`);
-            return null;
         }
         return elements;
       } catch (error) {
@@ -171,8 +167,5 @@ function getElements(type, selector) {
         return null;
       }
       break;
-    default:
-      console.error(`Unsupported selector type: ${type}`);
-      return null;
   }
 }
