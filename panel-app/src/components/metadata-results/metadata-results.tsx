@@ -30,7 +30,7 @@ export class MetadataResults {
 						</tr>
 					</thead>
 					<tbody>
-						{this.results?.length &&
+						{this.results?.length ? (
 							this.results.map((item) => {
 								return (
 									<tr>
@@ -43,7 +43,10 @@ export class MetadataResults {
 										</td>
 									</tr>
 								);
-							})}
+							})
+						) : (
+							<div></div>
+						)}
 					</tbody>
 				</table>
 			</div>

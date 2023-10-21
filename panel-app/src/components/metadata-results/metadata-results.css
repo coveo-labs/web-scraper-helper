@@ -1,7 +1,7 @@
 .result-container {
   margin-top: 8px;
-  /* width: 484px; */
-  height: 208px;
+  width: 100%;
+  max-height: 208px;
   border-radius: 8px;
   border: 1px solid #E5E8E8;
   display: flex;
@@ -42,6 +42,10 @@
   line-height: 21px;
   letter-spacing: 0.042px;
   padding: 6px 0px;
+}
+
+.result-container table td.metadata-name-section {
+  vertical-align: top;
 }
 
 .result-container table td.values-section {

@@ -1,5 +1,4 @@
 /*global chrome*/
-
 import { Component, h, Prop, State } from '@stencil/core';
 import { removeExcludedItem, removeMetadataItem, updateExcludedItem, updateMetadataItem } from '../store';
 
@@ -16,25 +15,6 @@ export class SelectElementItem {
 	@State() selectorValidity;
 
 	async validateSelector(selector: string, selectorType: string) {
-		// this.selectorValidity = 'Valid';
-		// try {
-		//   switch (selectorType) {
-		//     case 'Xpath':
-		//       this.selectorValidity = this.checkForElement(selectorType, selector);
-		//       break;
-		//     case 'CSS':
-		//       if (!this.isValidCssSelector(selector)) {
-		//         this.selectorValidity = 'Invalid';
-		//       }
-		//       console.log('before', this.selectorValidity);
-		//       this.selectorValidity = await this.checkForElement(selectorType, selector);
-		//       console.log('after', this.selectorValidity);
-		//       break;
-		//   }
-		// } catch (error) {
-		//   this.selectorValidity = 'Invalid';
-		// }
-
 		const response = await new Promise((resolve) => {
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 				chrome.tabs.sendMessage(tabs[0].id, { type: 'validate-selector', payload: { type: selectorType, selector: selector } }, null, (response) => {
@@ -63,12 +43,10 @@ export class SelectElementItem {
 		const newSelector = event.detail.value;
 		this.validateSelector(newSelector, this.selectorType);
 
-		// if (this.selectorValidity !== 'Invalid') {
 		if (this.type === 'excludeItem') {
 			updateExcludedItem({ type: this.selectorType, path: newSelector }, { type: this.selectorType, path: this.selector });
 		} else {
 			updateMetadataItem({ name: this.name, type: this.selectorType, path: newSelector }, { name: this.name, type: this.selectorType, path: this.selector });
-			// }
 		}
 	};
 
@@ -97,7 +75,7 @@ export class SelectElementItem {
 			<div class="select-element-item">
 				{this.type === 'metadataItem' && (
 					<div>
-						<ion-input class="name-input" fill="outline" value={this.name} placeholder="Name" onIonChange={this.handleNameChange}></ion-input>
+						<ion-input class="name-input" fill="outline" value={this.name} placeholder="Name" onIonInput={this.handleNameChange}></ion-input>
 					</div>
 				)}
 				<div>

@@ -115,7 +115,7 @@ export class CreateConfig {
 													</div>
 												</div>
 												<div style={{ marginTop: '24px' }}>Results</div>
-												<metadata-results></metadata-results>
+												<metadata-results metadata={state.metadata}></metadata-results>
 											</div>
 										</ion-tab>
 										<ion-tab tab="sub-items">
