@@ -1,5 +1,5 @@
 import { Component, Listen, Prop, State, h } from '@stencil/core';
-import state, { addExcludedItem, addMetadataItem, addSubItem, formatState, removeSubItem, updateState } from '../store';
+import state, { addExcludedItem, addMetadataItem, addSubItem, formatState, removeSubItem, updateGlobalName, updateState } from '../store';
 
 @Component({
 	tag: 'create-config',
@@ -44,6 +44,10 @@ export class CreateConfig {
 			console.log(e);
 		}
 		// state.redirectToConfig = false; /
+	}
+
+	handleGlobalNameChange(e) {
+		updateGlobalName(e.detail.value);
 	}
 
 	async componentWillLoad() {
@@ -91,7 +95,13 @@ export class CreateConfig {
 										<ion-tab tab="elements-to-exclude" id="collection-container">
 											<div>
 												<div>Global section name</div>
-												<ion-input class="global-section-input" fill="outline" placeholder="Name your global section"></ion-input>
+												<ion-input
+													class="global-section-input"
+													fill="outline"
+													placeholder="Name your global section"
+													value={state.name || ''}
+													onIonInput={(e) => this.handleGlobalNameChange(e)}
+												></ion-input>
 												<div>Select page elements to exclude</div>
 												<div class="select-element__container">
 													{this.renderExcludedItems()}
@@ -105,7 +115,13 @@ export class CreateConfig {
 										<ion-tab tab="metadata-to-extract" id="collection-container">
 											<div>
 												<div>Global section name</div>
-												<ion-input class="global-section-input" fill="outline" placeholder="Name your global section"></ion-input>
+												<ion-input
+													class="global-section-input"
+													fill="outline"
+													placeholder="Name your global section"
+													value={state.name || ''}
+													onIonInput={(e) => this.handleGlobalNameChange(e)}
+												></ion-input>
 												<div>Select metadata to extract</div>
 												<div class="select-element__container">
 													{this.renderMetadataItems()}

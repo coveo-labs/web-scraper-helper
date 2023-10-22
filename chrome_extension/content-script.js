@@ -32,7 +32,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'remove-exclude-selector') {
     const { item } = message.payload;
     try {
-      const elements = getElements(false, item.type, item.path);
+      const elements = getElements(item.type === 'XPath', item.type, item.path);
       elements.forEach(element => {
         element.classList.remove('web-scraper-helper-exclude');
       });

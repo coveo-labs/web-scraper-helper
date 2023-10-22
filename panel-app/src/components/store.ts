@@ -21,6 +21,7 @@ type SubItems = {
 };
 
 type ConfigState = {
+	name?: string;
 	redirectToConfig: boolean;
 	exclude: ElementsToExclude[];
 	metadata: Metadata;
@@ -125,6 +126,7 @@ function updateState(newState): boolean {
 				subItems: subItems ? formattedSubItems : [],
 			};
 
+			state.name = formattedValue.name;
 			state.exclude = formattedValue.exclude;
 			state.metadata = formattedValue.metadata;
 			state.subItems = formattedValue.subItems && formattedValue.subItems;
@@ -137,13 +139,13 @@ function updateState(newState): boolean {
 			return false;
 		}
 	} catch (error) {
-		console.error(error);
+		console.log(error);
 		return true;
 	}
 }
 
 function formatState() {
-	const { exclude, metadata, subItems } = state;
+	const { exclude, metadata, subItems, name } = state;
 	const formattedSubItems =
 		subItems &&
 		subItems.map((item) => {
@@ -160,6 +162,7 @@ function formatState() {
 
 	const formattedState = [
 		{
+			name: name,
 			for: {
 				urls: ['.*'],
 			},
@@ -174,12 +177,15 @@ function formatState() {
 					};
 					return acc;
 				}, {}),
-			name: '',
 		},
 		...formattedSubItems,
 	];
 
 	return formattedState;
+}
+
+function updateGlobalName(newName) {
+	state.name = newName;
 }
 
 function addExcludedItem(item: ElementsToExclude) {
@@ -270,6 +276,7 @@ function updateSubItem(newItem: SubItems, oldItem: SubItems) {
 export default state;
 export {
 	updateState,
+	updateGlobalName,
 	addExcludedItem,
 	removeExcludedItem,
 	addMetadataItem,
