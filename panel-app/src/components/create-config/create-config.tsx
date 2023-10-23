@@ -1,5 +1,6 @@
 import { Component, Listen, Prop, State, h } from '@stencil/core';
 import state, { addExcludedItem, addMetadataItem, addSubItem, formatState, removeSubItem, updateGlobalName, updateState } from '../store';
+import { toastController } from '@ionic/core';
 
 @Component({
 	tag: 'create-config',
@@ -43,10 +44,18 @@ export class CreateConfig {
 			chrome.storage.local.set({
 				[this.fileName]: JSON.stringify(formatState(), null, 2),
 			});
+			toastController
+				.create({
+					message: 'File saved successfully!',
+					duration: 2000,
+					position: 'top',
+				})
+				.then((toast) => {
+					toast.present();
+				});
 		} catch (e) {
 			console.log(e);
 		}
-		// state.redirectToConfig = false; /
 	}
 
 	handleGlobalNameChange(e) {
