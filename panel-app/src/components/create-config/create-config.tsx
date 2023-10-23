@@ -116,7 +116,7 @@ export class CreateConfig {
 												></ion-input>
 												<div>Select page elements to exclude</div>
 												<div class="select-element__container">
-													{this.renderExcludedItems()}
+													<div id="select-element__wrapper">{this.renderExcludedItems()}</div>
 													<div class="add-rule" onClick={() => addExcludedItem({ type: 'CSS', path: '' })}>
 														<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
 														<span>Add Rule</span>
@@ -136,7 +136,7 @@ export class CreateConfig {
 												></ion-input>
 												<div>Select metadata to extract</div>
 												<div class="select-element__container">
-													{this.renderMetadataItems()}
+													<div id="select-element__wrapper">{this.renderMetadataItems()}</div>
 													<div class="add-rule" onClick={() => addMetadataItem({ name: '', type: 'CSS', path: '' })}>
 														<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
 														<span>Add Rule</span>

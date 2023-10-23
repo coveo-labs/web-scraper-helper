@@ -209,7 +209,7 @@ export class SubitemEditConfig {
 				<div class="subItem-exclude-container">
 					<div class="subItem-edit-text">Elements to exlude</div>
 					<div class="subItem-box">
-						{this.renderExcludedItems()}
+						<div id="select-subItem__wrapper">{this.renderExcludedItems()}</div>
 						<div class="add-rule" onClick={() => this.updateState('add-excludedItem', { type: 'CSS', path: '' })}>
 							<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
 							<span>Add Rule</span>
@@ -219,7 +219,7 @@ export class SubitemEditConfig {
 				<div class="subItem-metadata-container">
 					<div class="subItem-edit-text">Metadata to extract</div>
 					<div class="subItem-box">
-						{this.renderMetadataItems()}
+						<div id="select-subItem__wrapper">{this.renderMetadataItems()}</div>
 						<div class="add-rule" onClick={() => this.updateState('add-metadataItem', { type: 'CSS', path: '' }, '')}>
 							<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
 							<span>Add Rule</span>

@@ -46,6 +46,10 @@
   height: 820px;
 }
 
+.content-section .content-container:has(subitem-edit-config) {
+  height: 950px !important;
+}
+
 .content-section .content-container .content-text {
   padding: 32px 24px;
   color: #282829;
@@ -126,6 +130,12 @@
   padding: 24px;
 }
 
+#select-element__wrapper {
+  margin: 8px;
+  max-height: 150px;
+  overflow: scroll;
+}
+
 #collection-container .select-element__container .add-rule {
   display: flex;
   align-items: center;
@@ -138,6 +148,7 @@
   letter-spacing: 0.042px;
   cursor: pointer;
   width: fit-content;
+  margin-left: 8px;
 }
 
 #collection-container .select-element__container .add-rule > span {
