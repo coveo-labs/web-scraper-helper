@@ -25,8 +25,8 @@ export class SelectElementItem {
 		this.selectorValidity = response;
 	}
 
-	handleSelectorTypeChange = (event: CustomEvent) => {
-		const newSelectorType = event.detail.value;
+	handleSelectorTypeChange = () => {
+		const newSelectorType = this.selectorType === 'CSS' ? 'XPath' : 'CSS';
 		this.validateSelector(this.selector, newSelectorType);
 
 		if (this.type === 'excludeItem') {
@@ -81,18 +81,7 @@ export class SelectElementItem {
 					</div>
 				)}
 				<div>
-					<ion-select
-						class={cssClassForValidity}
-						toggleIcon="caret-down-sharp"
-						aria-label="Selector"
-						interface="popover"
-						fill="outline"
-						value={this.selectorType}
-						onIonChange={this.handleSelectorTypeChange}
-					>
-						<ion-select-option value="CSS">CSS</ion-select-option>
-						<ion-select-option value="XPath">XPath</ion-select-option>
-					</ion-select>
+					<ion-input id="selector-type-input" class={cssClassForValidity} fill="outline" value={this.selectorType} onClick={this.handleSelectorTypeChange}></ion-input>
 				</div>
 				<div>
 					<ion-input
