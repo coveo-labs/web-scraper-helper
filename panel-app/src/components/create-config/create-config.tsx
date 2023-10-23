@@ -105,7 +105,7 @@ export class CreateConfig {
 										</ion-tab-bar>
 
 										<ion-tab tab="elements-to-exclude" id="collection-container">
-											<div>
+											<div class="collection-subContainer">
 												<div>Global section name</div>
 												<ion-input
 													class="global-section-input"
@@ -125,7 +125,7 @@ export class CreateConfig {
 											</div>
 										</ion-tab>
 										<ion-tab tab="metadata-to-extract" id="collection-container">
-											<div>
+											<div class="collection-subContainer">
 												<div>Global section name</div>
 												<ion-input
 													class="global-section-input"

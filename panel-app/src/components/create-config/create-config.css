@@ -91,7 +91,7 @@
   border-bottom: 1px solid #1372EC !important;
 }
 
-.content-section .content-container #collection-container > div {
+.content-section .content-container #collection-container .collection-subContainer {
   padding: 32px 24px;
   color:  #282829;
   font-family: Gibson;
@@ -131,7 +131,7 @@
 }
 
 #select-element__wrapper {
-  margin: 8px;
+  padding: 8px 2px;
   max-height: 150px;
   overflow: scroll;
 }
@@ -148,7 +148,8 @@
   letter-spacing: 0.042px;
   cursor: pointer;
   width: fit-content;
-  margin-left: 8px;
+  margin-left: 6px;
+  margin-top: 14px;
 }
 
 #collection-container .select-element__container .add-rule > span {
@@ -296,4 +297,8 @@ ion-button.cancel-btn::part(native), ion-button.save-btn::part(native) {
 
 .config-action-btns ion-button::part(native):hover {
   color: #FFF;
+}
+
+#select-element__wrapper select-element-item:last-child .select-element-item{
+  margin-bottom: 0px !important;
 }
