@@ -1,6 +1,7 @@
 import { Component, State, h } from '@stencil/core';
 import '@ionic/core';
 import noFileImage from '../../assets/icon/NotFoundImage.svg';
+import infoToken from '../../assets/icon/InfoToken.svg';
 import state from '../store';
 
 @Component({
@@ -63,7 +64,12 @@ export class FileExplorer {
 			<div id="file-explorer">
 				<div class="header-section">
 					<div class="header_text-container">
-						<div class="header_title-text">Your Web Scraper files</div>
+						<div class="header_title-text">
+							Your Web Scraper files
+							<a href="https://github.com/coveo-labs/web-scraper-helper">
+								<ion-img id="infoToken-img" src={infoToken}></ion-img>
+							</a>
+						</div>
 						<div class="header_sub-text">Choose an existing file or create a new one to work on.</div>
 					</div>
 					<div class="header_file-picker">

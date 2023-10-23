@@ -1,6 +1,7 @@
 import { Component, Listen, Prop, State, h } from '@stencil/core';
 import state, { addExcludedItem, addMetadataItem, addSubItem, formatState, removeSubItem, updateGlobalName, updateState } from '../store';
 import { toastController } from '@ionic/core';
+import infoToken from '../../assets/icon/InfoToken.svg';
 
 @Component({
 	tag: 'create-config',
@@ -81,7 +82,12 @@ export class CreateConfig {
 			<div id="create-config">
 				<div class="header-section">
 					<div class="header_text-container">
-						<div class="header_title-text">Web Scraper file name: {this.fileName}</div>
+						<div class="header_title-text">
+							Web Scraper file name: <span style={{ marginLeft: '4px', textTransform: 'capitalize' }}>{this.fileName}</span>
+							<a href="https://github.com/coveo-labs/web-scraper-helper">
+								<ion-img id="infoToken-img" src={infoToken}></ion-img>
+							</a>
+						</div>
 						<div class="header_sub-text">Start creating Web Scraper configuration for this file.</div>
 					</div>
 					<div class="header_btn">

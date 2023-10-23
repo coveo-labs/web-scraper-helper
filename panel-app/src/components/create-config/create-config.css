@@ -14,6 +14,17 @@
   font-weight: 500;
   line-height: 24px;
   margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+}
+
+#infoToken-img {
+  margin-left: 8px;
+  cursor: pointer;
+}
+#infoToken-img::part(image) {
+  width: 16px;
+  height: 16px;
 }
 
 .header_sub-text {
