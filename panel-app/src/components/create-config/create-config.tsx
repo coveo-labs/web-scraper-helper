@@ -33,6 +33,9 @@ export class CreateConfig {
 
 	onDone() {
 		state.redirectToConfig = false;
+		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+			chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-excluded-on-file-close' });
+		});
 	}
 
 	onSave() {

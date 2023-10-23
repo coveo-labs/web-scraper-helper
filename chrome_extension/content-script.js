@@ -40,6 +40,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       console.log(e)
     }
   }
+  if (message.type === 'remove-excluded-on-file-close') {
+    removePreviouslyExcludedStyles();
+  }
   if (message.type === 'metadata-results') {
     const { metadata } = message.payload;
     const results = [];
@@ -88,7 +91,6 @@ function removePreviouslyExcludedStyles() {
     }
   });
 }
-
 
 function getElements(asIs = false, type, selector) {
   switch (type) {
