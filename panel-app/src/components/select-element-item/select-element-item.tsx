@@ -29,12 +29,10 @@ export class SelectElementItem {
 		const newSelectorType = event.detail.value;
 		this.validateSelector(this.selector, newSelectorType);
 
-		if (this.selectorValidity !== 'Invalid') {
-			if (this.type === 'excludeItem') {
-				updateExcludedItem({ type: newSelectorType, path: this.selector }, { type: this.selectorType, path: this.selector });
-			} else {
-				updateMetadataItem({ name: this.name, type: newSelectorType, path: this.selector }, { name: this.name, type: this.selectorType, path: this.selector });
-			}
+		if (this.type === 'excludeItem') {
+			updateExcludedItem({ type: newSelectorType, path: this.selector }, { type: this.selectorType, path: this.selector });
+		} else {
+			updateMetadataItem({ name: this.name, type: newSelectorType, path: this.selector }, { name: this.name, type: this.selectorType, path: this.selector });
 		}
 	};
 
@@ -62,6 +60,10 @@ export class SelectElementItem {
 			removeMetadataItem({ name: this.name, type: this.selectorType, path: this.selector });
 		}
 	};
+
+	componentWillRender() {
+		this.validateSelector(this.selector, this.selectorType);
+	}
 
 	render() {
 		const cssClassForValidity =

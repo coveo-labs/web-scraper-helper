@@ -36,10 +36,13 @@ export class MetadataResults {
 									<tr>
 										<td class="metadata-name-section">{item.name}</td>
 										<td class="values-section" colSpan={item.values?.length}>
-											{item.values?.length &&
+											{item.values?.length ? (
 												item.values.map((val, idx) => {
 													return <div key={idx}>{val}</div>;
-												})}
+												})
+											) : (
+												<div></div>
+											)}
 										</td>
 									</tr>
 								);
