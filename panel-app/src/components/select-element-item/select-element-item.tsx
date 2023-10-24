@@ -12,6 +12,7 @@ export class SelectElementItem {
 	@Prop() name: string;
 	@Prop() selectorType: string;
 	@Prop() selector: string;
+	@Prop() isBoolean?: boolean;
 	@State() selectorValidity;
 
 	async validateSelector(selector: string, selectorType: string) {
@@ -53,6 +54,11 @@ export class SelectElementItem {
 		updateMetadataItem({ name: newName, type: this.selectorType, path: this.selector }, { name: this.name, type: this.selectorType, path: this.selector });
 	};
 
+	handleCheckboxChange = (event: CustomEvent) => {
+		const isChecked = event.detail.checked;
+		updateMetadataItem({ name: this.name, type: this.selectorType, path: this.selector, isBoolean: isChecked }, { name: this.name, type: this.selectorType, path: this.selector });
+	};
+
 	removeItem = () => {
 		if (this.type === 'excludeItem') {
 			removeExcludedItem({ type: this.selectorType, path: this.selector });
@@ -92,6 +98,12 @@ export class SelectElementItem {
 						onIonInput={this.handleSelectorChange}
 					></ion-input>
 				</div>
+				{this.type === 'metadataItem' && (
+					<div>
+						<ion-checkbox onIonChange={this.handleCheckboxChange} checked={this.isBoolean}></ion-checkbox>
+						<ion-icon name="information-circle-outline"></ion-icon>
+					</div>
+				)}
 				<div class="remove-icon" onClick={this.removeItem}>
 					<ion-icon name="remove-circle-outline" size="small" color="primary"></ion-icon>
 				</div>

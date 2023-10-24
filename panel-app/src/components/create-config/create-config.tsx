@@ -29,7 +29,7 @@ export class CreateConfig {
 		const metadata = state.metadata;
 		return Object.keys(metadata).map((key) => {
 			const item = metadata[key];
-			return <select-element-item type="metadataItem" name={key} selectorType={item.type} selector={item.path}></select-element-item>;
+			return <select-element-item type="metadataItem" name={key} selectorType={item.type} selector={item.path} isBoolean={item.isBoolean}></select-element-item>;
 		});
 	}
 

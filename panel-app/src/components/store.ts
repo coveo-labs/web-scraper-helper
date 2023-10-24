@@ -9,6 +9,7 @@ export type Metadata = {
 	[key: string]: {
 		type: string;
 		path: string;
+		isBoolean?: boolean;
 	};
 };
 
@@ -233,7 +234,7 @@ function removeSubItem(itemName: string) {
 	});
 }
 
-function updateMetadataItem(newItem: { name: string; type: string; path: string }, oldItem: { name: string; type: string; path: string }) {
+function updateMetadataItem(newItem: { name: string; type: string; path: string; isBoolean?: boolean }, oldItem: { name: string; type: string; path: string; isBoolean?: boolean }) {
 	if (newItem.name !== oldItem.name) {
 		const metadata = {};
 		for (const key in state.metadata) {
@@ -241,10 +242,10 @@ function updateMetadataItem(newItem: { name: string; type: string; path: string 
 				metadata[key] = state.metadata[key];
 			}
 		}
-		metadata[newItem.name] = { type: newItem.type, path: newItem.path };
+		metadata[newItem.name] = { type: newItem.type, path: newItem.path, ...(newItem.isBoolean && { isBoolean: newItem.isBoolean }) };
 		state.metadata = metadata;
 	} else {
-		state.metadata = { ...state.metadata, [newItem.name]: { type: newItem.type, path: newItem.path } };
+		state.metadata = { ...state.metadata, [newItem.name]: { type: newItem.type, path: newItem.path, ...(newItem.isBoolean && { isBoolean: newItem.isBoolean }) } };
 	}
 }
 

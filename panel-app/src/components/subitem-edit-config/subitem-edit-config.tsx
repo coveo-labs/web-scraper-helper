@@ -94,9 +94,9 @@ export class SubitemEditConfig {
 				if (metadataItem) {
 					if (newItem.name && newItem.name !== key) {
 						const { [key]: removed, ...rest } = this.metadata;
-						this.metadata = { ...rest, [newItem.name]: { type: newItem.type, path: newItem.path } };
+						this.metadata = { ...rest, [newItem.name]: { type: newItem.type, path: newItem.path, isBoolean: newItem.isBoolean } };
 					} else {
-						this.metadata = { ...this.metadata, [key]: { ...metadataItem, ...{ type: newItem.type, path: newItem.path } } };
+						this.metadata = { ...this.metadata, [key]: { ...metadataItem, ...{ type: newItem.type, path: newItem.path, isBoolean: newItem.isBoolean } } };
 					}
 				}
 				break;
@@ -117,7 +117,7 @@ export class SubitemEditConfig {
 	renderMetadataItems() {
 		return Object.keys(this.metadata).map((key) => {
 			const item = this.metadata[key];
-			return this.renderInputItem('metadataItem', key, item.type, item.path);
+			return this.renderInputItem('metadataItem', key, item.type, item.path, item.isBoolean);
 		});
 	}
 
@@ -125,13 +125,13 @@ export class SubitemEditConfig {
 		return this.renderInputItem('subItem', this.subItemState.name, this.subItemState.type, this.subItemState.path);
 	}
 
-	renderInputItem(type, name = '', selectorType, selector) {
+	renderInputItem(type, name = '', selectorType, selector, isBoolean = false) {
 		return (
 			<div class="subItem-select-element">
 				{(type === 'metadataItem' || type === 'subItem') && (
 					<div>
 						<ion-input
-							class="name-input"
+							class={type === 'metadataItem' ? 'metadata-name-input name-input' : 'name-input'}
 							fill="outline"
 							value={name}
 							placeholder="Name"
@@ -183,6 +183,20 @@ export class SubitemEditConfig {
 						}
 					></ion-input>
 				</div>
+				{type === 'metadataItem' && (
+					<div>
+						<ion-checkbox
+							checked={isBoolean}
+							onIonChange={(event) =>
+								this.updateState('update-metadataItem', { type: selectorType, path: selector, isBoolean: event.detail.checked }, name, {
+									type: selectorType,
+									path: selector,
+								})
+							}
+						></ion-checkbox>
+						<ion-icon name="information-circle-outline"></ion-icon>
+					</div>
+				)}
 				{!(type === 'subItem') && (
 					<div
 						style={{ cursor: 'pointer' }}

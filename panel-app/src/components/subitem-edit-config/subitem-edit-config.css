@@ -136,6 +136,10 @@
   width: 100px;
 }
 
+.subItem-select-element ion-input.metadata-name-input {
+  width: 70px !important;
+}
+
 .subItem-select-element ion-input.metadata-selector-input {
   width: 150px;
 }
@@ -167,4 +171,24 @@
 
 #select-subItem__wrapper .subItem-select-element:last-child {
   margin-bottom: 0px !important;
+}
+
+
+ion-checkbox {
+  --size: 16px;
+  --checkbox-background-checked:#3F3F71;
+  --checkmark-width: 2;
+}
+
+ion-checkbox::part(container) {
+  border-radius: 4px;
+  border: 1px solid #E5E8E8;
+}
+
+ion-icon[name="information-circle-outline"] {
+  height: 16px;
+  width: 16px;
+  color: #B7BCC0;
+  margin-left: 8px;
+  cursor: pointer;
 }
