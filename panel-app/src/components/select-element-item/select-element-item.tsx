@@ -8,6 +8,7 @@ import { removeExcludedItem, removeMetadataItem, updateExcludedItem, updateMetad
 	shadow: false,
 })
 export class SelectElementItem {
+	@Prop() uniqueId: string;
 	@Prop() type: string;
 	@Prop() name: string;
 	@Prop() selectorType: string;
@@ -31,7 +32,7 @@ export class SelectElementItem {
 		this.validateSelector(this.selector, newSelectorType);
 
 		if (this.type === 'excludeItem') {
-			updateExcludedItem({ type: newSelectorType, path: this.selector }, { type: this.selectorType, path: this.selector });
+			updateExcludedItem({ id: this.uniqueId, type: newSelectorType, path: this.selector }, { id: this.uniqueId, type: this.selectorType, path: this.selector });
 		} else {
 			updateMetadataItem({ name: this.name, type: newSelectorType, path: this.selector }, { name: this.name, type: this.selectorType, path: this.selector });
 		}
@@ -43,7 +44,7 @@ export class SelectElementItem {
 		this.validateSelector(newSelector, this.selectorType);
 
 		if (this.type === 'excludeItem') {
-			updateExcludedItem({ type: this.selectorType, path: newSelector }, { type: this.selectorType, path: this.selector });
+			updateExcludedItem({ id: this.uniqueId, type: this.selectorType, path: newSelector }, { id: this.uniqueId, type: this.selectorType, path: this.selector });
 		} else {
 			updateMetadataItem({ name: this.name, type: this.selectorType, path: newSelector }, { name: this.name, type: this.selectorType, path: this.selector });
 		}
@@ -61,7 +62,7 @@ export class SelectElementItem {
 
 	removeItem = () => {
 		if (this.type === 'excludeItem') {
-			removeExcludedItem({ type: this.selectorType, path: this.selector });
+			removeExcludedItem({ id: this.uniqueId, type: this.selectorType, path: this.selector });
 		} else {
 			removeMetadataItem({ name: this.name, type: this.selectorType, path: this.selector });
 		}

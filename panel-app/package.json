@@ -22,7 +22,8 @@
 		"puppeteer": "^21.3.8"
 	},
 	"dependencies": {
-		"@types/babel__traverse": "^7.20.3"
+		"@types/babel__traverse": "^7.20.3",
+		"uuid": "^9.0.1"
 	},
 	"browserslist": [
 		"last 2 Chrome versions"

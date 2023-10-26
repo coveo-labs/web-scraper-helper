@@ -1,6 +1,8 @@
 import { createStore } from '@stencil/store';
+import { v4 as uuidv4 } from 'uuid';
 
 export type ElementsToExclude = {
+	id: string;
 	type: string;
 	path: string;
 };
@@ -33,10 +35,12 @@ const { state }: { state: ConfigState } = createStore({
 	redirectToConfig: false,
 	exclude: [
 		{
+			id: getId(),
 			type: 'CSS',
 			path: '.header',
 		},
 		{
+			id: getId(),
 			type: 'XPath',
 			path: '/html/body/div[1]/div[2]/div[1]/div/div[1]/div[1]/div/p[2]',
 		},
@@ -54,10 +58,12 @@ const { state }: { state: ConfigState } = createStore({
 			path: '.rsx-product-list-product-wrap, .rsx-product-list-lightbox-product-wrap',
 			exclude: [
 				{
+					id: getId(),
 					type: 'CSS',
 					path: '.header',
 				},
 				{
+					id: getId(),
 					type: 'XPath',
 					path: '#footer',
 				},
@@ -75,10 +81,12 @@ const { state }: { state: ConfigState } = createStore({
 			path: '.rsx-product-list-product-wrap, .rsx-product-list-lightbox-product-wrap',
 			exclude: [
 				{
+					id: getId(),
 					type: 'CSS',
 					path: '.header',
 				},
 				{
+					id: getId(),
 					type: 'XPath',
 					path: '#footer',
 				},
@@ -93,9 +101,10 @@ const { state }: { state: ConfigState } = createStore({
 	],
 });
 
-// onChange('exclude', (newValue) => {
-// 	console.log('exclude-changed', newValue);
-// });
+function getId() {
+	let uniqueId = uuidv4();
+	return `uid-${uniqueId}-${Date.now()}`;
+}
 
 function getSubItemValues(arrayList, key) {
 	return arrayList.find((obj) => obj.name === key);
@@ -189,13 +198,14 @@ function updateGlobalName(newName) {
 	state.name = newName;
 }
 
-function addExcludedItem(item: ElementsToExclude) {
-	state.exclude = [...state.exclude, item];
+function addExcludedItem(item) {
+	const id = getId();
+	state.exclude = [...state.exclude, { ...item, id }];
 }
 
 function removeExcludedItem(item: ElementsToExclude) {
 	state.exclude = state.exclude.filter((excludedItem) => {
-		return excludedItem.type !== item.type || excludedItem.path !== item.path;
+		return excludedItem.id !== item.id;
 	});
 
 	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -256,7 +266,7 @@ function updateExcludedItem(newItem: ElementsToExclude, oldItem: ElementsToExclu
 		chrome.tabs.sendMessage(tabs[0].id, { type: 'exclude-selector', payload: { newItem: newItem, oldItem: oldItem } });
 	});
 	state.exclude = state.exclude.map((excludedItem) => {
-		if (excludedItem.type === oldItem.type && excludedItem.path === oldItem.path) {
+		if (excludedItem.id === oldItem.id) {
 			return newItem;
 		} else {
 			return excludedItem;

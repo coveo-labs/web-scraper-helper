@@ -25,6 +25,7 @@ export namespace Components {
         "selector": string;
         "selectorType": string;
         "type": string;
+        "uniqueId": string;
     }
     interface SubitemEditConfig {
         "subItem": {};
@@ -107,6 +108,7 @@ declare namespace LocalJSX {
         "selector"?: string;
         "selectorType"?: string;
         "type"?: string;
+        "uniqueId"?: string;
     }
     interface SubitemEditConfig {
         "onUpdateSubItemState"?: (event: SubitemEditConfigCustomEvent<any>) => void;

@@ -21,7 +21,7 @@ export class CreateConfig {
 
 	renderExcludedItems() {
 		return state.exclude.map((item) => {
-			return <select-element-item type="excludeItem" selectorType={item.type} selector={item.path}></select-element-item>;
+			return <select-element-item type="excludeItem" selectorType={item.type} selector={item.path} uniqueId={item.id}></select-element-item>;
 		});
 	}
 
