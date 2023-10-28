@@ -120,6 +120,12 @@ function updateState(newState): boolean {
 		if (parsedValue) {
 			const { name, exclude, metadata, subItems } = parsedValue[0];
 
+			const formattedExclude =
+				exclude &&
+				exclude.map((item) => {
+					return { id: getId(), type: item.type, path: item.path };
+				});
+
 			const formattedMetadata =
 				metadata &&
 				Object.keys(metadata).reduce((acc, key) => {
@@ -145,7 +151,7 @@ function updateState(newState): boolean {
 
 			const formattedValue = {
 				name,
-				exclude,
+				exclude: formattedExclude,
 				metadata: formattedMetadata,
 				subItems: subItems ? formattedSubItems : [],
 			};
@@ -170,6 +176,12 @@ function updateState(newState): boolean {
 
 function formatState() {
 	const { exclude, metadata, subItems, name } = state;
+
+	const formattedExclude =
+		exclude &&
+		exclude.map((item) => {
+			return { type: item.type, path: item.path };
+		});
 
 	const formattedMetadata =
 		metadata &&
@@ -200,7 +212,7 @@ function formatState() {
 			for: {
 				urls: ['.*'],
 			},
-			exclude,
+			exclude: formattedExclude,
 			metadata: formattedMetadata,
 			subItems:
 				subItems &&
