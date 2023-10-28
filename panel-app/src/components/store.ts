@@ -9,6 +9,7 @@ export type ElementsToExclude = {
 
 export type Metadata = {
 	[key: string]: {
+		name: string;
 		type: string;
 		path: string;
 		isBoolean?: boolean;
@@ -31,6 +32,11 @@ type ConfigState = {
 	subItems: SubItems[];
 };
 
+function getId(): string {
+	let uniqueId = uuidv4();
+	return `uid-${uniqueId}-${Date.now()}`;
+}
+
 const { state }: { state: ConfigState } = createStore({
 	redirectToConfig: false,
 	exclude: [
@@ -46,7 +52,8 @@ const { state }: { state: ConfigState } = createStore({
 		},
 	],
 	metadata: {
-		Title: {
+		'uid-7fb4d0a5-664b-4df7-89a0-702b7b47e255-1698474061246': {
+			name: 'Title',
 			type: 'CSS',
 			path: '.title::text',
 		},
@@ -69,7 +76,8 @@ const { state }: { state: ConfigState } = createStore({
 				},
 			],
 			metadata: {
-				Title: {
+				'uid-7fb4d0a5-664b-4df7-89a0-702b7b47e255-1698474061247': {
+					name: 'Title',
 					type: 'CSS',
 					path: '.title',
 				},
@@ -92,7 +100,8 @@ const { state }: { state: ConfigState } = createStore({
 				},
 			],
 			metadata: {
-				Title: {
+				'uid-7fb4d0a5-664b-4df7-89a0-702b7b47e255-1698474061248': {
+					name: 'Title',
 					type: 'CSS',
 					path: 'head > title',
 				},
@@ -100,11 +109,6 @@ const { state }: { state: ConfigState } = createStore({
 		},
 	],
 });
-
-function getId() {
-	let uniqueId = uuidv4();
-	return `uid-${uniqueId}-${Date.now()}`;
-}
 
 function getSubItemValues(arrayList, key) {
 	return arrayList.find((obj) => obj.name === key);
@@ -115,6 +119,16 @@ function updateState(newState): boolean {
 		const parsedValue = JSON.parse(newState);
 		if (parsedValue) {
 			const { name, exclude, metadata, subItems } = parsedValue[0];
+
+			const formattedMetadata =
+				metadata &&
+				Object.keys(metadata).reduce((acc, key) => {
+					const item = metadata[key];
+					const itemName = Object.keys(item)[0];
+					const { type, path, isBoolean } = Object.values(item)[0] as { type: string; path: string; isBoolean: boolean };
+					acc[getId()] = { name: itemName, type: type, path: path, ...(isBoolean && { isBoolean: isBoolean }) };
+					return acc;
+				}, {});
 
 			const formattedSubItems =
 				subItems &&
@@ -132,7 +146,7 @@ function updateState(newState): boolean {
 			const formattedValue = {
 				name,
 				exclude,
-				metadata,
+				metadata: formattedMetadata,
 				subItems: subItems ? formattedSubItems : [],
 			};
 
@@ -156,6 +170,16 @@ function updateState(newState): boolean {
 
 function formatState() {
 	const { exclude, metadata, subItems, name } = state;
+
+	const formattedMetadata =
+		metadata &&
+		Object.keys(metadata).map((key) => {
+			const { name, type, path, isBoolean } = metadata[key];
+			return {
+				[name]: { type, path, isBoolean },
+			};
+		});
+
 	const formattedSubItems =
 		subItems &&
 		subItems.map((item) => {
@@ -177,7 +201,7 @@ function formatState() {
 				urls: ['.*'],
 			},
 			exclude,
-			metadata,
+			metadata: formattedMetadata,
 			subItems:
 				subItems &&
 				subItems.reduce((acc, curr) => {
@@ -214,11 +238,11 @@ function removeExcludedItem(item: ElementsToExclude) {
 }
 
 function addMetadataItem(item: { name: string; type: string; path: string }) {
-	state.metadata = { ...state.metadata, [item.name]: { type: item.type, path: item.path } };
+	state.metadata = { ...state.metadata, [getId()]: { name: item.name, type: item.type, path: item.path } };
 }
 
-function removeMetadataItem(item: { name: string; type: string; path: string }) {
-	const { [item.name]: _, ...metadata } = state.metadata;
+function removeMetadataItem(uid: string) {
+	const { [uid]: _, ...metadata } = state.metadata;
 	state.metadata = metadata;
 }
 
@@ -244,19 +268,15 @@ function removeSubItem(itemName: string) {
 	});
 }
 
-function updateMetadataItem(newItem: { name: string; type: string; path: string; isBoolean?: boolean }, oldItem: { name: string; type: string; path: string; isBoolean?: boolean }) {
-	if (newItem.name !== oldItem.name) {
-		const metadata = {};
-		for (const key in state.metadata) {
-			if (key !== oldItem.name) {
-				metadata[key] = state.metadata[key];
-			}
+function updateMetadataItem(newItem: { id: string; name: string; type: string; path: string; isBoolean?: boolean }) {
+	state.metadata = Object.keys(state.metadata).reduce((acc, key) => {
+		if (key === newItem.id) {
+			acc[key] = { name: newItem.name, type: newItem.type, path: newItem.path, ...(newItem.isBoolean && { isBoolean: newItem.isBoolean }) };
+		} else {
+			acc[key] = state.metadata[key];
 		}
-		metadata[newItem.name] = { type: newItem.type, path: newItem.path, ...(newItem.isBoolean && { isBoolean: newItem.isBoolean }) };
-		state.metadata = metadata;
-	} else {
-		state.metadata = { ...state.metadata, [newItem.name]: { type: newItem.type, path: newItem.path, ...(newItem.isBoolean && { isBoolean: newItem.isBoolean }) } };
-	}
+		return acc;
+	}, {});
 }
 
 function updateExcludedItem(newItem: ElementsToExclude, oldItem: ElementsToExclude) {

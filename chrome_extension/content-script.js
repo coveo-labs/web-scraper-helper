@@ -47,11 +47,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const { metadata } = message.payload;
     const results = [];
     for (const [key, value] of Object.entries(metadata)) {
-      const { type, path, isBoolean } = value;
+      const { name, type, path, isBoolean } = value;
 
       const result = getElements(false, type, path);
       const modifiedResult = isBoolean ? [(!!result.length).toString()] : result && result.map((e) => typeof (e) === 'object' ? e.outerHTML : e)
-      results.push({ "name": key, "values": modifiedResult });
+      results.push({ "name": name, "values": modifiedResult });
     }
     console.log('metadata-result-array', results)
     sendResponse(results);

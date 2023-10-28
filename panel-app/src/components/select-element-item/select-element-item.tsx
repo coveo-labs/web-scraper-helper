@@ -34,7 +34,7 @@ export class SelectElementItem {
 		if (this.type === 'excludeItem') {
 			updateExcludedItem({ id: this.uniqueId, type: newSelectorType, path: this.selector }, { id: this.uniqueId, type: this.selectorType, path: this.selector });
 		} else {
-			updateMetadataItem({ name: this.name, type: newSelectorType, path: this.selector }, { name: this.name, type: this.selectorType, path: this.selector });
+			updateMetadataItem({ id: this.uniqueId, name: this.name, type: newSelectorType, path: this.selector });
 		}
 	};
 
@@ -46,25 +46,25 @@ export class SelectElementItem {
 		if (this.type === 'excludeItem') {
 			updateExcludedItem({ id: this.uniqueId, type: this.selectorType, path: newSelector }, { id: this.uniqueId, type: this.selectorType, path: this.selector });
 		} else {
-			updateMetadataItem({ name: this.name, type: this.selectorType, path: newSelector }, { name: this.name, type: this.selectorType, path: this.selector });
+			updateMetadataItem({ id: this.uniqueId, name: this.name, type: this.selectorType, path: newSelector });
 		}
 	};
 
 	handleNameChange = (event: CustomEvent) => {
 		const newName = event.detail.value;
-		updateMetadataItem({ name: newName, type: this.selectorType, path: this.selector }, { name: this.name, type: this.selectorType, path: this.selector });
+		updateMetadataItem({ id: this.uniqueId, name: newName, type: this.selectorType, path: this.selector });
 	};
 
 	handleCheckboxChange = (event: CustomEvent) => {
 		const isChecked = event.detail.checked;
-		updateMetadataItem({ name: this.name, type: this.selectorType, path: this.selector, isBoolean: isChecked }, { name: this.name, type: this.selectorType, path: this.selector });
+		updateMetadataItem({ id: this.uniqueId, name: this.name, type: this.selectorType, path: this.selector, isBoolean: isChecked });
 	};
 
 	removeItem = () => {
 		if (this.type === 'excludeItem') {
 			removeExcludedItem({ id: this.uniqueId, type: this.selectorType, path: this.selector });
 		} else {
-			removeMetadataItem({ name: this.name, type: this.selectorType, path: this.selector });
+			removeMetadataItem(this.uniqueId);
 		}
 	};
 
