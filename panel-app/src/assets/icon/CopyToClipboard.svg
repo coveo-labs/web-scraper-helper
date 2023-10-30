@@ -1,0 +1,9 @@
+<svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Icon">
+<rect id="Outer Sheet" x="0.5" y="0.5" width="9" height="10" rx="1.5" stroke="#1372EC"/>
+<path id="Txt" d="M2.5 7.5H7.5" stroke="#1372EC" stroke-linecap="round"/>
+<path id="Txt_2" d="M2.5 3.5H7.5" stroke="#1372EC" stroke-linecap="round"/>
+<path id="Txt_3" d="M2.5 5.5H7.5" stroke="#1372EC" stroke-linecap="round"/>
+<path id="Sheet" d="M3.5 13.5H10.5C11.6046 13.5 12.5 12.6046 12.5 11.5V4.5" stroke="#1372EC" stroke-linecap="round"/>
+</g>
+</svg>
