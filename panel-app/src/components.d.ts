@@ -27,9 +27,21 @@ export namespace Components {
         "type": string;
         "uniqueId": string;
     }
+    interface SubItemInputElement {
+        "isBoolean": boolean;
+        "name": string;
+        "selector": string;
+        "selectorType": string;
+        "type": string;
+        "uniqueId": string;
+    }
     interface SubitemEditConfig {
         "subItem": {};
     }
+}
+export interface SubItemInputElementCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLSubItemInputElementElement;
 }
 export interface SubitemEditConfigCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -72,6 +84,12 @@ declare global {
         prototype: HTMLSelectElementItemElement;
         new (): HTMLSelectElementItemElement;
     };
+    interface HTMLSubItemInputElementElement extends Components.SubItemInputElement, HTMLStencilElement {
+    }
+    var HTMLSubItemInputElementElement: {
+        prototype: HTMLSubItemInputElementElement;
+        new (): HTMLSubItemInputElementElement;
+    };
     interface HTMLSubitemEditConfigElement extends Components.SubitemEditConfig, HTMLStencilElement {
     }
     var HTMLSubitemEditConfigElement: {
@@ -85,6 +103,7 @@ declare global {
         "file-explorer": HTMLFileExplorerElement;
         "metadata-results": HTMLMetadataResultsElement;
         "select-element-item": HTMLSelectElementItemElement;
+        "sub-item-input-element": HTMLSubItemInputElementElement;
         "subitem-edit-config": HTMLSubitemEditConfigElement;
     }
 }
@@ -110,6 +129,15 @@ declare namespace LocalJSX {
         "type"?: string;
         "uniqueId"?: string;
     }
+    interface SubItemInputElement {
+        "isBoolean"?: boolean;
+        "name"?: string;
+        "onUpdateSubItem"?: (event: SubItemInputElementCustomEvent<any>) => void;
+        "selector"?: string;
+        "selectorType"?: string;
+        "type"?: string;
+        "uniqueId"?: string;
+    }
     interface SubitemEditConfig {
         "onUpdateSubItemState"?: (event: SubitemEditConfigCustomEvent<any>) => void;
         "subItem"?: {};
@@ -121,6 +149,7 @@ declare namespace LocalJSX {
         "file-explorer": FileExplorer;
         "metadata-results": MetadataResults;
         "select-element-item": SelectElementItem;
+        "sub-item-input-element": SubItemInputElement;
         "subitem-edit-config": SubitemEditConfig;
     }
 }
@@ -134,6 +163,7 @@ declare module "@stencil/core" {
             "file-explorer": LocalJSX.FileExplorer & JSXBase.HTMLAttributes<HTMLFileExplorerElement>;
             "metadata-results": LocalJSX.MetadataResults & JSXBase.HTMLAttributes<HTMLMetadataResultsElement>;
             "select-element-item": LocalJSX.SelectElementItem & JSXBase.HTMLAttributes<HTMLSelectElementItemElement>;
+            "sub-item-input-element": LocalJSX.SubItemInputElement & JSXBase.HTMLAttributes<HTMLSubItemInputElementElement>;
             "subitem-edit-config": LocalJSX.SubitemEditConfig & JSXBase.HTMLAttributes<HTMLSubitemEditConfigElement>;
         }
     }

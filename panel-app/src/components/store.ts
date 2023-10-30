@@ -32,7 +32,7 @@ type ConfigState = {
 	subItems: SubItems[];
 };
 
-function getId(): string {
+export function getId(): string {
 	let uniqueId = uuidv4();
 	return `uid-${uniqueId}-${Date.now()}`;
 }
@@ -65,12 +65,12 @@ const { state }: { state: ConfigState } = createStore({
 			path: '.rsx-product-list-product-wrap, .rsx-product-list-lightbox-product-wrap',
 			exclude: [
 				{
-					id: getId(),
+					id: 'uid-7fb4d0a5-664b-4df7-89a0-702b7b47e255-1698474061555',
 					type: 'CSS',
 					path: '.header',
 				},
 				{
-					id: getId(),
+					id: 'uid-7fb4d0a5-664b-4df7-89a0-702b7b47e255-6578474061248',
 					type: 'XPath',
 					path: '#footer',
 				},
@@ -89,12 +89,12 @@ const { state }: { state: ConfigState } = createStore({
 			path: '.rsx-product-list-product-wrap, .rsx-product-list-lightbox-product-wrap',
 			exclude: [
 				{
-					id: getId(),
+					id: 'uid-7fb4d0a5-664b-4df7-89a0-702b7b47e255-1698474081248',
 					type: 'CSS',
 					path: '.header',
 				},
 				{
-					id: getId(),
+					id: 'uid-7fb4d0a5-664b-4dghj7-89a0-702b7b47e255-1698474061248',
 					type: 'XPath',
 					path: '#footer',
 				},
