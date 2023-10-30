@@ -130,9 +130,8 @@ function updateState(newState): boolean {
 				metadata &&
 				Object.keys(metadata).reduce((acc, key) => {
 					const item = metadata[key];
-					const itemName = Object.keys(item)[0];
-					const { type, path, isBoolean } = Object.values(item)[0] as { type: string; path: string; isBoolean: boolean };
-					acc[getId()] = { name: itemName, type: type, path: path, ...(isBoolean && { isBoolean: isBoolean }) };
+					const { type, path, isBoolean } = item;
+					acc[getId()] = { name: key, type: type, path: path, ...(isBoolean && { isBoolean: isBoolean }) };
 					return acc;
 				}, {});
 
@@ -140,12 +139,25 @@ function updateState(newState): boolean {
 				subItems &&
 				Object.keys(subItems).map((key) => {
 					const { exclude, metadata } = getSubItemValues(parsedValue, key);
+					const formattedSubItemExclude =
+						exclude &&
+						exclude.map((item) => {
+							return { id: getId(), type: item.type, path: item.path };
+						});
+					const formattedSubItemMetadata =
+						metadata &&
+						Object.keys(metadata).reduce((acc, key) => {
+							const item = metadata[key];
+							const { type, path, isBoolean } = item;
+							acc[getId()] = { name: key, type: type, path: path, ...(isBoolean && { isBoolean: isBoolean }) };
+							return acc;
+						}, {});
 					return {
 						name: key,
 						type: subItems[key].type,
 						path: subItems[key].path,
-						exclude,
-						metadata,
+						exclude: formattedSubItemExclude,
+						metadata: formattedSubItemMetadata,
 					};
 				});
 
@@ -163,7 +175,7 @@ function updateState(newState): boolean {
 
 			// add opacity to the elements onLoad
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-				chrome.tabs.sendMessage(tabs[0].id, { type: 'update-excludeItem-onLoad', payload: { exclude: formattedValue.exclude } });
+				chrome.tabs.sendMessage(tabs[0].id, { type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude } });
 			});
 
 			return false;
@@ -185,23 +197,35 @@ function formatState() {
 
 	const formattedMetadata =
 		metadata &&
-		Object.keys(metadata).map((key) => {
+		Object.keys(metadata).reduce((result, key) => {
 			const { name, type, path, isBoolean } = metadata[key];
-			return {
-				[name]: { type, path, isBoolean },
-			};
-		});
+			result[name] = { type, path, isBoolean };
+			return result;
+		}, {});
 
 	const formattedSubItems =
 		subItems &&
 		subItems.map((item) => {
 			const { name, exclude, metadata } = item;
+			const formattedSubItemExclude =
+				exclude &&
+				exclude.map((item) => {
+					return { type: item.type, path: item.path };
+				});
+			const formattedSubItemMetadata =
+				metadata &&
+				Object.keys(metadata).reduce((result, key) => {
+					const { name, type, path, isBoolean } = metadata[key];
+					result[name] = { type, path, isBoolean };
+					return result;
+				}, {});
+
 			return {
 				for: {
 					types: [name],
 				},
-				exclude,
-				metadata,
+				exclude: formattedSubItemExclude,
+				metadata: formattedSubItemMetadata,
 				name,
 			};
 		});
