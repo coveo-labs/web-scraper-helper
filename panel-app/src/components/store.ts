@@ -43,67 +43,43 @@ const { state }: { state: ConfigState } = createStore({
 		{
 			id: getId(),
 			type: 'CSS',
-			path: '.header',
+			path: 'header, .header, *[role="header"]',
 		},
 		{
 			id: getId(),
-			type: 'XPath',
-			path: '/html/body/div[1]/div[2]/div[1]/div/div[1]/div[1]/div/p[2]',
+			type: 'CSS',
+			path: 'footer, .footer',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: 'noscript, nav',
 		},
 	],
 	metadata: {
 		'uid-7fb4d0a5-664b-4df7-89a0-702b7b47e255-1698474061246': {
-			name: 'Title',
+			name: '',
 			type: 'CSS',
-			path: '.title::text',
+			path: '',
 		},
 	},
 	subItems: [
 		{
-			name: 'product',
+			name: 'SubItemName',
 			type: 'CSS',
-			path: '.rsx-product-list-product-wrap, .rsx-product-list-lightbox-product-wrap',
+			path: '.productpage',
 			exclude: [
 				{
 					id: 'uid-7fb4d0a5-664b-4df7-89a0-702b7b47e255-1698474061555',
 					type: 'CSS',
-					path: '.header',
-				},
-				{
-					id: 'uid-7fb4d0a5-664b-4df7-89a0-702b7b47e255-6578474061248',
-					type: 'XPath',
-					path: '#footer',
+					path: '',
 				},
 			],
 			metadata: {
 				'uid-7fb4d0a5-664b-4df7-89a0-702b7b47e255-1698474061247': {
-					name: 'Title',
+					name: '',
 					type: 'CSS',
-					path: '.title',
-				},
-			},
-		},
-		{
-			name: 'product1',
-			type: 'CSS',
-			path: '.rsx-product-list-product-wrap, .rsx-product-list-lightbox-product-wrap',
-			exclude: [
-				{
-					id: 'uid-7fb4d0a5-664b-4df7-89a0-702b7b47e255-1698474081248',
-					type: 'CSS',
-					path: '.header',
-				},
-				{
-					id: 'uid-7fb4d0a5-664b-4dghj7-89a0-702b7b47e255-1698474061248',
-					type: 'XPath',
-					path: '#footer',
-				},
-			],
-			metadata: {
-				'uid-7fb4d0a5-664b-4df7-89a0-702b7b47e255-1698474061248': {
-					name: 'Title',
-					type: 'CSS',
-					path: 'head > title',
+					path: '',
 				},
 			},
 		},
