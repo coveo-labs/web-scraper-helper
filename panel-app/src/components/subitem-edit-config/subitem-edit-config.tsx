@@ -4,7 +4,7 @@ import state, { ElementsToExclude, Metadata, getId } from '../store';
 @Component({
 	tag: 'subitem-edit-config',
 	styleUrl: 'subitem-edit-config.scss',
-	shadow: true,
+	shadow: false,
 })
 export class SubitemEditConfig {
 	@Prop() subItem: {};

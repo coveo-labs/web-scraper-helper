@@ -3,7 +3,7 @@ import { getMetadataResults } from '../store';
 @Component({
 	tag: 'metadata-results',
 	styleUrl: 'metadata-results.scss',
-	shadow: true,
+	shadow: false,
 })
 export class MetadataResults {
 	@Prop() metadata: any;
