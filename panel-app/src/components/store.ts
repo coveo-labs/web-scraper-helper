@@ -90,6 +90,28 @@ function getSubItemValues(arrayList, key) {
 	return arrayList.find((obj) => obj.name === key);
 }
 
+function getFormattedMetadata(action, metadata) {
+	let formattedMetadata;
+	switch (action) {
+		case 'updateState':
+			formattedMetadata = Object.keys(metadata).reduce((acc, key) => {
+				const item = metadata[key];
+				const { type, path, isBoolean } = item;
+				acc[getId()] = { name: key, type: type, path: path, ...(isBoolean && { isBoolean: isBoolean }) };
+				return acc;
+			}, {});
+			break;
+		case 'formatState':
+			formattedMetadata = Object.keys(metadata).reduce((result, key) => {
+				const { name, type, path, isBoolean } = metadata[key];
+				result[name] = { type, path, isBoolean };
+				return result;
+			}, {});
+			break;
+	}
+	return formattedMetadata;
+}
+
 function updateState(newState): boolean {
 	try {
 		const parsedValue = JSON.parse(newState);
@@ -102,14 +124,7 @@ function updateState(newState): boolean {
 					return { id: getId(), type: item.type, path: item.path };
 				});
 
-			const formattedMetadata =
-				metadata &&
-				Object.keys(metadata).reduce((acc, key) => {
-					const item = metadata[key];
-					const { type, path, isBoolean } = item;
-					acc[getId()] = { name: key, type: type, path: path, ...(isBoolean && { isBoolean: isBoolean }) };
-					return acc;
-				}, {});
+			const formattedMetadata = metadata ? getFormattedMetadata('updateState', metadata) : {};
 
 			const formattedSubItems =
 				subItems &&
@@ -120,14 +135,7 @@ function updateState(newState): boolean {
 						exclude.map((item) => {
 							return { id: getId(), type: item.type, path: item.path };
 						});
-					const formattedSubItemMetadata =
-						metadata &&
-						Object.keys(metadata).reduce((acc, key) => {
-							const item = metadata[key];
-							const { type, path, isBoolean } = item;
-							acc[getId()] = { name: key, type: type, path: path, ...(isBoolean && { isBoolean: isBoolean }) };
-							return acc;
-						}, {});
+					const formattedSubItemMetadata = metadata ? getFormattedMetadata('updateState', metadata) : {};
 					return {
 						name: key,
 						type: subItems[key].type,
@@ -171,13 +179,7 @@ function formatState() {
 			return { type: item.type, path: item.path };
 		});
 
-	const formattedMetadata =
-		metadata &&
-		Object.keys(metadata).reduce((result, key) => {
-			const { name, type, path, isBoolean } = metadata[key];
-			result[name] = { type, path, isBoolean };
-			return result;
-		}, {});
+	const formattedMetadata = metadata ? getFormattedMetadata('formatState', metadata) : {};
 
 	const formattedSubItems =
 		subItems &&
@@ -188,13 +190,7 @@ function formatState() {
 				exclude.map((item) => {
 					return { type: item.type, path: item.path };
 				});
-			const formattedSubItemMetadata =
-				metadata &&
-				Object.keys(metadata).reduce((result, key) => {
-					const { name, type, path, isBoolean } = metadata[key];
-					result[name] = { type, path, isBoolean };
-					return result;
-				}, {});
+			const formattedSubItemMetadata = metadata ? getFormattedMetadata('formatState', metadata) : {};
 
 			return {
 				for: {
