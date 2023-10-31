@@ -1,5 +1,5 @@
-import { Component, Prop, h, Event, EventEmitter, State } from '@stencil/core';
-import state, { ElementsToExclude, Metadata } from '../store';
+import { Component, Prop, h, Event, EventEmitter, State, Listen } from '@stencil/core';
+import state, { ElementsToExclude, Metadata, getId } from '../store';
 
 @Component({
 	tag: 'subitem-edit-config',
@@ -14,15 +14,10 @@ export class SubitemEditConfig {
 	@State() subItemState: { name: ''; type: ''; path: '' };
 	selectorValidity;
 
-	async validateSelector(selector: string, selectorType: string) {
-		const response = await new Promise((resolve) => {
-			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-				chrome.tabs.sendMessage(tabs[0].id, { type: 'validate-selector', payload: { type: selectorType, selector: selector } }, null, (response) => {
-					resolve(response);
-				});
-			});
-		});
-		return response;
+	@Listen('updateSubItem')
+	updateSubItemElement(event) {
+		const { action, newItem, oldItem } = event.detail;
+		this.updateState(action, newItem, oldItem);
 	}
 
 	onSave() {
@@ -50,15 +45,15 @@ export class SubitemEditConfig {
 		this.metadata = this.subItem['metadata'];
 	}
 
-	updateState(action: string, newItem, key = '', oldItem = { type: '', path: '' }) {
+	updateState(action: string, newItem, oldItem = { type: '', path: '' }) {
 		switch (action) {
 			case 'add-excludedItem': {
-				this.excludedItems = [...this.excludedItems, newItem];
+				this.excludedItems = [...this.excludedItems, { ...newItem, id: getId() }];
 				break;
 			}
 			case 'remove-excludedItem': {
 				this.excludedItems = this.excludedItems.filter((excludedItem) => {
-					return excludedItem.type !== newItem.type || excludedItem.path !== newItem.path;
+					return excludedItem.id !== newItem.id;
 				});
 				chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 					chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-exclude-selector', payload: { item: newItem } });
@@ -66,43 +61,38 @@ export class SubitemEditConfig {
 				break;
 			}
 			case 'add-metadataItem': {
-				this.metadata = { ...this.metadata, [key]: newItem };
+				this.metadata = { ...this.metadata, [getId()]: newItem };
 				break;
 			}
 			case 'remove-metadataItem': {
-				const { [key]: removed, ...rest } = this.metadata;
+				const { [newItem.id]: removed, ...rest } = this.metadata;
 				this.metadata = rest;
 				break;
 			}
 			case 'update-excludedItem': {
-				// this.validateSelector(newItem.path, newItem.type);
 				this.excludedItems = this.excludedItems.map((excludedItem) => {
-					if (excludedItem.type === oldItem.type && excludedItem.path === oldItem.path) {
+					if (excludedItem.id === newItem.id) {
 						chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 							console.log('updateExcludedSubItem: ', newItem.path, oldItem.path);
 							chrome.tabs.sendMessage(tabs[0].id, { type: 'exclude-selector', payload: { newItem: newItem, oldItem: oldItem } });
 						});
-						return newItem;
+						return { id: newItem.id, type: newItem.type, path: newItem.path };
 					} else {
 						return excludedItem;
 					}
 				});
+				console.log(this.excludedItems);
 				break;
 			}
 			case 'update-metadataItem': {
-				const metadataItem = this.metadata[key];
+				const metadataItem = this.metadata[newItem.id];
 				if (metadataItem) {
-					if (newItem.name && newItem.name !== key) {
-						const { [key]: removed, ...rest } = this.metadata;
-						this.metadata = { ...rest, [newItem.name]: { type: newItem.type, path: newItem.path, isBoolean: newItem.isBoolean } };
-					} else {
-						this.metadata = { ...this.metadata, [key]: { ...metadataItem, ...{ type: newItem.type, path: newItem.path, isBoolean: newItem.isBoolean } } };
-					}
+					this.metadata = { ...this.metadata, [newItem.id]: { name: newItem.name, type: newItem.type, path: newItem.path, ...(newItem.isBoolean && { isBoolean: newItem.isBoolean }) } };
 				}
 				break;
 			}
 			case 'update-subItem': {
-				this.subItemState = { name: key as '', type: newItem.type, path: newItem.path };
+				this.subItemState = { name: newItem.name as '', type: newItem.type, path: newItem.path };
 				break;
 			}
 		}
@@ -110,103 +100,19 @@ export class SubitemEditConfig {
 
 	renderExcludedItems() {
 		return this.excludedItems.map((item) => {
-			return this.renderInputItem('excludeItem', '', item.type, item.path);
+			return <sub-item-input-element uniqueId={item.id} type="excludeItem" selectorType={item.type} selector={item.path}></sub-item-input-element>;
 		});
 	}
 
 	renderMetadataItems() {
 		return Object.keys(this.metadata).map((key) => {
 			const item = this.metadata[key];
-			return this.renderInputItem('metadataItem', key, item.type, item.path, item.isBoolean);
+			return <sub-item-input-element uniqueId={key} type="metadataItem" name={item.name} selectorType={item.type} selector={item.path} isBoolean={item.isBoolean}></sub-item-input-element>;
 		});
 	}
 
 	renderSubItemInfo() {
-		return this.renderInputItem('subItem', this.subItemState.name, this.subItemState.type, this.subItemState.path);
-	}
-
-	renderInputItem(type, name = '', selectorType, selector, isBoolean = false) {
-		return (
-			<div class="subItem-select-element">
-				{(type === 'metadataItem' || type === 'subItem') && (
-					<div>
-						<ion-input
-							class={type === 'metadataItem' ? 'metadata-name-input name-input' : 'name-input'}
-							fill="outline"
-							value={name}
-							placeholder="Name"
-							onIonInput={(event) =>
-								this.updateState(
-									type === 'metadataItem' ? 'update-metadataItem' : 'update-subItem',
-									{ name: event.target.value, type: selectorType, path: selector },
-									type === 'subItem' ? (event.target.value as string) : name
-								)
-							}
-						></ion-input>
-					</div>
-				)}
-				<div>
-					<ion-input
-						id="subItem-selector-type-input"
-						fill="outline"
-						// class={this.getClassTest(selector, selectorType)}
-						value={selectorType}
-						onClick={() =>
-							this.updateState(
-								type === 'excludeItem' ? 'update-excludedItem' : type === 'metadataItem' ? 'update-metadataItem' : 'update-subItem',
-								{ type: selectorType === 'CSS' ? 'XPath' : 'CSS', path: selector },
-								name,
-								{
-									type: selectorType,
-									path: selector,
-								}
-							)
-						}
-					></ion-input>
-				</div>
-				<div>
-					<ion-input
-						class={type === 'excludeItem' ? 'selector-input' : type === 'metadataItem' ? 'metadata-selector-input' : 'subItem-selector-input'}
-						fill="outline"
-						value={selector}
-						placeholder="expression"
-						onIonInput={(event) =>
-							this.updateState(
-								type === 'excludeItem' ? 'update-excludedItem' : type === 'metadataItem' ? 'update-metadataItem' : 'update-subItem',
-								{ type: selectorType, path: event.detail.value },
-								name,
-								{
-									type: selectorType,
-									path: selector,
-								}
-							)
-						}
-					></ion-input>
-				</div>
-				{type === 'metadataItem' && (
-					<div>
-						<ion-checkbox
-							checked={isBoolean}
-							onIonChange={(event) =>
-								this.updateState('update-metadataItem', { type: selectorType, path: selector, isBoolean: event.detail.checked }, name, {
-									type: selectorType,
-									path: selector,
-								})
-							}
-						></ion-checkbox>
-						<ion-icon name="information-circle-outline"></ion-icon>
-					</div>
-				)}
-				{!(type === 'subItem') && (
-					<div
-						style={{ cursor: 'pointer' }}
-						onClick={() => this.updateState(type === 'excludeItem' ? 'remove-excludedItem' : 'remove-metadataItem', { name, type: selectorType, path: selector }, name)}
-					>
-						<ion-icon name="remove-circle-outline" size="small" color="primary"></ion-icon>
-					</div>
-				)}
-			</div>
-		);
+		return <sub-item-input-element type="subItem" name={this.subItemState.name} selectorType={this.subItemState.type} selector={this.subItemState.path}></sub-item-input-element>;
 	}
 
 	render() {
@@ -234,7 +140,7 @@ export class SubitemEditConfig {
 					<div class="subItem-edit-text">Metadata to extract</div>
 					<div class="subItem-box">
 						<div id="select-subItem__wrapper">{this.renderMetadataItems()}</div>
-						<div class="add-rule" onClick={() => this.updateState('add-metadataItem', { type: 'CSS', path: '' }, '')}>
+						<div class="add-rule" onClick={() => this.updateState('add-metadataItem', { name: '', type: 'CSS', path: '' })}>
 							<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
 							<span>Add Rule</span>
 						</div>

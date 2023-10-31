@@ -64,16 +64,20 @@ export class CreateConfig {
 	}
 
 	async componentWillLoad() {
-		if (this.triggerType === 'load-file') {
-			try {
+		try {
+			if (this.triggerType === 'load-file') {
 				const fileItem = await new Promise((resolve) => {
 					chrome.storage.local.get(this.fileName, (items) => resolve(items));
 				});
 
 				updateState(fileItem[this.fileName]);
-			} catch (e) {
-				console.log(e);
+			} else {
+				chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+					chrome.tabs.sendMessage(tabs[0].id, { type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude } });
+				});
 			}
+		} catch (e) {
+			console.log(e);
 		}
 	}
 
