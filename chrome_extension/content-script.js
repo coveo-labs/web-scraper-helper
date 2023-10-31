@@ -35,8 +35,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const { item } = message.payload;
     try {
       const elements = getElements(item.type === 'XPath', item.type, item.path);
-      elements.forEach(element => {
-        element.classList.remove('web-scraper-helper-exclude');
+      elements?.forEach(element => {
+        element.classList?.remove('web-scraper-helper-exclude');
       });
     } catch (e) {
       console.log(e);
@@ -77,7 +77,7 @@ function applyStylesToElements(newItem, oldItem = null) {
       newElements = getElements(newItem.type === 'XPath', newItem.type, newItem.path) ?? [];
     }
 
-    newElements.forEach(element => {
+    newElements?.forEach(element => {
       element?.classList?.add('web-scraper-helper-exclude');
     });
 
