@@ -37,7 +37,7 @@ export function getId(): string {
 	return `uid-${uniqueId}-${Date.now()}`;
 }
 
-const { state }: { state: ConfigState } = createStore({
+const { state }: { state: ConfigState; } = createStore({
 	redirectToConfig: false,
 	exclude: [
 		{
@@ -90,6 +90,32 @@ function getSubItemValues(arrayList, key) {
 	return arrayList.find((obj) => obj.name === key);
 }
 
+function getFormattedMetadata(action, metadata) {
+	let formattedMetadata = {};
+
+	const keys = Object.keys(metadata || {});
+	if (keys.length) {
+		switch (action) {
+			case 'updateState':
+				formattedMetadata = keys.reduce((acc, key) => {
+					const item = metadata[key];
+					const { type, path, isBoolean } = item;
+					acc[getId()] = { name: key, type: type, path: path, ...(isBoolean && { isBoolean: isBoolean }) };
+					return acc;
+				}, {});
+				break;
+			case 'formatState':
+				formattedMetadata = keys.reduce((result, key) => {
+					const { name, type, path, isBoolean } = metadata[key];
+					result[name] = { type, path, isBoolean };
+					return result;
+				}, {});
+				break;
+		}
+	}
+	return formattedMetadata;
+}
+
 function updateState(newState): boolean {
 	try {
 		const parsedValue = JSON.parse(newState);
@@ -102,14 +128,7 @@ function updateState(newState): boolean {
 					return { id: getId(), type: item.type, path: item.path };
 				});
 
-			const formattedMetadata =
-				metadata &&
-				Object.keys(metadata).reduce((acc, key) => {
-					const item = metadata[key];
-					const { type, path, isBoolean } = item;
-					acc[getId()] = { name: key, type: type, path: path, ...(isBoolean && { isBoolean: isBoolean }) };
-					return acc;
-				}, {});
+			const formattedMetadata = getFormattedMetadata('updateState', metadata);
 
 			const formattedSubItems =
 				subItems &&
@@ -120,14 +139,7 @@ function updateState(newState): boolean {
 						exclude.map((item) => {
 							return { id: getId(), type: item.type, path: item.path };
 						});
-					const formattedSubItemMetadata =
-						metadata &&
-						Object.keys(metadata).reduce((acc, key) => {
-							const item = metadata[key];
-							const { type, path, isBoolean } = item;
-							acc[getId()] = { name: key, type: type, path: path, ...(isBoolean && { isBoolean: isBoolean }) };
-							return acc;
-						}, {});
+					const formattedSubItemMetadata = getFormattedMetadata('updateState', metadata);
 					return {
 						name: key,
 						type: subItems[key].type,
@@ -171,13 +183,7 @@ function formatState() {
 			return { type: item.type, path: item.path };
 		});
 
-	const formattedMetadata =
-		metadata &&
-		Object.keys(metadata).reduce((result, key) => {
-			const { name, type, path, isBoolean } = metadata[key];
-			result[name] = { type, path, isBoolean };
-			return result;
-		}, {});
+	const formattedMetadata = getFormattedMetadata('formatState', metadata);
 
 	const formattedSubItems =
 		subItems &&
@@ -188,13 +194,7 @@ function formatState() {
 				exclude.map((item) => {
 					return { type: item.type, path: item.path };
 				});
-			const formattedSubItemMetadata =
-				metadata &&
-				Object.keys(metadata).reduce((result, key) => {
-					const { name, type, path, isBoolean } = metadata[key];
-					result[name] = { type, path, isBoolean };
-					return result;
-				}, {});
+			const formattedSubItemMetadata = getFormattedMetadata('formatState', metadata);
 
 			return {
 				for: {
@@ -249,7 +249,7 @@ function removeExcludedItem(item: ElementsToExclude) {
 	});
 }
 
-function addMetadataItem(item: { name: string; type: string; path: string }) {
+function addMetadataItem(item: { name: string; type: string; path: string; }) {
 	state.metadata = { ...state.metadata, [getId()]: { name: item.name, type: item.type, path: item.path } };
 }
 
@@ -280,7 +280,7 @@ function removeSubItem(itemName: string) {
 	});
 }
 
-function updateMetadataItem(newItem: { id: string; name: string; type: string; path: string; isBoolean?: boolean }) {
+function updateMetadataItem(newItem: { id: string; name: string; type: string; path: string; isBoolean?: boolean; }) {
 	state.metadata = Object.keys(state.metadata).reduce((acc, key) => {
 		if (key === newItem.id) {
 			acc[key] = { name: newItem.name, type: newItem.type, path: newItem.path, ...(newItem.isBoolean && { isBoolean: newItem.isBoolean }) };
