@@ -7,7 +7,7 @@ import state from '../store';
 @Component({
 	tag: 'file-explorer',
 	styleUrl: 'file-explorer.scss',
-	shadow: true,
+	shadow: false,
 })
 export class FileExplorer {
 	@State() showModal = false;

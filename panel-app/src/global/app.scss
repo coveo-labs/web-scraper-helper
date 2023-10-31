@@ -14,12 +14,6 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
 }
 
-ion-popover {
-  --width: 317px !important;
-  margin-top: 175px;
-  margin-left: 2rem;
-}
-
 ion-popover .no-files-option{
   color: #565B66;
   font-family: Gibson;
@@ -77,13 +71,15 @@ ion-modal#create-file-modal .modal-content {
   letter-spacing: 0.042px;
 }
 
-ion-modal#create-file-modal .modal-content input{
+ion-modal#create-file-modal .modal-content ion-input{
   height: 36px;
   width: 300px;
   border-radius: 8px;
   border: 1px solid #E5E8E8;
   padding: 0px 16px;
   margin-top: 8px;
+  min-height: 36px;
+  --border-width: 0px;
 }
 
 ion-modal#create-file-modal .modal-footer {

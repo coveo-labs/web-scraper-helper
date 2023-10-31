@@ -6,7 +6,7 @@ import infoToken from '../../assets/icon/InfoToken.svg';
 @Component({
 	tag: 'create-config',
 	styleUrl: 'create-config.scss',
-	shadow: true,
+	shadow: false,
 })
 export class CreateConfig {
 	@Prop() fileName;

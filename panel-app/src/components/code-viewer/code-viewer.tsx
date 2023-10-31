@@ -5,7 +5,7 @@ import copyToClipboardIcon from '../../assets/icon/CopyToClipboard.svg';
 @Component({
 	tag: 'code-viewer',
 	styleUrl: 'code-viewer.scss',
-	shadow: true,
+	shadow: false,
 })
 export class CodeViewer {
 	@State() invalidJSON = false;

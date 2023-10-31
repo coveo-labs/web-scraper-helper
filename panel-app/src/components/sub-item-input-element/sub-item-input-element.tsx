@@ -3,7 +3,7 @@ import { Component, Prop, h, Event, EventEmitter, State } from '@stencil/core';
 @Component({
 	tag: 'sub-item-input-element',
 	styleUrl: 'sub-item-input-element.scss',
-	shadow: true,
+	shadow: false,
 })
 export class SubItemInputElement {
 	@Event() updateSubItem: EventEmitter<any>;
