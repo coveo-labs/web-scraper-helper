@@ -1,3 +1,5 @@
+/* global chrome */
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'exclude-selector') {
     const { newItem, oldItem } = message.payload;
@@ -46,7 +48,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'metadata-results') {
     const { metadata } = message.payload;
     const results = [];
-    for (const [key, value] of Object.entries(metadata)) {
+    for (const [, value] of Object.entries(metadata)) {
       const { name, type, path, isBoolean } = value;
 
       const result = getElements(false, type, path);
@@ -93,81 +95,78 @@ function removePreviouslyExcludedStyles() {
 }
 
 function getElements(asIs = false, type, selector) {
-  switch (type) {
-    case 'CSS':
-      try {
-        let reTextSub = /::text\b/;
-        let reAttrSub = /::attr\b/;
-        let shouldReturnAttr = false;
-        let attrToGet = '';
-        let shouldReturnText = false;
+  try {
 
-        if (reAttrSub.test(selector)) {
-          shouldReturnAttr = true;
-          attrToGet = selector.match(/::attr\((.*?)\)/)[1];
-          selector = selector.replace(reAttrSub, '');
-        }
+    if (type === 'CSS') {
+      let reTextSub = /::text\b/;
+      let reAttrSub = /::attr\b/;
+      let shouldReturnAttr = false;
+      let attrToGet = '';
+      let shouldReturnText = false;
 
-        if (reTextSub.test(selector)) {
-          shouldReturnText = true;
-          selector = selector.replace(reTextSub, '');
-        }
-
-        let elements = document.querySelectorAll(selector);
-        if (shouldReturnAttr) {
-          let attrValues = [];
-          elements.forEach(element => {
-            attrValues.push(element.getAttribute(attrToGet));
-          });
-          return attrValues;
-        } else if (shouldReturnText) {
-          let textValues = [];
-          elements.forEach(element => {
-            textValues.push(element.textContent);
-          });
-          return textValues;
-        } else {
-          return Array.from(elements);
-        }
-      } catch (error) {
-        console.log(error);
-        return null;
+      if (reAttrSub.test(selector)) {
+        shouldReturnAttr = true;
+        attrToGet = selector.match(/::attr\((.*?)\)/)[1];
+        selector = selector.replace(reAttrSub, '');
       }
-      break;
-    case 'XPath':
-      try {
-        let path = selector;
-        let nodes = document.evaluate(path, document);
-        let elements = [];
-        switch (nodes.resultType) {
-          case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
-          case XPathResult.ORDERED_NODE_ITERATOR_TYPE:
-            let e;
-            while ((e = nodes.iterateNext())) {
-              let value = e.nodeValue;
-              if (asIs) {
-                value = e;
-              } else if (value === null) {
-                value = e.outerHTML;
-              }
-              elements.push(value);
+
+      if (reTextSub.test(selector)) {
+        shouldReturnText = true;
+        selector = selector.replace(reTextSub, '');
+      }
+
+      let elements = document.querySelectorAll(selector);
+      if (shouldReturnAttr) {
+        let attrValues = [];
+        elements.forEach(element => {
+          attrValues.push(element.getAttribute(attrToGet));
+        });
+        return attrValues;
+      }
+      else if (shouldReturnText) {
+        let textValues = [];
+        elements.forEach(element => {
+          textValues.push(element.textContent);
+        });
+        return textValues;
+      }
+      return Array.from(elements);
+    }
+
+    else if (type === 'XPath') {
+      let path = selector;
+      let nodes = document.evaluate(path, document);
+      let elements = [];
+      let e;
+
+      switch (nodes.resultType) {
+        case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
+        case XPathResult.ORDERED_NODE_ITERATOR_TYPE:
+          while ((e = nodes.iterateNext())) {
+            let value = e.nodeValue;
+            if (asIs) {
+              value = e;
+            } else if (value === null) {
+              value = e.outerHTML;
             }
-            break;
-          case XPathResult.NUMBER_TYPE:
-            elements.push(nodes.numberValue);
-            break;
-          case XPathResult.STRING_TYPE:
-            elements.push(nodes.stringValue);
-            break;
-          case XPathResult.BOOLEAN_TYPE:
-            elements.push(nodes.booleanValue);
-            break;
-        }
-        return elements;
-      } catch (error) {
-        console.log(error);
-        return null;
+            elements.push(value);
+          }
+          break;
+        case XPathResult.NUMBER_TYPE:
+          elements.push(nodes.numberValue);
+          break;
+        case XPathResult.STRING_TYPE:
+          elements.push(nodes.stringValue);
+          break;
+        case XPathResult.BOOLEAN_TYPE:
+          elements.push(nodes.booleanValue);
+          break;
       }
-      break;
+      return elements;
+    }
+
+  } catch (error) {
+    console.log(error);
   }
+  return null;
 }

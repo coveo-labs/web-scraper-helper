@@ -1,16 +1,16 @@
 {
-  "ignorePatterns": ["node_modules"],
-  "extends": ["eslint:recommended"],
-  "parserOptions": {
-    "ecmaVersion": 2020,
-    "sourceType": "module"
-  },
-  "env": {
-    "browser": true,
-    "es2020": true,
-    "node": true
-  },
-  "rules": {
-    "no-console": "off"
-  }
+	"ignorePatterns": ["node_modules"],
+	"extends": ["eslint:recommended"],
+	"parserOptions": {
+		"ecmaVersion": 2023,
+		"sourceType": "module"
+	},
+	"env": {
+		"browser": true,
+		"es2023": true,
+		"node": true
+	},
+	"rules": {
+		"no-console": "off"
+	}
 }

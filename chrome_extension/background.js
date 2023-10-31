@@ -1,4 +1,5 @@
 // background.js
+/* global chrome */
 
 let openCount = 0;
 const connections = {};
@@ -10,7 +11,7 @@ chrome.runtime.onConnect.addListener(function (port) {
   }
   openCount++;
 
-  const extensionListener = function (message, sender, sendResponse) {
+  const extensionListener = function (message/*, sender, sendResponse*/) {
     // The original connection event doesn't include the tab ID of the
     // DevTools page, so we need to send it explicitly.
     if (message.name == "init") {
@@ -49,7 +50,7 @@ chrome.runtime.onConnect.addListener(function (port) {
 });
 
 // Receive message from content script and relay to the devTools page for the current tab
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function (request, sender/*, sendResponse*/) {
   // Messages from content scripts should have sender.tab set
   if (sender.tab) {
     const tabId = sender.tab.id;
