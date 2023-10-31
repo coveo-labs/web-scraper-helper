@@ -1,7 +1,7 @@
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'exclude-selector') {
     const { newItem, oldItem } = message.payload;
-    applyStylesToElements(newItem, oldItem)
+    applyStylesToElements(newItem, oldItem);
   }
   if (message.type === 'validate-selector') {
     let response = 'Invalid';
@@ -26,8 +26,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'update-excludeItem-onLoad') {
     const { exclude } = message.payload;
     exclude.length && exclude.map((element) => {
-      return applyStylesToElements(element)
-    })
+      return applyStylesToElements(element);
+    });
   }
   if (message.type === 'remove-exclude-selector') {
     const { item } = message.payload;
@@ -37,7 +37,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         element.classList.remove('web-scraper-helper-exclude');
       });
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
   }
   if (message.type === 'remove-excluded-on-file-close') {
@@ -50,10 +50,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const { name, type, path, isBoolean } = value;
 
       const result = getElements(false, type, path);
-      const modifiedResult = isBoolean ? [(!!result.length).toString()] : result && result.map((e) => typeof (e) === 'object' ? e.outerHTML : e)
+      const modifiedResult = isBoolean ? [(!!result.length).toString()] : result && result.map((e) => typeof (e) === 'object' ? e.outerHTML : e);
       results.push({ "name": name, "values": modifiedResult });
     }
-    console.log('metadata-result-array', results)
+    console.log('metadata-result-array', results);
     sendResponse(results);
   }
 });
@@ -76,7 +76,7 @@ function applyStylesToElements(newItem, oldItem = null) {
     }
 
     newElements.forEach(element => {
-      element.classList.add('web-scraper-helper-exclude');
+      element?.classList?.add('web-scraper-helper-exclude');
     });
 
   } catch (error) {
