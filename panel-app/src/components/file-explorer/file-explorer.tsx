@@ -6,7 +6,7 @@ import state from '../store';
 
 @Component({
 	tag: 'file-explorer',
-	styleUrl: 'file-explorer.css',
+	styleUrl: 'file-explorer.scss',
 	shadow: true,
 })
 export class FileExplorer {

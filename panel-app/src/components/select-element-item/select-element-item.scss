@@ -1,0 +1,102 @@
+.select-element-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+
+  #selector-type-input {
+    width: 88px;
+    height: 36px;
+    min-height: unset;
+    color: #565B66;
+    text-align: center;
+    font-family: Gibson;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: 21px;
+    letter-spacing: 0.042px;
+    --border-radius: 8px;
+    --highlight-color: transparent;
+    --highlight-color-focused: transparent;
+    cursor: pointer;
+
+    &:hover, &:focus-within {
+      cursor: pointer;
+      --border-width: 1px !important;
+    }
+
+    input {
+      cursor: pointer;
+    }
+  }
+
+  ion-input.selector-input,
+  ion-input.name-input,
+  ion-input.metadata-selector-input {
+    width: 230px;
+    min-height: unset;
+    height: 36px;
+    padding: 0px 16px;
+    color: #565B66;
+    font-family: Gibson;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: 21px;
+    letter-spacing: 0.042px;
+    --border-radius: 8px;
+
+    &.name-input {
+      width: 70px;
+    }
+
+    &.metadata-selector-input {
+      width: 150px;
+    }
+  }
+
+  .remove-icon {
+    cursor: pointer;
+  }
+
+  .valid-selector {
+    --border-color: #12A344 !important;
+    color: #12A344 !important;
+    border-radius: 8px;
+    box-shadow: 0px 0px 3px 2px rgba(0, 136, 67, 0.12), 0px 0px 0px 1px rgba(0, 136, 67, 0.60) !important;
+  }
+
+  .invalid-selector {
+    --border-color: #CD2113 !important;
+    color: #CD2113 !important;
+    border-radius: 8px;
+    box-shadow: 0px 0px 3px 2px rgba(205, 33, 19, 0.12), 0px 0px 0px 1px rgba(205, 33, 19, 0.60) !important;
+  }
+
+  .no-element-found-selector {
+    --border-color: #8F7000 !important;
+    color: #8F7000 !important;
+    box-shadow: 0px 0px 3px 2px rgba(226, 177, 4, 0.12), 0px 0px 0px 1px rgba(226, 177, 4, 0.60) !important;
+    border-radius: 8px;
+  }
+
+  ion-checkbox {
+    --size: 16px;
+    --checkbox-background-checked: #3F3F71;
+    --checkmark-width: 2;
+
+    &::part(container) {
+      border-radius: 4px;
+      border: 1px solid #E5E8E8;
+    }
+  }
+
+  ion-icon[name="information-circle-outline"] {
+    height: 16px;
+    width: 16px;
+    color: #B7BCC0;
+    margin-left: 8px;
+    cursor: pointer;
+  }
+}

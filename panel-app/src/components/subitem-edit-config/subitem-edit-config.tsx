@@ -3,7 +3,7 @@ import state, { ElementsToExclude, Metadata, getId } from '../store';
 
 @Component({
 	tag: 'subitem-edit-config',
-	styleUrl: 'subitem-edit-config.css',
+	styleUrl: 'subitem-edit-config.scss',
 	shadow: true,
 })
 export class SubitemEditConfig {

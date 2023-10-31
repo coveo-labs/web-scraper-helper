@@ -2,7 +2,7 @@ import { Component, Prop, State, h } from '@stencil/core';
 import { getMetadataResults } from '../store';
 @Component({
 	tag: 'metadata-results',
-	styleUrl: 'metadata-results.css',
+	styleUrl: 'metadata-results.scss',
 	shadow: true,
 })
 export class MetadataResults {
