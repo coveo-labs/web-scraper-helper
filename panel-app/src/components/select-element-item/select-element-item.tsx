@@ -4,7 +4,7 @@ import { removeExcludedItem, removeMetadataItem, updateExcludedItem, updateMetad
 
 @Component({
 	tag: 'select-element-item',
-	styleUrl: 'select-element-item.css',
+	styleUrl: 'select-element-item.scss',
 	shadow: false,
 })
 export class SelectElementItem {

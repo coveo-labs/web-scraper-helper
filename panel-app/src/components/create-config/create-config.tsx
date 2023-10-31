@@ -5,7 +5,7 @@ import infoToken from '../../assets/icon/InfoToken.svg';
 
 @Component({
 	tag: 'create-config',
-	styleUrl: 'create-config.css',
+	styleUrl: 'create-config.scss',
 	shadow: true,
 })
 export class CreateConfig {
@@ -102,7 +102,7 @@ export class CreateConfig {
 					<div class="content-container">
 						{!this.showSubItemConfig ? (
 							<div>
-								<div class="content-text">Create a Web Scraping configuration</div>
+								{/* <div class="content-text">Create a Web Scraping configuration</div> */}
 								<div class="content-tabs">
 									<ion-tabs>
 										<ion-tab-bar selectedTab="elements-to-exclude">
