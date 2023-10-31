@@ -87,9 +87,7 @@ export class CreateConfig {
 				<div class="header-section">
 					<div class="header_text-container">
 						<div class="header_title-text">
-							Web Scraper file name: <input type="text" value={this.fileName} />
-							<input type="text" value="allo" />
-							<span style={{ marginLeft: '4px', textTransform: 'capitalize' }}>{this.fileName}</span>
+							Web Scraper file name: <span style={{ marginLeft: '4px', textTransform: 'capitalize' }}>{this.fileName}</span>
 							<a href="https://github.com/coveo-labs/web-scraper-helper">
 								<ion-img id="infoToken-img" src={infoToken}></ion-img>
 							</a>
