@@ -75,7 +75,7 @@ export class FileExplorer {
 					<div class="header_text-container">
 						<div class="header_title-text">
 							Your Web Scraper files
-							<a href="https://github.com/coveo-labs/web-scraper-helper">
+							<a href="https://github.com/coveo-labs/web-scraper-helper" target="web-scraper-help">
 								<ion-img id="infoToken-img" src={infoToken}></ion-img>
 							</a>
 						</div>
