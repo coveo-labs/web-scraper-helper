@@ -1,5 +1,5 @@
 import { Component, Listen, Prop, State, h } from '@stencil/core';
-import state, { addExcludedItem, addMetadataItem, addSubItem, formatState, removeSubItem, updateGlobalName, updateState } from '../store';
+import state, { addExcludedItem, addMetadataItem, addSubItem, formatState, removeSubItem, resetStore, updateGlobalName, updateState } from '../store';
 import { toastController } from '@ionic/core';
 import infoToken from '../../assets/icon/InfoToken.svg';
 
@@ -35,6 +35,7 @@ export class CreateConfig {
 
 	onDone() {
 		state.redirectToConfig = false;
+		resetStore();
 		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 			chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-excluded-on-file-close' });
 		});

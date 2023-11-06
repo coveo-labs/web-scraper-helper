@@ -2,7 +2,7 @@ import { Component, State, h } from '@stencil/core';
 import '@ionic/core';
 import noFileImage from '../../assets/icon/NotFoundImage.svg';
 import infoToken from '../../assets/icon/InfoToken.svg';
-import state from '../store';
+import state, { formatState } from '../store';
 
 @Component({
 	tag: 'file-explorer',
@@ -19,6 +19,15 @@ export class FileExplorer {
 		this.showModal = false;
 		const modal = document.querySelector('ion-modal');
 		await modal.dismiss();
+
+		// save the default state right away
+		try {
+			chrome.storage.local.set({
+				[this.fileName]: JSON.stringify(formatState(), null, 2),
+			});
+		} catch (e) {
+			console.log(e);
+		}
 
 		state.redirectToConfig = true;
 	}
