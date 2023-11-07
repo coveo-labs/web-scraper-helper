@@ -37,7 +37,7 @@ export function getId(): string {
 	return `uid-${uniqueId}-${Date.now()}`;
 }
 
-const { state }: { state: ConfigState; } = createStore({
+const { reset, state }: { reset: Function; state: ConfigState } = createStore({
 	redirectToConfig: false,
 	exclude: [
 		{
@@ -85,6 +85,10 @@ const { state }: { state: ConfigState; } = createStore({
 		},
 	],
 });
+
+function resetStore() {
+	reset();
+}
 
 function getSubItemValues(arrayList, key) {
 	return arrayList.find((obj) => obj.name === key);
@@ -249,7 +253,7 @@ function removeExcludedItem(item: ElementsToExclude) {
 	});
 }
 
-function addMetadataItem(item: { name: string; type: string; path: string; }) {
+function addMetadataItem(item: { name: string; type: string; path: string }) {
 	state.metadata = { ...state.metadata, [getId()]: { name: item.name, type: item.type, path: item.path } };
 }
 
@@ -280,7 +284,7 @@ function removeSubItem(itemName: string) {
 	});
 }
 
-function updateMetadataItem(newItem: { id: string; name: string; type: string; path: string; isBoolean?: boolean; }) {
+function updateMetadataItem(newItem: { id: string; name: string; type: string; path: string; isBoolean?: boolean }) {
 	state.metadata = Object.keys(state.metadata).reduce((acc, key) => {
 		if (key === newItem.id) {
 			acc[key] = { name: newItem.name, type: newItem.type, path: newItem.path, ...(newItem.isBoolean && { isBoolean: newItem.isBoolean }) };
@@ -331,4 +335,5 @@ export {
 	updateSubItem,
 	formatState,
 	getMetadataResults,
+	resetStore,
 };

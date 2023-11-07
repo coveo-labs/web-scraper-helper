@@ -1,5 +1,5 @@
 import { Component, Listen, Prop, State, h } from '@stencil/core';
-import state, { addExcludedItem, addMetadataItem, addSubItem, formatState, removeSubItem, updateGlobalName, updateState } from '../store';
+import state, { addExcludedItem, addMetadataItem, addSubItem, formatState, removeSubItem, resetStore, updateGlobalName, updateState } from '../store';
 import { toastController } from '@ionic/core';
 import infoToken from '../../assets/icon/InfoToken.svg';
 
@@ -35,6 +35,7 @@ export class CreateConfig {
 
 	onDone() {
 		state.redirectToConfig = false;
+		resetStore();
 		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 			chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-excluded-on-file-close' });
 		});
@@ -88,7 +89,7 @@ export class CreateConfig {
 					<div class="header_text-container">
 						<div class="header_title-text">
 							Web Scraper file name: <span style={{ marginLeft: '4px', textTransform: 'capitalize' }}>{this.fileName}</span>
-							<a href="https://github.com/coveo-labs/web-scraper-helper">
+							<a href="https://github.com/coveo-labs/web-scraper-helper" target="web-scraper-help">
 								<ion-img id="infoToken-img" src={infoToken}></ion-img>
 							</a>
 						</div>

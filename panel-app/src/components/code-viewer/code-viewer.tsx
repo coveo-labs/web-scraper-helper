@@ -16,8 +16,11 @@ export class CodeViewer {
 	};
 
 	copyToClipboard() {
-		const json = JSON.stringify(formatState(), null, 2);
-		navigator.clipboard.writeText(json);
+		const textarea = document.querySelector('.code-view textarea');
+		if (textarea) {
+			(textarea as HTMLTextAreaElement).select();
+			document.execCommand('copy');
+		}
 	}
 
 	render() {
