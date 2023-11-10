@@ -20,6 +20,16 @@ export class SubitemEditConfig {
 		this.updateState(action, newItem, oldItem);
 	}
 
+	removeExcludeStyleOnClose() {
+		try {
+			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+				chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-excluded-on-file-close', payload: { parentSelector: this.subItemState.path } });
+			});
+		} catch (e) {
+			console.log(e);
+		}
+	}
+
 	onSave() {
 		state.subItems = state.subItems.map((item) => {
 			if (item.name === this.subItem['name']) {
@@ -33,16 +43,25 @@ export class SubitemEditConfig {
 			}
 		});
 		this.updateSubItemState.emit();
+		this.removeExcludeStyleOnClose();
 	}
 
 	onCancel() {
 		this.updateSubItemState.emit();
+		this.removeExcludeStyleOnClose();
 	}
 
 	componentWillLoad() {
 		this.subItemState = { name: this.subItem['name'], type: this.subItem['type'], path: this.subItem['path'] };
 		this.excludedItems = this.subItem['exclude'];
 		this.metadata = this.subItem['metadata'];
+		try {
+			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+				chrome.tabs.sendMessage(tabs[0].id, { type: 'update-excludeSubItem-onLoad', payload: { exclude: this.excludedItems, parentSelector: this.subItemState.path } });
+			});
+		} catch (e) {
+			console.log(e);
+		}
 	}
 
 	updateState(action: string, newItem, oldItem = { type: '', path: '' }) {
@@ -56,7 +75,7 @@ export class SubitemEditConfig {
 					return excludedItem.id !== newItem.id;
 				});
 				chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-					chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-exclude-selector', payload: { item: newItem } });
+					chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-exclude-selector', payload: { item: newItem, parentSelector: this.subItemState.path } });
 				});
 				break;
 			}
@@ -74,7 +93,7 @@ export class SubitemEditConfig {
 					if (excludedItem.id === newItem.id) {
 						chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 							console.log('updateExcludedSubItem: ', newItem.path, oldItem.path);
-							chrome.tabs.sendMessage(tabs[0].id, { type: 'exclude-selector', payload: { newItem: newItem, oldItem: oldItem } });
+							chrome.tabs.sendMessage(tabs[0].id, { type: 'exclude-selector', payload: { newItem: newItem, oldItem: oldItem, parentSelector: this.subItemState.path } });
 						});
 						return { id: newItem.id, type: newItem.type, path: newItem.path };
 					} else {
