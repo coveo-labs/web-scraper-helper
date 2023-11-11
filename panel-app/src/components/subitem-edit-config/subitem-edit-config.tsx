@@ -165,6 +165,9 @@ export class SubitemEditConfig {
 						</div>
 					</div>
 				</div>
+				<div class="subItem-metadata-container">
+					<metadata-results metadata={this.metadata} type="sub-item" parentSelector={this.subItemState.path}></metadata-results>
+				</div>
 				<div class="action-btn-container">
 					<ion-button onClick={() => this.onCancel()} fill="outline">
 						Cancel

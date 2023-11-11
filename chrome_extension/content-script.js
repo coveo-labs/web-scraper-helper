@@ -53,12 +53,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     removePreviouslyExcludedStyles(parentSelector);
   }
   if (message.type === 'metadata-results') {
-    const { metadata } = message.payload;
+    const { metadata, parentSelector } = message.payload;
     const results = [];
     for (const [, value] of Object.entries(metadata)) {
       const { name, type, path, isBoolean } = value;
 
-      const result = getElements(false, type, path);
+      const result = getElements(false, type, path, parentSelector);
       const modifiedResult = isBoolean ? [(!!result.length).toString()] : result && result.map((e) => typeof (e) === 'object' ? e.outerHTML : e);
       results.push({ "name": name, "values": modifiedResult });
     }

@@ -262,10 +262,10 @@ function removeMetadataItem(uid: string) {
 	state.metadata = metadata;
 }
 
-async function getMetadataResults() {
+async function getMetadataResults(type = 'global', metadata: Metadata = {}, parentSelector = null) {
 	const response = await new Promise((resolve) => {
 		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-			chrome.tabs.sendMessage(tabs[0].id, { type: 'metadata-results', payload: { metadata: state.metadata } }, (response) => {
+			chrome.tabs.sendMessage(tabs[0].id, { type: 'metadata-results', payload: { metadata: type === 'global' ? state.metadata : metadata, parentSelector: parentSelector } }, (response) => {
 				resolve(response);
 			});
 		});

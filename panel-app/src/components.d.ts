@@ -18,6 +18,8 @@ export namespace Components {
     }
     interface MetadataResults {
         "metadata": any;
+        "parentSelector": any;
+        "type": string;
     }
     interface SelectElementItem {
         "isBoolean"?: boolean;
@@ -84,35 +86,13 @@ declare global {
         prototype: HTMLSelectElementItemElement;
         new (): HTMLSelectElementItemElement;
     };
-    interface HTMLSubItemInputElementElementEventMap {
-        "updateSubItem": any;
-    }
     interface HTMLSubItemInputElementElement extends Components.SubItemInputElement, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLSubItemInputElementElementEventMap>(type: K, listener: (this: HTMLSubItemInputElementElement, ev: SubItemInputElementCustomEvent<HTMLSubItemInputElementElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLSubItemInputElementElementEventMap>(type: K, listener: (this: HTMLSubItemInputElementElement, ev: SubItemInputElementCustomEvent<HTMLSubItemInputElementElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLSubItemInputElementElement: {
         prototype: HTMLSubItemInputElementElement;
         new (): HTMLSubItemInputElementElement;
     };
-    interface HTMLSubitemEditConfigElementEventMap {
-        "updateSubItemState": any;
-    }
     interface HTMLSubitemEditConfigElement extends Components.SubitemEditConfig, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLSubitemEditConfigElementEventMap>(type: K, listener: (this: HTMLSubitemEditConfigElement, ev: SubitemEditConfigCustomEvent<HTMLSubitemEditConfigElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLSubitemEditConfigElementEventMap>(type: K, listener: (this: HTMLSubitemEditConfigElement, ev: SubitemEditConfigCustomEvent<HTMLSubitemEditConfigElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLSubitemEditConfigElement: {
         prototype: HTMLSubitemEditConfigElement;
@@ -142,6 +122,8 @@ declare namespace LocalJSX {
     }
     interface MetadataResults {
         "metadata"?: any;
+        "parentSelector"?: any;
+        "type"?: string;
     }
     interface SelectElementItem {
         "isBoolean"?: boolean;

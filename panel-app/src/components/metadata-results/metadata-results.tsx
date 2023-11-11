@@ -7,11 +7,13 @@ import { getMetadataResults } from '../store';
 })
 export class MetadataResults {
 	@Prop() metadata: any;
+	@Prop() type = 'global';
+	@Prop() parentSelector;
 	@State() results: any;
 
 	async componentWillRender() {
 		try {
-			this.results = await getMetadataResults();
+			this.results = await getMetadataResults(this.type, this.metadata, this.parentSelector);
 			console.log('results', this.results);
 		} catch (e) {
 			console.log(e);
