@@ -34,7 +34,7 @@
   ion-input.selector-input,
   ion-input.name-input,
   ion-input.metadata-selector-input {
-    width: 230px;
+    // width: 230px;
     min-height: unset;
     height: 36px;
     padding: 0px 16px;
@@ -46,14 +46,14 @@
     line-height: 21px;
     letter-spacing: 0.042px;
     --border-radius: 8px;
+  }
 
-    &.name-input {
-      width: 70px;
-    }
+  ion-input.name-input {
+    width: 70px;
+  }
 
-    &.metadata-selector-input {
-      width: 150px;
-    }
+  ion-input.metadata-selector-input {
+    width: 150px;
   }
 
   .remove-icon {

@@ -11,8 +11,18 @@
     border-bottom: 1px solid #E5E8E8;
   }
 
+  .subItem-config-wrapper {
+    max-height: 765px;
+    overflow: scroll;
+    margin: 24px 0px;
+  }
+
   .subItem-selector-container, .subItem-exclude-container, .subItem-metadata-container {
     padding: 32px 24px;
+  }
+
+  .subItem-selector-container {
+    padding-top: 0px;
   }
 
   .subItem-box {
@@ -22,12 +32,6 @@
     border: 1px solid #E5E8E8;
     background: #FCFCFC;
     box-shadow: 0px 4px 2px -2px rgba(55, 55, 55, 0.03) inset, 0px 1px 0px -1px #E5E8E8 inset;
-  }
-
-  #select-subItem__wrapper {
-    padding: 8px 0;
-    max-height: 150px;
-    overflow: scroll;
   }
 
   .subItem-edit-text {

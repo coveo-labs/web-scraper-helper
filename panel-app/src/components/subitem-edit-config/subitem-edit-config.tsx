@@ -138,35 +138,37 @@ export class SubitemEditConfig {
 		return (
 			<div class="subItem-edit-container">
 				<div class="subItem-edit-titleText">Edit Subitem : {this.subItem['name']}</div>
-				<div class="subItem-selector-container">
-					<div class="subItem-edit-text">Selector for the subItem</div>
-					<div class="subItem-box">
-						{this.renderSubItemInfo()}
-						{/* <select-element-item type="subItem" name={this.subItem['name']} selectorType={this.subItem['type']} selector={this.subItem['path']}></select-element-item> */}
-					</div>
-				</div>
-				<div class="subItem-exclude-container">
-					<div class="subItem-edit-text">Elements to exlude</div>
-					<div class="subItem-box">
-						<div id="select-subItem__wrapper">{this.renderExcludedItems()}</div>
-						<div class="add-rule" onClick={() => this.updateState('add-excludedItem', { type: 'CSS', path: '' })}>
-							<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
-							<span>Add Rule</span>
+				<div class="subItem-config-wrapper">
+					<div class="subItem-selector-container">
+						<div class="subItem-edit-text">Selector for the subItem</div>
+						<div class="subItem-box">
+							{this.renderSubItemInfo()}
+							{/* <select-element-item type="subItem" name={this.subItem['name']} selectorType={this.subItem['type']} selector={this.subItem['path']}></select-element-item> */}
 						</div>
 					</div>
-				</div>
-				<div class="subItem-metadata-container">
-					<div class="subItem-edit-text">Metadata to extract</div>
-					<div class="subItem-box">
-						<div id="select-subItem__wrapper">{this.renderMetadataItems()}</div>
-						<div class="add-rule" onClick={() => this.updateState('add-metadataItem', { name: '', type: 'CSS', path: '' })}>
-							<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
-							<span>Add Rule</span>
+					<div class="subItem-exclude-container">
+						<div class="subItem-edit-text">Elements to exlude</div>
+						<div class="subItem-box">
+							<div id="select-subItem__wrapper">{this.renderExcludedItems()}</div>
+							<div class="add-rule" onClick={() => this.updateState('add-excludedItem', { type: 'CSS', path: '' })}>
+								<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
+								<span>Add Rule</span>
+							</div>
 						</div>
 					</div>
-				</div>
-				<div class="subItem-metadata-container">
-					<metadata-results metadata={this.metadata} type="sub-item" parentSelector={this.subItemState.path}></metadata-results>
+					<div class="subItem-metadata-container">
+						<div class="subItem-edit-text">Metadata to extract</div>
+						<div class="subItem-box">
+							<div id="select-subItem__wrapper">{this.renderMetadataItems()}</div>
+							<div class="add-rule" onClick={() => this.updateState('add-metadataItem', { name: '', type: 'CSS', path: '' })}>
+								<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
+								<span>Add Rule</span>
+							</div>
+						</div>
+					</div>
+					<div class="subItem-metadata-container">
+						<metadata-results metadata={this.metadata} type="sub-item" parentSelector={this.subItemState.path}></metadata-results>
+					</div>
 				</div>
 				<div class="action-btn-container">
 					<ion-button onClick={() => this.onCancel()} fill="outline">
