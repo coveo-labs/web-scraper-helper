@@ -63,27 +63,7 @@ const { reset, state }: { reset: Function; state: ConfigState } = createStore({
 			path: '',
 		},
 	},
-	subItems: [
-		{
-			name: 'SubItemName',
-			type: 'CSS',
-			path: '.productpage',
-			exclude: [
-				{
-					id: 'uid-7fb4d0a5-664b-4df7-89a0-702b7b47e255-1698474061555',
-					type: 'CSS',
-					path: '',
-				},
-			],
-			metadata: {
-				'uid-7fb4d0a5-664b-4df7-89a0-702b7b47e255-1698474061247': {
-					name: '',
-					type: 'CSS',
-					path: '',
-				},
-			},
-		},
-	],
+	subItems: [],
 });
 
 function resetStore() {

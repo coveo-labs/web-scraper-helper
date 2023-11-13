@@ -38,6 +38,7 @@ ion-popover .file-list-names {
 ion-modal#create-file-modal {
   --height: 280px;
   --width: 430px;
+  --border-radius: 8px;
 }
 
 ion-modal#create-file-modal .modal-header {
@@ -112,4 +113,5 @@ ion-modal#create-file-modal .modal-footer ion-button.button-disabled {
 
 ion-toast {
   --max-width: 400px;
+  position: fixed;
 }

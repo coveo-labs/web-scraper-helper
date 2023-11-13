@@ -49,7 +49,7 @@ export class CreateConfig {
 			toastController
 				.create({
 					message: 'File saved successfully!',
-					duration: 2000,
+					duration: 3000,
 					position: 'top',
 				})
 				.then((toast) => {

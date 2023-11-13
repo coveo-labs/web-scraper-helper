@@ -1,5 +1,6 @@
 import { Component, Prop, h, Event, EventEmitter, State, Listen } from '@stencil/core';
 import state, { ElementsToExclude, Metadata, getId } from '../store';
+import { toastController } from '@ionic/core';
 
 @Component({
 	tag: 'subitem-edit-config',
@@ -43,6 +44,15 @@ export class SubitemEditConfig {
 			}
 		});
 		this.updateSubItemState.emit();
+		toastController
+			.create({
+				message: 'Subitem saved successfully!',
+				duration: 3000,
+				position: 'top',
+			})
+			.then((toast) => {
+				toast.present();
+			});
 		this.removeExcludeStyleOnClose();
 	}
 
