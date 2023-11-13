@@ -115,3 +115,31 @@ ion-toast {
   --max-width: 400px;
   position: fixed;
 }
+
+// Alert
+.alert-title.sc-ion-alert-md {
+  color: #282829;
+  font-family: Gibson;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 36px; /* 150% */
+  letter-spacing: 0.264px;
+}
+
+.alert-message.sc-ion-alert-md{
+  color: #565B66;
+  font-family: Gibson;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: 21px; /* 150% */
+  letter-spacing: 0.042px;
+  padding-bottom: 14px;
+}
+
+.alert-button-group .alert-button-inner {
+  cursor: pointer;
+  text-transform: capitalize;
+  font-size: 16px;
+}

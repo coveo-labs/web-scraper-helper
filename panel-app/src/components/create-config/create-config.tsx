@@ -1,6 +1,6 @@
 import { Component, Listen, Prop, State, h } from '@stencil/core';
 import state, { addExcludedItem, addMetadataItem, addSubItem, formatState, removeSubItem, resetStore, updateGlobalName, updateState } from '../store';
-import { toastController } from '@ionic/core';
+import { alertController, toastController } from '@ionic/core';
 import infoToken from '../../assets/icon/InfoToken.svg';
 
 @Component({
@@ -33,12 +33,37 @@ export class CreateConfig {
 		});
 	}
 
-	onDone() {
+	redirectAndReset() {
 		state.redirectToConfig = false;
 		resetStore();
 		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 			chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-excluded-on-file-close', payload: { parentSelector: null } });
 		});
+	}
+
+	async onDone() {
+		if (state.hasChanges) {
+			const alert = await alertController.create({
+				header: 'Unsaved Changes',
+				message: 'You have unsaved changes. Are you sure you want to close the file?',
+				buttons: [
+					{
+						text: 'Cancel',
+						role: 'cancel',
+					},
+					{
+						text: 'Yes',
+						handler: () => {
+							this.redirectAndReset();
+						},
+					},
+				],
+			});
+
+			await alert.present();
+		} else {
+			this.redirectAndReset();
+		}
 	}
 
 	onSave() {
@@ -55,6 +80,7 @@ export class CreateConfig {
 				.then((toast) => {
 					toast.present();
 				});
+			state.hasChanges = false; // changes have been saved
 		} catch (e) {
 			console.log(e);
 		}

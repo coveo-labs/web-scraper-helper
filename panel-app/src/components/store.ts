@@ -27,6 +27,7 @@ type SubItems = {
 type ConfigState = {
 	name?: string;
 	redirectToConfig: boolean;
+	hasChanges: boolean;
 	exclude: ElementsToExclude[];
 	metadata: Metadata;
 	subItems: SubItems[];
@@ -37,8 +38,9 @@ export function getId(): string {
 	return `uid-${uniqueId}-${Date.now()}`;
 }
 
-const { reset, state }: { reset: Function; state: ConfigState } = createStore({
+const { reset, state, onChange }: { reset: Function; state: ConfigState; onChange: Function } = createStore({
 	redirectToConfig: false,
+	hasChanges: false,
 	exclude: [
 		{
 			id: getId(),
@@ -69,6 +71,18 @@ const { reset, state }: { reset: Function; state: ConfigState } = createStore({
 function resetStore() {
 	reset();
 }
+
+onChange('exclude', () => {
+	state.hasChanges = true;
+});
+
+onChange('metadata', () => {
+	state.hasChanges = true;
+});
+
+onChange('subItems', () => {
+	state.hasChanges = true;
+});
 
 function getSubItemValues(arrayList, key) {
 	return arrayList.find((obj) => obj.name === key);
