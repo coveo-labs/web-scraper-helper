@@ -98,7 +98,7 @@ export class CreateConfig {
 					chrome.storage.local.get(this.fileName, (items) => resolve(items));
 				});
 
-				updateState(fileItem[this.fileName]);
+				updateState(fileItem[this.fileName], false);
 			} else {
 				chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 					chrome.tabs.sendMessage(tabs[0].id, { type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude } });

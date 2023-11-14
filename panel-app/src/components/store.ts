@@ -108,7 +108,7 @@ function getFormattedMetadata(action, metadata) {
 	return formattedMetadata;
 }
 
-function updateState(newState): boolean {
+function updateState(newState, hasChanges?: boolean): boolean {
 	try {
 		const parsedValue = JSON.parse(newState);
 		if (parsedValue) {
@@ -157,6 +157,10 @@ function updateState(newState): boolean {
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 				chrome.tabs.sendMessage(tabs[0].id, { type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude } });
 			});
+
+			if (hasChanges !== undefined) {
+				state.hasChanges = hasChanges;
+			}
 
 			return false;
 		}
