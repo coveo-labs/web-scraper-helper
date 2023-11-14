@@ -3,6 +3,7 @@ import '@ionic/core';
 import noFileImage from '../../assets/icon/NotFoundImage.svg';
 import infoToken from '../../assets/icon/InfoToken.svg';
 import state, { formatState } from '../store';
+import { alertController } from '@ionic/core';
 
 const RECENT_FILES_ITEM_NAME = '__Recent__Files__';
 @Component({
@@ -41,7 +42,7 @@ export class FileExplorer {
 			});
 
 			this.fileList = Object.keys(items).filter((item) => item !== RECENT_FILES_ITEM_NAME);
-			this.recentFiles = items[RECENT_FILES_ITEM_NAME] || [];
+			this.recentFiles = (items[RECENT_FILES_ITEM_NAME] || []).filter((item) => this.fileList.includes(item));
 		} catch (e) {
 			console.log(e);
 			this.fileList = [];
@@ -73,7 +74,7 @@ export class FileExplorer {
 					<div class="recent-file-name" onClick={() => this.loadFile(item)}>
 						{item}
 					</div>
-					<ion-icon name="trash-outline" size="small" color="primary"></ion-icon>
+					<ion-icon name="trash-outline" size="small" color="primary" onClick={() => this.removeFile(item)}></ion-icon>
 				</div>
 			));
 
@@ -118,6 +119,32 @@ export class FileExplorer {
 		this.fileName = fileName;
 		this.triggerType = 'load-file';
 		state.redirectToConfig = true;
+	}
+
+	async removeFile(filename) {
+		const alert = await alertController.create({
+			header: 'Remove file',
+			cssClass: 'alert-remove-file',
+			message: `Are you sure you want to remove the file "${filename}"?`,
+			buttons: [
+				{
+					text: 'Cancel',
+					role: 'cancel',
+				},
+				{
+					text: 'Delete',
+					handler: () => {
+						console.log('Deleting file', filename);
+						chrome.storage.local.remove(filename);
+						this.recentFiles = this.recentFiles.filter((item) => item !== filename);
+						this.fileList = this.fileList.filter((item) => item !== filename);
+						console.log('Deleting file - Done');
+					},
+				},
+			],
+		});
+
+		await alert.present();
 	}
 
 	render() {

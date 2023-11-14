@@ -119,10 +119,9 @@ ion-toast {
 // Alert
 .alert-wrapper.sc-ion-alert-md {
 	--max-width: 400px;
-
-	.alert-message.sc-ion-alert-md {
-		white-space: pre;
-	}
+}
+.alert-unsaved .alert-message.sc-ion-alert-md {
+	white-space: pre;
 }
 
 .alert-title.sc-ion-alert-md {
