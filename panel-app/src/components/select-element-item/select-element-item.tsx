@@ -83,14 +83,14 @@ export class SelectElementItem {
 		return (
 			<div class="select-element-item">
 				{this.type === 'metadataItem' && (
-					<div>
+					<div style={{ flex: '1' }}>
 						<ion-input class="name-input" fill="outline" value={this.name} placeholder="Name" onIonInput={this.handleNameChange}></ion-input>
 					</div>
 				)}
 				<div>
 					<ion-input id="selector-type-input" class={cssClassForValidity} fill="outline" value={this.selectorType} onClick={this.handleSelectorTypeChange}></ion-input>
 				</div>
-				<div>
+				<div style={{ flex: '2' }}>
 					<ion-input
 						class={this.type === 'excludeItem' ? 'selector-input' : 'metadata-selector-input'}
 						fill="outline"
