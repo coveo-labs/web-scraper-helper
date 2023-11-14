@@ -45,7 +45,7 @@ export class SubItemInputElement {
 		return (
 			<div class="subItem-select-element">
 				{(this.type === 'metadataItem' || this.type === 'subItem') && (
-					<div>
+					<div style={{ flex: '1' }}>
 						<ion-input
 							class={this.type === 'metadataItem' ? 'metadata-name-input name-input' : 'name-input'}
 							fill="outline"
@@ -75,7 +75,7 @@ export class SubItemInputElement {
 						}
 					></ion-input>
 				</div>
-				<div>
+				<div style={{ flex: '2' }}>
 					<ion-input
 						class={this.type === 'excludeItem' ? 'selector-input' : this.type === 'metadataItem' ? 'metadata-selector-input' : 'subItem-selector-input'}
 						fill="outline"
