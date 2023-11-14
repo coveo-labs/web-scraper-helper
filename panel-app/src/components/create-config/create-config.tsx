@@ -45,7 +45,8 @@ export class CreateConfig {
 		if (state.hasChanges) {
 			const alert = await alertController.create({
 				header: 'Unsaved Changes',
-				message: 'You have unsaved changes. Are you sure you want to close the file?',
+				cssClass: 'alert-unsaved',
+				message: 'You have unsaved changes.\n\nAre you sure you want to close the file?',
 				buttons: [
 					{
 						text: 'Cancel',
