@@ -165,13 +165,13 @@ function updateState(newState, hasChanges?: boolean): boolean {
 			if (hasChanges !== undefined) {
 				state.hasChanges = hasChanges;
 			}
-
-			return false;
 		}
 	} catch (error) {
 		console.log(error);
 		return true;
 	}
+
+	return false;
 }
 
 function formatState() {
@@ -302,7 +302,6 @@ function updateExcludedItem(newItem: ElementsToExclude, oldItem: ElementsToExclu
 			return newItem;
 		}
 		return excludedItem;
-
 	});
 }
 

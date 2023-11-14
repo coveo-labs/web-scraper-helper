@@ -4,6 +4,7 @@ import noFileImage from '../../assets/icon/NotFoundImage.svg';
 import infoToken from '../../assets/icon/InfoToken.svg';
 import state, { formatState } from '../store';
 
+const RECENT_FILES_ITEM_NAME = '__Recent__Files__';
 @Component({
 	tag: 'file-explorer',
 	styleUrl: 'file-explorer.scss',
@@ -14,6 +15,7 @@ export class FileExplorer {
 	@State() fileName = '';
 	@State() triggerType = 'new-file'; // keeps track whether a new file is created or loaded
 	@State() fileList = [];
+	@State() recentFiles = [];
 
 	async onSaveClick() {
 		this.showModal = false;
@@ -37,7 +39,9 @@ export class FileExplorer {
 			const items = await new Promise((resolve) => {
 				chrome.storage.local.get(null, (items) => resolve(items));
 			});
-			this.fileList = Object.keys(items);
+
+			this.fileList = Object.keys(items).filter((item) => item !== RECENT_FILES_ITEM_NAME);
+			this.recentFiles = items[RECENT_FILES_ITEM_NAME] || [];
 		} catch (e) {
 			console.log(e);
 			this.fileList = [];
@@ -62,8 +66,56 @@ export class FileExplorer {
 		}
 	}
 
+	renderRecentFiles() {
+		if (this.recentFiles?.length) {
+			const recentFiles = this.recentFiles.map((item) => (
+				<div class="recent-file">
+					<div class="recent-file-name" onClick={() => this.loadFile(item)}>
+						{item}
+					</div>
+					<ion-icon name="trash-outline" size="small" color="primary"></ion-icon>
+				</div>
+			));
+
+			return (
+				<div>
+					<div class="recent-title">Your recent files</div>
+					<div class="recent-subtitle">Choose one of recently created file or search for more in the list above.</div>
+					<div class="recent-files-section">
+						{recentFiles}
+						<div class="recent-file create-new" onClick={() => (this.showModal = true)}>
+							<div class="recent-file-name">Create a new file</div>
+							<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
+						</div>
+					</div>
+				</div>
+			);
+		}
+
+		return (
+			<div class="no-file-container">
+				<div class="createFile-wrapper">
+					<div class="info-text">You have no files</div>
+					<div>
+						<ion-button class="create-file-btn" onClick={() => (this.showModal = true)}>
+							<ion-icon slot="start" name="add-circle-outline"></ion-icon>
+							Create a new file
+						</ion-button>
+					</div>
+				</div>
+				<div class="noFile-img-wrapper">
+					<ion-img id="coveo-logo-img" src={noFileImage}></ion-img>
+				</div>
+			</div>
+		);
+	}
+
 	handleFileSelection(event) {
-		this.fileName = event.target.value;
+		this.loadFile(event.target.value);
+	}
+
+	loadFile(fileName) {
+		this.fileName = fileName;
 		this.triggerType = 'load-file';
 		state.redirectToConfig = true;
 	}
@@ -96,20 +148,7 @@ export class FileExplorer {
 					</div>
 				</div>
 				<div class="content-section">
-					<div class="no-file-container">
-						<div class="createFile-wrapper">
-							<div class="info-text"> You have no files</div>
-							<div>
-								<ion-button class="create-file-btn" onClick={() => (this.showModal = true)}>
-									<ion-icon slot="start" name="add-circle-outline"></ion-icon>
-									Create a new file
-								</ion-button>
-							</div>
-						</div>
-						<div class="noFile-img-wrapper">
-							<ion-img id="coveo-logo-img" src={noFileImage}></ion-img>
-						</div>
-					</div>
+					{this.renderRecentFiles()}
 					<ion-modal id="create-file-modal" isOpen={this.showModal} backdropDismiss={false}>
 						<div class="modal-header">
 							<div>Create new file</div>
