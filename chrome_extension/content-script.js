@@ -2,8 +2,8 @@
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'exclude-selector') {
-    const { newItem, oldItem } = message.payload;
-    applyStylesToElements(newItem, oldItem);
+    const { newItem, oldItem, parentSelector } = message.payload;
+    applyStylesToElements(newItem, oldItem, parentSelector);
   }
   if (message.type === 'validate-selector') {
     let response = 'Invalid';
@@ -31,10 +31,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return applyStylesToElements(element);
     });
   }
+  if (message.type === 'update-excludeSubItem-onLoad') {
+    const { exclude, parentSelector } = message.payload;
+    exclude.length && exclude.map((element) => {
+      return applyStylesToElements(element, null, parentSelector);
+    });
+  }
   if (message.type === 'remove-exclude-selector') {
-    const { item } = message.payload;
+    const { item, parentSelector } = message.payload;
     try {
-      const elements = getElements(item.type === 'XPath', item.type, item.path);
+      const elements = getElements(item.type === 'XPath', item.type, item.path, parentSelector);
       elements?.forEach(element => {
         element.classList?.remove('web-scraper-helper-exclude');
       });
@@ -43,15 +49,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
   }
   if (message.type === 'remove-excluded-on-file-close') {
-    removePreviouslyExcludedStyles();
+    const { parentSelector } = message.payload;
+    removePreviouslyExcludedStyles(parentSelector);
   }
   if (message.type === 'metadata-results') {
-    const { metadata } = message.payload;
+    const { metadata, parentSelector } = message.payload;
     const results = [];
     for (const [, value] of Object.entries(metadata)) {
       const { name, type, path, isBoolean } = value;
 
-      const result = getElements(false, type, path);
+      const result = getElements(false, type, path, parentSelector);
       const modifiedResult = isBoolean ? [(!!result.length).toString()] : result && result.map((e) => typeof (e) === 'object' ? e.outerHTML : e);
       results.push({ "name": name, "values": modifiedResult });
     }
@@ -60,10 +67,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-function applyStylesToElements(newItem, oldItem = null) {
+function applyStylesToElements(newItem, oldItem = null, parentSelector = null) {
   try {
     if (oldItem && oldItem.path !== newItem.path) {
-      const oldElements = getElements(newItem.type === 'XPath', oldItem.type, oldItem.path) ?? [];
+      const oldElements = getElements(newItem.type === 'XPath', oldItem.type, oldItem.path, parentSelector) ?? [];
 
       oldElements.forEach(element => {
         element.classList.remove('web-scraper-helper-exclude');
@@ -72,9 +79,9 @@ function applyStylesToElements(newItem, oldItem = null) {
 
     let newElements = [];
     if (newItem.type === 'CSS' && newItem.path.indexOf(',') !== -1) {
-      newElements = newItem.path.split(',').flatMap((i) => getElements(false, 'CSS', i)) ?? [];
+      newElements = newItem.path.split(',').flatMap((i) => getElements(false, 'CSS', i, parentSelector)) ?? [];
     } else {
-      newElements = getElements(newItem.type === 'XPath', newItem.type, newItem.path) ?? [];
+      newElements = getElements(newItem.type === 'XPath', newItem.type, newItem.path, parentSelector) ?? [];
     }
 
     newElements?.forEach(element => {
@@ -86,17 +93,22 @@ function applyStylesToElements(newItem, oldItem = null) {
   }
 }
 
-function removePreviouslyExcludedStyles() {
-  document.querySelectorAll('.web-scraper-helper-exclude').forEach(e => {
-    if (e && e.classList) {
-      e.classList.remove('web-scraper-helper-exclude');
-    }
-  });
+function removePreviouslyExcludedStyles(parentSelector = null) {
+  try {
+    let parent = parentSelector ? document.querySelector(parentSelector) : document;
+    parent.querySelectorAll('.web-scraper-helper-exclude').forEach(e => {
+      if (e && e.classList) {
+        e.classList.remove('web-scraper-helper-exclude');
+      }
+    });
+  } catch (e) {
+    console.log(e)
+  }
 }
 
-function getElements(asIs = false, type, selector) {
+function getElements(asIs = false, type, selector, parentSelector = null) {
   try {
-
+    let parent = parentSelector ? document.querySelector(parentSelector) : document;
     if (type === 'CSS') {
       let reTextSub = /::text\b/;
       let reAttrSub = /::attr\b/;
@@ -115,7 +127,7 @@ function getElements(asIs = false, type, selector) {
         selector = selector.replace(reTextSub, '');
       }
 
-      let elements = document.querySelectorAll(selector);
+      let elements = parent.querySelectorAll(selector);
       if (shouldReturnAttr) {
         let attrValues = [];
         elements.forEach(element => {
@@ -135,7 +147,7 @@ function getElements(asIs = false, type, selector) {
 
     else if (type === 'XPath') {
       let path = selector;
-      let nodes = document.evaluate(path, document);
+      let nodes = parent.evaluate(path, document);
       let elements = [];
       let e;
 

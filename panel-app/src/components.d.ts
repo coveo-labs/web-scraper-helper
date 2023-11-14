@@ -18,6 +18,8 @@ export namespace Components {
     }
     interface MetadataResults {
         "metadata": any;
+        "parentSelector": any;
+        "type": string;
     }
     interface SelectElementItem {
         "isBoolean"?: boolean;
@@ -142,6 +144,8 @@ declare namespace LocalJSX {
     }
     interface MetadataResults {
         "metadata"?: any;
+        "parentSelector"?: any;
+        "type"?: string;
     }
     interface SelectElementItem {
         "isBoolean"?: boolean;

@@ -4,6 +4,7 @@
   align-items: center;
   margin-bottom: 24px;
   padding: 0 1px;
+  gap: 20px;
 
   #subItem-selector-type-input {
     width: 88px;
@@ -36,7 +37,6 @@
   ion-input.name-input,
   ion-input.metadata-selector-input,
   ion-input.subItem-selector-input {
-    width: 230px;
     min-height: unset;
     height: 36px;
     padding: 0px 16px;
@@ -48,23 +48,6 @@
     line-height: 21px;
     letter-spacing: 0.042px;
     --border-radius: 8px;
-  }
-
-
-  ion-input.name-input {
-    width: 100px;
-  }
-
-  ion-input.metadata-name-input {
-    width: 70px !important;
-  }
-
-  ion-input.metadata-selector-input {
-    width: 150px;
-  }
-
-  ion-input.subItem-selector-input {
-    width: 200px;
   }
 
   .valid-selector {
@@ -93,6 +76,7 @@ ion-checkbox {
   --size: 16px;
   --checkbox-background-checked: #3F3F71;
   --checkmark-width: 2;
+  vertical-align: middle;
 
   &::part(container) {
     border-radius: 4px;
@@ -106,4 +90,9 @@ ion-icon[name="information-circle-outline"] {
   color: #B7BCC0;
   margin-left: 8px;
   cursor: pointer;
+  vertical-align: middle;
+}
+
+ion-icon[name="remove-circle-outline"] {
+  vertical-align: middle;
 }

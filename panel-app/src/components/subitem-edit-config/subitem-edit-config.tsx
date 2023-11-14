@@ -1,5 +1,6 @@
 import { Component, Prop, h, Event, EventEmitter, State, Listen } from '@stencil/core';
 import state, { ElementsToExclude, Metadata, getId } from '../store';
+import { toastController } from '@ionic/core';
 
 @Component({
 	tag: 'subitem-edit-config',
@@ -20,6 +21,16 @@ export class SubitemEditConfig {
 		this.updateState(action, newItem, oldItem);
 	}
 
+	removeExcludeStyleOnClose() {
+		try {
+			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+				chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-excluded-on-file-close', payload: { parentSelector: this.subItemState.path } });
+			});
+		} catch (e) {
+			console.log(e);
+		}
+	}
+
 	onSave() {
 		state.subItems = state.subItems.map((item) => {
 			if (item.name === this.subItem['name']) {
@@ -33,16 +44,34 @@ export class SubitemEditConfig {
 			}
 		});
 		this.updateSubItemState.emit();
+		toastController
+			.create({
+				message: 'Subitem saved successfully!',
+				duration: 3000,
+				position: 'top',
+			})
+			.then((toast) => {
+				toast.present();
+			});
+		this.removeExcludeStyleOnClose();
 	}
 
 	onCancel() {
 		this.updateSubItemState.emit();
+		this.removeExcludeStyleOnClose();
 	}
 
 	componentWillLoad() {
 		this.subItemState = { name: this.subItem['name'], type: this.subItem['type'], path: this.subItem['path'] };
 		this.excludedItems = this.subItem['exclude'];
 		this.metadata = this.subItem['metadata'];
+		try {
+			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+				chrome.tabs.sendMessage(tabs[0].id, { type: 'update-excludeSubItem-onLoad', payload: { exclude: this.excludedItems, parentSelector: this.subItemState.path } });
+			});
+		} catch (e) {
+			console.log(e);
+		}
 	}
 
 	updateState(action: string, newItem, oldItem = { type: '', path: '' }) {
@@ -56,7 +85,7 @@ export class SubitemEditConfig {
 					return excludedItem.id !== newItem.id;
 				});
 				chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-					chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-exclude-selector', payload: { item: newItem } });
+					chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-exclude-selector', payload: { item: newItem, parentSelector: this.subItemState.path } });
 				});
 				break;
 			}
@@ -74,7 +103,7 @@ export class SubitemEditConfig {
 					if (excludedItem.id === newItem.id) {
 						chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 							console.log('updateExcludedSubItem: ', newItem.path, oldItem.path);
-							chrome.tabs.sendMessage(tabs[0].id, { type: 'exclude-selector', payload: { newItem: newItem, oldItem: oldItem } });
+							chrome.tabs.sendMessage(tabs[0].id, { type: 'exclude-selector', payload: { newItem: newItem, oldItem: oldItem, parentSelector: this.subItemState.path } });
 						});
 						return { id: newItem.id, type: newItem.type, path: newItem.path };
 					} else {
@@ -119,31 +148,36 @@ export class SubitemEditConfig {
 		return (
 			<div class="subItem-edit-container">
 				<div class="subItem-edit-titleText">Edit Subitem : {this.subItem['name']}</div>
-				<div class="subItem-selector-container">
-					<div class="subItem-edit-text">Selector for the subItem</div>
-					<div class="subItem-box">
-						{this.renderSubItemInfo()}
-						{/* <select-element-item type="subItem" name={this.subItem['name']} selectorType={this.subItem['type']} selector={this.subItem['path']}></select-element-item> */}
-					</div>
-				</div>
-				<div class="subItem-exclude-container">
-					<div class="subItem-edit-text">Elements to exlude</div>
-					<div class="subItem-box">
-						<div id="select-subItem__wrapper">{this.renderExcludedItems()}</div>
-						<div class="add-rule" onClick={() => this.updateState('add-excludedItem', { type: 'CSS', path: '' })}>
-							<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
-							<span>Add Rule</span>
+				<div class="subItem-config-wrapper">
+					<div class="subItem-selector-container">
+						<div class="subItem-edit-text">Selector for the subItem</div>
+						<div class="subItem-box">
+							{this.renderSubItemInfo()}
+							{/* <select-element-item type="subItem" name={this.subItem['name']} selectorType={this.subItem['type']} selector={this.subItem['path']}></select-element-item> */}
 						</div>
 					</div>
-				</div>
-				<div class="subItem-metadata-container">
-					<div class="subItem-edit-text">Metadata to extract</div>
-					<div class="subItem-box">
-						<div id="select-subItem__wrapper">{this.renderMetadataItems()}</div>
-						<div class="add-rule" onClick={() => this.updateState('add-metadataItem', { name: '', type: 'CSS', path: '' })}>
-							<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
-							<span>Add Rule</span>
+					<div class="subItem-exclude-container">
+						<div class="subItem-edit-text">Elements to exlude</div>
+						<div class="subItem-box">
+							<div id="select-subItem__wrapper">{this.renderExcludedItems()}</div>
+							<div class="add-rule" onClick={() => this.updateState('add-excludedItem', { type: 'CSS', path: '' })}>
+								<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
+								<span>Add Rule</span>
+							</div>
 						</div>
+					</div>
+					<div class="subItem-metadata-container">
+						<div class="subItem-edit-text">Metadata to extract</div>
+						<div class="subItem-box">
+							<div id="select-subItem__wrapper">{this.renderMetadataItems()}</div>
+							<div class="add-rule" onClick={() => this.updateState('add-metadataItem', { name: '', type: 'CSS', path: '' })}>
+								<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
+								<span>Add Rule</span>
+							</div>
+						</div>
+					</div>
+					<div class="subItem-metadata-container">
+						<metadata-results metadata={this.metadata} type="sub-item" parentSelector={this.subItemState.path}></metadata-results>
 					</div>
 				</div>
 				<div class="action-btn-container">

@@ -3,6 +3,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  gap: 20px;
 
   #selector-type-input {
     width: 88px;
@@ -34,7 +35,6 @@
   ion-input.selector-input,
   ion-input.name-input,
   ion-input.metadata-selector-input {
-    width: 230px;
     min-height: unset;
     height: 36px;
     padding: 0px 16px;
@@ -46,18 +46,14 @@
     line-height: 21px;
     letter-spacing: 0.042px;
     --border-radius: 8px;
-
-    &.name-input {
-      width: 70px;
-    }
-
-    &.metadata-selector-input {
-      width: 150px;
-    }
   }
 
   .remove-icon {
     cursor: pointer;
+
+    ion-icon {
+      vertical-align: middle;
+    }
   }
 
   .valid-selector {
@@ -85,6 +81,7 @@
     --size: 16px;
     --checkbox-background-checked: #3F3F71;
     --checkmark-width: 2;
+    vertical-align: middle;
 
     &::part(container) {
       border-radius: 4px;
@@ -98,5 +95,6 @@
     color: #B7BCC0;
     margin-left: 8px;
     cursor: pointer;
+    vertical-align: middle;
   }
 }

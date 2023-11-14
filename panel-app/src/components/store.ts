@@ -27,6 +27,7 @@ type SubItems = {
 type ConfigState = {
 	name?: string;
 	redirectToConfig: boolean;
+	hasChanges: boolean;
 	exclude: ElementsToExclude[];
 	metadata: Metadata;
 	subItems: SubItems[];
@@ -37,8 +38,9 @@ export function getId(): string {
 	return `uid-${uniqueId}-${Date.now()}`;
 }
 
-const { reset, state }: { reset: Function; state: ConfigState } = createStore({
+const { reset, state, onChange }: { reset: Function; state: ConfigState; onChange: Function } = createStore({
 	redirectToConfig: false,
+	hasChanges: false,
 	exclude: [
 		{
 			id: getId(),
@@ -63,32 +65,24 @@ const { reset, state }: { reset: Function; state: ConfigState } = createStore({
 			path: '',
 		},
 	},
-	subItems: [
-		{
-			name: 'SubItemName',
-			type: 'CSS',
-			path: '.productpage',
-			exclude: [
-				{
-					id: 'uid-7fb4d0a5-664b-4df7-89a0-702b7b47e255-1698474061555',
-					type: 'CSS',
-					path: '',
-				},
-			],
-			metadata: {
-				'uid-7fb4d0a5-664b-4df7-89a0-702b7b47e255-1698474061247': {
-					name: '',
-					type: 'CSS',
-					path: '',
-				},
-			},
-		},
-	],
+	subItems: [],
 });
 
 function resetStore() {
 	reset();
 }
+
+onChange('exclude', () => {
+	state.hasChanges = true;
+});
+
+onChange('metadata', () => {
+	state.hasChanges = true;
+});
+
+onChange('subItems', () => {
+	state.hasChanges = true;
+});
 
 function getSubItemValues(arrayList, key) {
 	return arrayList.find((obj) => obj.name === key);
@@ -262,10 +256,10 @@ function removeMetadataItem(uid: string) {
 	state.metadata = metadata;
 }
 
-async function getMetadataResults() {
+async function getMetadataResults(type = 'global', metadata: Metadata = {}, parentSelector = null) {
 	const response = await new Promise((resolve) => {
 		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-			chrome.tabs.sendMessage(tabs[0].id, { type: 'metadata-results', payload: { metadata: state.metadata } }, (response) => {
+			chrome.tabs.sendMessage(tabs[0].id, { type: 'metadata-results', payload: { metadata: type === 'global' ? state.metadata : metadata, parentSelector: parentSelector } }, (response) => {
 				resolve(response);
 			});
 		});

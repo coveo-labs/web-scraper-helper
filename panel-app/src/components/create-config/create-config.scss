@@ -103,7 +103,7 @@
 
       #collection-container {
         .collection-subContainer {
-          padding: 32px 24px;
+          padding: 0px 24px;
           color: #282829;
           font-family: Gibson;
           font-size: 14px;
@@ -111,6 +111,9 @@
           font-weight: 500;
           line-height: 21px;
           letter-spacing: 0.154px;
+          max-height: 600px;
+          overflow: scroll;
+          margin: 32px 0;
         }
 
         ion-input.global-section-input {
@@ -138,12 +141,6 @@
           box-shadow: 0px 4px 2px -2px rgba(55, 55, 55, 0.03) inset, 0px 1px 0px -1px #E5E8E8 inset;
           margin-top: 8px;
           padding: 24px;
-
-          #select-element__wrapper {
-            padding: 8px 2px;
-            max-height: 150px;
-            overflow: scroll;
-          }
 
           .add-rule {
             display: flex;
