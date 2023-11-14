@@ -134,11 +134,9 @@ export class FileExplorer {
 				{
 					text: 'Delete',
 					handler: () => {
-						console.log('Deleting file', filename);
 						chrome.storage.local.remove(filename);
 						this.recentFiles = this.recentFiles.filter((item) => item !== filename);
 						this.fileList = this.fileList.filter((item) => item !== filename);
-						console.log('Deleting file - Done');
 					},
 				},
 			],
