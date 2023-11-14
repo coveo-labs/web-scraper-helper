@@ -38,7 +38,7 @@ export function getId(): string {
 	return `uid-${uniqueId}-${Date.now()}`;
 }
 
-const { reset, state, onChange }: { reset: Function; state: ConfigState; onChange: Function } = createStore({
+const { reset, state, onChange }: { reset: Function; state: ConfigState; onChange: Function; } = createStore({
 	redirectToConfig: false,
 	hasChanges: false,
 	exclude: [
@@ -58,13 +58,7 @@ const { reset, state, onChange }: { reset: Function; state: ConfigState; onChang
 			path: 'noscript, nav',
 		},
 	],
-	metadata: {
-		'uid-7fb4d0a5-664b-4df7-89a0-702b7b47e255-1698474061246': {
-			name: '',
-			type: 'CSS',
-			path: '',
-		},
-	},
+	metadata: {},
 	subItems: [],
 });
 
@@ -247,7 +241,7 @@ function removeExcludedItem(item: ElementsToExclude) {
 	});
 }
 
-function addMetadataItem(item: { name: string; type: string; path: string }) {
+function addMetadataItem(item: { name: string; type: string; path: string; }) {
 	state.metadata = { ...state.metadata, [getId()]: { name: item.name, type: item.type, path: item.path } };
 }
 
@@ -278,7 +272,7 @@ function removeSubItem(itemName: string) {
 	});
 }
 
-function updateMetadataItem(newItem: { id: string; name: string; type: string; path: string; isBoolean?: boolean }) {
+function updateMetadataItem(newItem: { id: string; name: string; type: string; path: string; isBoolean?: boolean; }) {
 	state.metadata = Object.keys(state.metadata).reduce((acc, key) => {
 		if (key === newItem.id) {
 			acc[key] = { name: newItem.name, type: newItem.type, path: newItem.path, ...(newItem.isBoolean && { isBoolean: newItem.isBoolean }) };
