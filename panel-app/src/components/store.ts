@@ -66,6 +66,10 @@ function resetStore() {
 	reset();
 }
 
+onChange('name', () => {
+	state.hasChanges = true;
+});
+
 onChange('exclude', () => {
 	state.hasChanges = true;
 });
@@ -296,9 +300,9 @@ function updateExcludedItem(newItem: ElementsToExclude, oldItem: ElementsToExclu
 	state.exclude = state.exclude.map((excludedItem) => {
 		if (excludedItem.id === oldItem.id) {
 			return newItem;
-		} else {
-			return excludedItem;
 		}
+		return excludedItem;
+
 	});
 }
 
@@ -306,9 +310,8 @@ function updateSubItem(newItem: SubItems, oldItem: SubItems) {
 	state.subItems = state.subItems.map((subItem) => {
 		if (subItem.name === oldItem.name && subItem.type === oldItem.type && subItem.path === oldItem.path) {
 			return newItem;
-		} else {
-			return subItem;
 		}
+		return subItem;
 	});
 }
 

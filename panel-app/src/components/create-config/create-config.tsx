@@ -110,12 +110,23 @@ export class CreateConfig {
 	}
 
 	render() {
+		const dirty = state.hasChanges ? (
+			<span class="is-dirty" title="Unsaved changes">
+				*
+			</span>
+		) : (
+			''
+		);
 		return (
 			<div id="create-config">
 				<div class="header-section">
 					<div class="header_text-container">
 						<div class="header_title-text">
-							Web Scraper file name: <span style={{ marginLeft: '4px', textTransform: 'capitalize' }}>{this.fileName}</span>
+							Web Scraper file name:{' '}
+							<span style={{ marginLeft: '4px', textTransform: 'capitalize' }}>
+								{this.fileName}
+								{dirty}
+							</span>
 							<a href="https://github.com/coveo-labs/web-scraper-helper" target="web-scraper-help">
 								<ion-img id="infoToken-img" src={infoToken}></ion-img>
 							</a>
