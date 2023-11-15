@@ -1,6 +1,7 @@
 /*global chrome*/
 import { Component, h, Prop, State } from '@stencil/core';
-import { removeExcludedItem, removeMetadataItem, Selector, updateExcludedItem, updateMetadataItem } from '../store';
+import { removeExcludedItem, removeMetadataItem, updateExcludedItem, updateMetadataItem } from '../store';
+import { Selector, SelectorType } from '../types';
 
 @Component({
 	tag: 'select-element-item',
@@ -12,7 +13,7 @@ export class SelectElementItem {
 	@Prop() type: string;
 	@Prop() name: string;
 	@Prop() selector: Selector;
-	@State() selectorValidity;
+	@State() selectorValidity: 'No element found' | 'Invalid' | 'Valid';
 
 	async validateSelector(selector: Selector) {
 		const response = await new Promise((resolve) => {
@@ -22,11 +23,11 @@ export class SelectElementItem {
 				});
 			});
 		});
-		this.selectorValidity = response;
+		this.selectorValidity = response as any;
 	}
 
 	handleSelectorTypeChange = () => {
-		const newSelectorType = this.selector.type === 'CSS' ? 'XPath' : 'CSS';
+		const newSelectorType: SelectorType = this.selector.type === 'CSS' ? 'XPATH' : 'CSS';
 		this.validateSelector({ ...this.selector, type: newSelectorType });
 
 		if (this.type === 'excludeItem') {

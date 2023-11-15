@@ -5,16 +5,14 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { Selector } from "./components/store";
-export { Selector } from "./components/store";
+import { Selector } from "./components/types";
+export { Selector } from "./components/types";
 export namespace Components {
     interface AppRoot {
     }
     interface CodeViewer {
     }
     interface CreateConfig {
-        "fileName": string;
-        "triggerType": 'new-file' | 'load-file';
     }
     interface FileExplorer {
     }
@@ -135,8 +133,6 @@ declare namespace LocalJSX {
     interface CodeViewer {
     }
     interface CreateConfig {
-        "fileName"?: string;
-        "triggerType"?: 'new-file' | 'load-file';
     }
     interface FileExplorer {
     }

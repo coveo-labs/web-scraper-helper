@@ -1,155 +1,185 @@
-/* global chrome */
+'use strict';
+// jshint -W110, -W003
+/*global chrome*/
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'exclude-selector') {
-    const { newItem, oldItem, parentSelector } = message.payload;
-    applyStylesToElements(newItem, oldItem, parentSelector);
-  }
-  if (message.type === 'validate-selector') {
-    let response = 'Invalid';
-    const { type, selector } = message.payload;
-
-    try {
-      const elements = getElements(false, type, selector);
-
-      if (!elements) {
-        response = 'Invalid';
-      }
-      else if (elements && elements.length > 0) {
-        response = 'Valid';
-      } else {
-        response = 'No element found';
-      }
-    } catch (e) {
-      response = 'Invalid';
+class RulePath {
+  constructor(spec, title, subItemName, container) {
+    this.path = spec.path;
+    this.isBoolean = spec.isBoolean ? true : false;
+    if (title !== undefined) {
+      this.title = title;
+    } else if (spec.name) {
+      this.title = spec.name;
     }
-    sendResponse(response);
-  }
-  if (message.type === 'update-excludeItem-onLoad') {
-    const { exclude } = message.payload;
-    exclude.length && exclude.map((element) => {
-      return applyStylesToElements(element);
-    });
-  }
-  if (message.type === 'update-excludeSubItem-onLoad') {
-    const { exclude, parentSelector } = message.payload;
-    exclude.length && exclude.map((element) => {
-      return applyStylesToElements(element, null, parentSelector);
-    });
-  }
-  if (message.type === 'remove-exclude-selector') {
-    const { item, parentSelector } = message.payload;
-    try {
-      const elements = getElements(item.type === 'XPath', item.type, item.path, parentSelector);
-      elements?.forEach(element => {
-        element.classList?.remove('web-scraper-helper-exclude');
-      });
-    } catch (e) {
-      console.log(e);
+    this.id = spec.id;
+
+    this.container = container || null;
+
+    if (subItemName) {
+      this.subItemName = subItemName;
     }
+    return this;
   }
-  if (message.type === 'remove-excluded-on-file-close') {
-    const { parentSelector } = message.payload;
-    removePreviouslyExcludedStyles(parentSelector);
+
+  getElements() {
+    return null;
   }
-  if (message.type === 'metadata-results') {
-    const { metadata, parentSelector } = message.payload;
-    const results = [];
-    for (const [, value] of Object.entries(metadata)) {
-      const { name, type, path, isBoolean } = value;
 
-      const result = getElements(false, type, path, parentSelector);
-      const modifiedResult = isBoolean ? [(!!result.length).toString()] : result && result.map((e) => typeof (e) === 'object' ? e.outerHTML : e);
-      results.push({ "name": name, "values": modifiedResult });
-    }
-    console.log('metadata-result-array', results);
-    sendResponse(results);
-  }
-});
-
-function applyStylesToElements(newItem, oldItem = null, parentSelector = null) {
-  try {
-    if (oldItem && oldItem.path !== newItem.path) {
-      const oldElements = getElements(newItem.type === 'XPath', oldItem.type, oldItem.path, parentSelector) ?? [];
-
-      oldElements.forEach(element => {
-        element.classList.remove('web-scraper-helper-exclude');
-      });
-    }
-
-    let newElements = [];
-    if (newItem.type === 'CSS' && newItem.path.indexOf(',') !== -1) {
-      newElements = newItem.path.split(',').flatMap((i) => getElements(false, 'CSS', i, parentSelector)) ?? [];
-    } else {
-      newElements = getElements(newItem.type === 'XPath', newItem.type, newItem.path, parentSelector) ?? [];
-    }
-
-    newElements?.forEach(element => {
-      element?.classList?.add('web-scraper-helper-exclude');
-    });
-
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-function removePreviouslyExcludedStyles(parentSelector = null) {
-  try {
-    let parent = parentSelector ? document.querySelector(parentSelector) : document;
-    parent.querySelectorAll('.web-scraper-helper-exclude').forEach(e => {
+  exludeFromPage() {
+    let elements = this.getElements(true);
+    (elements || []).forEach(e => {
       if (e && e.classList) {
-        e.classList.remove('web-scraper-helper-exclude');
+        e.classList.add('web-scraper-helper-exclude');
       }
     });
-  } catch (e) {
-    console.log(e)
+  }
+
+  formatError(err) {
+    return `[${this.title}] Failed to parse ${this.type} "${this.path}"\n${err}`;
+  }
+
+  toJson() {
+    let o = {
+      type: this.type,
+      path: this.path
+    };
+    if (this.subItemName) {
+      o.subItemName = this.subItemName;
+    }
+    if (this.isBoolean) {
+      o.isBoolean = true;
+    }
+    if (this.title !== undefined) {
+      o.title = this.title;
+    }
+    let elements = this.getElements();
+    if (elements) {
+      o.value = elements;
+    }
+    if (this._error) {
+      o.error = this.error;
+    }
+    return o;
+  }
+
+  toString() {
+    return JSON.stringify(this.toJson());
+  }
+
+  isError() {
+    return this._error ? true : false;
+  }
+
+  /**
+   * isValid means some element in the page matches this rule.
+   */
+  isValid() {
+    if (this._isValid === undefined) {
+      this._elements = this.getElements();
+      this._isValid = this._elements && this._elements.length ? true : false;
+    }
+    return this._isValid;
   }
 }
 
-function getElements(asIs = false, type, selector, parentSelector = null) {
-  try {
-    let parent = parentSelector ? document.querySelector(parentSelector) : document;
-    if (type === 'CSS') {
+class CssRule extends RulePath {
+  constructor(spec, title, subItemKey, container) {
+    super(spec, title, subItemKey, container);
+    this.type = 'CSS';
+    this.isValid();
+  }
+
+  getTextNodes(container) {
+    let aNodes = [];
+    (container.childNodes || []).forEach(c => {
+      if (c.nodeType === 3) {
+        aNodes.push(c);
+      }
+    });
+    return aNodes;
+  }
+
+  getElements(asIs = false) {
+    try {
       let reTextSub = /::text\b/;
       let reAttrSub = /::attr\b/;
       let shouldReturnAttr = false;
       let attrToGet = '';
       let shouldReturnText = false;
 
-      if (reAttrSub.test(selector)) {
-        shouldReturnAttr = true;
-        attrToGet = selector.match(/::attr\((.*?)\)/)[1];
-        selector = selector.replace(reAttrSub, '');
-      }
-
-      if (reTextSub.test(selector)) {
+      let cssSelector = this.path || '';
+      if (reTextSub.test(cssSelector)) {
         shouldReturnText = true;
-        selector = selector.replace(reTextSub, '');
+        cssSelector = cssSelector.split(reTextSub)[0];
       }
 
-      let elements = parent.querySelectorAll(selector);
-      if (shouldReturnAttr) {
-        let attrValues = [];
-        elements.forEach(element => {
-          attrValues.push(element.getAttribute(attrToGet));
-        });
-        return attrValues;
+      if (reAttrSub.test(cssSelector)) {
+        shouldReturnAttr = true;
+        attrToGet = cssSelector.split(reAttrSub)[1].slice(1, -1);
+        cssSelector = cssSelector.split(reAttrSub)[0];
       }
-      else if (shouldReturnText) {
-        let textValues = [];
-        elements.forEach(element => {
-          textValues.push(element.textContent);
-        });
-        return textValues;
+
+      let container = this.container || document;
+      let nodes = [],
+        elements = [];
+
+      let n = container.querySelectorAll(cssSelector);
+      n.forEach(e => {
+        nodes.push(e);
+      });
+
+      if (this.isBoolean) {
+        return [nodes && nodes.length ? true : false];
       }
-      return Array.from(elements);
+
+      (nodes || []).forEach(e => {
+        let value = e;
+        if (shouldReturnText) {
+          value = this.getTextNodes(e)
+            .map(n => (n.textContent || '').trim())
+            .filter(t => t)
+            .join('\n');
+        }
+
+        if (shouldReturnAttr) {
+          value = e.getAttribute(attrToGet);
+        }
+
+        if (!asIs && (typeof value === "object") && value.outerHTML) {
+          value = value.outerHTML;
+        }
+
+        elements.push(value);
+      });
+      return elements;
+    } catch (err) {
+      // console.error(err);
+      this._error = this.formatError(err);
+      return null;
     }
+  }
+}
 
-    else if (type === 'XPath') {
-      let path = selector;
-      let nodes = parent.evaluate(path, document);
-      let elements = [];
-      let e;
+class XPathRule extends RulePath {
+  constructor(spec, title, subItemKey, container) {
+    super(spec, title, subItemKey, container);
+    this.type = 'XPATH';
+    this.isValid();
+  }
+
+  /**
+   *
+   * @param {*} asIs if true, return the element as is, not as text.
+   */
+  getElements(asIs) {
+    try {
+      let path = this.path;
+      if (this.container && path && path.startsWith('//')) {
+        path = '.' + this.path;
+      }
+      let nodes = document.evaluate(path, this.container || document);
+      let e,
+        elements = [];
 
       switch (nodes.resultType) {
         case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
@@ -174,11 +204,129 @@ function getElements(asIs = false, type, selector, parentSelector = null) {
           elements.push(nodes.booleanValue);
           break;
       }
+
+      if (this.isBoolean) {
+        return [elements && elements.length ? true : false];
+      }
+
       return elements;
+    } catch (err) {
+      // console.error(err);
+      this._error = this.formatError(err);
+      return null;
     }
+  }
+}
+
+class ErrorRule extends RulePath {
+  constructor(spec, title) {
+    super(spec, title);
+    this.type = 'ERROR';
+    this._error = 'Unknown type: ' + JSON.stringify(spec);
+  }
+}
+
+let createRule = (obj, title, subItemKey, container) => {
+  if (obj.type === 'CSS') {
+    return new CssRule(obj, title, subItemKey, container);
+  }
+  if (obj.type === 'XPATH') {
+    return new XPathRule(obj, title, subItemKey, container);
+  }
+  return new ErrorRule(obj, title);
+};
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'exclude-selector') {
+    const { newItem, oldItem, parentSelector } = message.payload;
+    applyStylesToElements(newItem, oldItem, parentSelector);
+  }
+  if (message.type === 'validate-selector') {
+    let response = 'Invalid';
+    const { type, selector } = message.payload;
+
+    try {
+      const elements = createRule(message.payload).getElements(true);
+      if (elements === null) {
+        response = 'Invalid';
+      }
+      else if (elements?.length > 0) {
+        response = 'Valid';
+      } else {
+        response = 'No element found';
+      }
+    } catch (e) {
+      response = 'Invalid';
+    }
+    console.log('validate-selector', message, response);
+    sendResponse(response);
+  }
+  if (message.type === 'update-excludeItem-onLoad') {
+    const { exclude } = message.payload;
+    exclude.length && exclude.map((element) => applyStylesToElements(element));
+  }
+  if (message.type === 'update-excludeSubItem-onLoad') {
+    const { exclude, parentSelector } = message.payload;
+    exclude.length && exclude.map((element) => applyStylesToElements(element, null, parentSelector));
+  }
+  if (message.type === 'remove-exclude-selector') {
+    const { item, parentSelector } = message.payload;
+    try {
+      const elements = createRule(item, null, null, parentSelector).getElements(true);
+      elements?.forEach(element => {
+        element.classList?.remove('web-scraper-helper-exclude');
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  }
+  if (message.type === 'remove-excluded-on-file-close') {
+    const { parentSelector } = message.payload;
+    removePreviouslyExcludedStyles(parentSelector);
+  }
+  if (message.type === 'metadata-results') {
+    const { metadata, parentSelector } = message.payload;
+    const results = [];
+    for (const [, value] of Object.entries(metadata)) {
+      const { name, type, path, isBoolean } = value;
+
+      const rule = createRule(value, null, null, parentSelector);
+      results.push({ "name": name, "values": rule.getElements() });
+    }
+    console.log('metadata-result-array', message, results);
+    sendResponse(results);
+  }
+});
+
+function applyStylesToElements(newItem, oldItem = null, parentSelector = null) {
+  try {
+    if (oldItem && oldItem.path !== newItem.path) {
+      const oldElements = createRule(oldItem, null, null, parentSelector).getElements(true);
+      oldElements?.forEach(element => {
+        element.classList.remove('web-scraper-helper-exclude');
+      });
+    }
+
+    let newElements = createRule(newItem, null, null, parentSelector).getElements(true);;
+    newElements?.forEach(element => {
+      element?.classList?.add('web-scraper-helper-exclude');
+    });
 
   } catch (error) {
     console.log(error);
   }
-  return null;
 }
+
+function removePreviouslyExcludedStyles(parentSelector = null) {
+  try {
+    let parent = parentSelector ? document.querySelector(parentSelector) : document;
+    parent.querySelectorAll('.web-scraper-helper-exclude').forEach(e => {
+      if (e && e.classList) {
+        e.classList.remove('web-scraper-helper-exclude');
+      }
+    });
+  } catch (e) {
+    console.log(e);
+  }
+}
+

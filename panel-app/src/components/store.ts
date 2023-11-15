@@ -1,33 +1,6 @@
 import { createStore } from '@stencil/store';
 import { v4 as uuidv4 } from 'uuid';
-
-export type Selector = {
-	type: 'CSS' | 'XPath';
-	path: string;
-	isBoolean?: boolean;
-};
-
-export type SelectorElement = Selector & { id?: string; };
-export type MetadataElement = SelectorElement & { name: string; };
-
-export type MetadataMap = {
-	[key: string]: MetadataElement;
-};
-
-export type SubItem = Selector & {
-	name: string;
-	exclude?: SelectorElement[];
-	metadata?: MetadataMap;
-};
-
-type ConfigState = {
-	name?: string;
-	redirectToConfig: boolean;
-	hasChanges: boolean;
-	exclude: SelectorElement[];
-	metadata: MetadataMap;
-	subItems: SubItem[];
-};
+import { ConfigState, MetadataMap, SelectorElement, SelectorType, SubItem } from './types';
 
 export function getId(): string {
 	let uniqueId = uuidv4();
@@ -35,7 +8,7 @@ export function getId(): string {
 }
 
 const { reset, state, onChange }: { reset: Function; state: ConfigState; onChange: Function; } = createStore({
-	redirectToConfig: false,
+	currentFile: null,
 	hasChanges: false,
 	exclude: [
 		{
@@ -245,7 +218,7 @@ function removeExcludedItem(item: SelectorElement) {
 	});
 }
 
-function addMetadataItem(item: { name: string; type: 'CSS' | 'XPath'; path: string; }) {
+function addMetadataItem(item: { name: string; type: SelectorType; path: string; }) {
 	state.metadata = { ...state.metadata, [getId()]: { name: item.name, type: item.type, path: item.path } };
 }
 
@@ -326,19 +299,20 @@ const addToRecentFiles = async (filename: string): Promise<string[]> => {
 
 export default state;
 export {
-	addToRecentFiles,
-	updateState,
-	updateGlobalName,
 	addExcludedItem,
-	removeExcludedItem,
 	addMetadataItem,
-	removeMetadataItem,
 	addSubItem,
-	removeSubItem,
-	updateExcludedItem,
-	updateMetadataItem,
-	updateSubItem,
+	addToRecentFiles,
 	formatState,
 	getMetadataResults,
+	removeExcludedItem,
+	removeMetadataItem,
+	removeSubItem,
 	resetStore,
+	updateExcludedItem,
+	updateGlobalName,
+	updateMetadataItem,
+	updateState,
+	updateSubItem,
 };
+

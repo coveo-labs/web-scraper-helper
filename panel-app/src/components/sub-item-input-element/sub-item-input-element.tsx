@@ -1,5 +1,5 @@
 import { Component, Prop, h, Event, EventEmitter, State } from '@stencil/core';
-import { SelectorElement, Selector, MetadataElement } from '../store';
+import { SelectorElement, Selector, MetadataElement } from '../types';
 
 @Component({
 	tag: 'sub-item-input-element',
@@ -66,7 +66,7 @@ export class SubItemInputElement {
 						fill="outline"
 						class={cssClassForValidity}
 						value={this.selector.type}
-						onClick={() => this.updateState('update', { ...this.selector, id: this.uniqueId, name: this.name, type: this.selector.type === 'CSS' ? 'XPath' : 'CSS' }, this.selector)}
+						onClick={() => this.updateState('update', { ...this.selector, id: this.uniqueId, name: this.name, type: this.selector.type === 'CSS' ? 'XPATH' : 'CSS' }, this.selector)}
 					></ion-input>
 				</div>
 				<div style={{ flex: '2' }}>

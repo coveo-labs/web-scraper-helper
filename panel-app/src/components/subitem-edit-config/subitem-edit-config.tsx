@@ -1,6 +1,7 @@
-import { Component, Prop, h, Event, EventEmitter, State, Listen } from '@stencil/core';
-import state, { SelectorElement, MetadataMap, getId, SubItem } from '../store';
 import { toastController } from '@ionic/core';
+import { Component, Event, EventEmitter, Listen, Prop, State, h } from '@stencil/core';
+import state, { getId } from '../store';
+import { MetadataMap, SelectorElement, SubItem } from '../types';
 
 @Component({
 	tag: 'subitem-edit-config',

@@ -1,7 +1,8 @@
-import { Component, Listen, Prop, State, h } from '@stencil/core';
-import state, { SubItem, addExcludedItem, addMetadataItem, addSubItem, addToRecentFiles, formatState, removeSubItem, resetStore, updateGlobalName, updateState } from '../store';
+import { Component, Host, Listen, State, h } from '@stencil/core';
+import state, { addExcludedItem, addMetadataItem, addSubItem, addToRecentFiles, formatState, removeSubItem, resetStore, updateGlobalName, updateState } from '../store';
 import { alertController, toastController } from '@ionic/core';
 import infoToken from '../../assets/icon/InfoToken.svg';
+import { SubItem } from '../types';
 
 @Component({
 	tag: 'create-config',
@@ -9,8 +10,6 @@ import infoToken from '../../assets/icon/InfoToken.svg';
 	shadow: false,
 })
 export class CreateConfig {
-	@Prop() fileName: string;
-	@Prop() triggerType: 'new-file' | 'load-file';
 	@State() showSubItemConfig: boolean;
 	@State() subItem: SubItem;
 
@@ -34,7 +33,7 @@ export class CreateConfig {
 	}
 
 	redirectAndReset() {
-		state.redirectToConfig = false;
+		state.currentFile = null;
 		resetStore();
 		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 			chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-excluded-on-file-close', payload: { parentSelector: null } });
@@ -49,11 +48,12 @@ export class CreateConfig {
 				message: 'You have unsaved changes.\n\nAre you sure you want to close the file?',
 				buttons: [
 					{
-						text: 'Cancel',
+						text: 'No',
 						role: 'cancel',
 					},
 					{
 						text: 'Yes',
+						role: 'destructive',
 						handler: () => {
 							this.redirectAndReset();
 						},
@@ -70,7 +70,7 @@ export class CreateConfig {
 	onSave() {
 		try {
 			chrome.storage.local.set({
-				[this.fileName]: JSON.stringify(formatState(), null, 2),
+				[state.currentFile.name]: JSON.stringify(formatState(), null, 2),
 			});
 			toastController
 				.create({
@@ -93,13 +93,14 @@ export class CreateConfig {
 
 	async componentWillLoad() {
 		try {
-			if (this.triggerType === 'load-file') {
+			if (state.currentFile.triggerType === 'load-file') {
+				const fileName = state.currentFile.name;
 				const fileItem = await new Promise((resolve) => {
-					chrome.storage.local.get(this.fileName, (items) => resolve(items));
+					chrome.storage.local.get(fileName, (items) => resolve(items));
 				});
 
-				updateState(fileItem[this.fileName], false);
-				await addToRecentFiles(this.fileName);
+				updateState(fileItem[fileName], false);
+				await addToRecentFiles(fileName);
 			} else {
 				chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 					chrome.tabs.sendMessage(tabs[0].id, { type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude } });
@@ -119,20 +120,19 @@ export class CreateConfig {
 			''
 		);
 		return (
-			<div id="create-config">
+			<Host id="create-config">
 				<div class="header-section">
 					<div class="header_text-container">
 						<div class="header_title-text">
 							Web Scraper file name:{' '}
 							<span style={{ marginLeft: '4px', textTransform: 'capitalize' }}>
-								{this.fileName}
+								{state.currentFile.name}
 								{dirty}
 							</span>
 							<a href="https://github.com/coveo-labs/web-scraper-helper" target="web-scraper-help">
 								<ion-img id="infoToken-img" src={infoToken}></ion-img>
 							</a>
 						</div>
-						<div class="header_sub-text">Start creating Web Scraper configuration for this file.</div>
 					</div>
 					<div class="header_btn">
 						<ion-button onClick={() => this.onDone()}>Done</ion-button>
@@ -266,18 +266,18 @@ export class CreateConfig {
 							<subitem-edit-config subItem={this.subItem}></subitem-edit-config>
 						)}
 					</div>
-					{!this.showSubItemConfig && (
-						<div class="config-action-btns">
-							<ion-button onClick={() => this.onDone()} fill="outline" class="cancel-btn">
-								Cancel
-							</ion-button>
-							<ion-button onClick={() => this.onSave()} fill="outline" class="save-btn">
-								Save
-							</ion-button>
-						</div>
-					)}
 				</div>
-			</div>
+				{!this.showSubItemConfig && (
+					<div class="config-action-btns">
+						<ion-button onClick={() => this.onDone()} fill="outline" class="cancel-btn">
+							Cancel
+						</ion-button>
+						<ion-button onClick={() => this.onSave()} fill="outline" class="save-btn">
+							Save
+						</ion-button>
+					</div>
+				)}
+			</Host>
 		);
 	}
 }

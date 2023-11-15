@@ -1,7 +1,8 @@
 /*global chrome*/
 
-import { Component, h } from '@stencil/core';
+import { Component, Host, h } from '@stencil/core';
 import logo from '../../assets/icon/CoveoLogo.svg';
+import state from '../store';
 
 @Component({
 	tag: 'app-root',
@@ -11,7 +12,7 @@ import logo from '../../assets/icon/CoveoLogo.svg';
 export class AppRoot {
 	render() {
 		return (
-			<div>
+			<Host>
 				<header id="top-bar">
 					<div class="header-container">
 						<ion-img id="coveo-logo-img" src={logo}></ion-img>
@@ -20,10 +21,8 @@ export class AppRoot {
 					</div>
 				</header>
 
-				<main>
-					<file-explorer></file-explorer>
-				</main>
-			</div>
+				{state.currentFile?.name ? <create-config /> : <file-explorer />}
+			</Host>
 		);
 	}
 }
