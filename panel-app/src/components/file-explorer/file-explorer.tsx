@@ -2,7 +2,7 @@ import { Component, State, h } from '@stencil/core';
 import '@ionic/core';
 import noFileImage from '../../assets/icon/NotFoundImage.svg';
 import infoToken from '../../assets/icon/InfoToken.svg';
-import state, { formatState } from '../store';
+import state, { addToRecentFiles, formatState } from '../store';
 import { alertController } from '@ionic/core';
 
 const RECENT_FILES_ITEM_NAME = '__Recent__Files__';
@@ -25,9 +25,8 @@ export class FileExplorer {
 
 		// save the default state right away
 		try {
-			chrome.storage.local.set({
-				[this.fileName]: JSON.stringify(formatState(), null, 2),
-			});
+			chrome.storage.local.set({ [this.fileName]: JSON.stringify(formatState(), null, 2) });
+			this.recentFiles = await addToRecentFiles(this.fileName);
 		} catch (e) {
 			console.log(e);
 		}
