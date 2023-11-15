@@ -1,9 +1,7 @@
 import { Component, Listen, Prop, State, h } from '@stencil/core';
-import state, { addExcludedItem, addMetadataItem, addSubItem, formatState, removeSubItem, resetStore, updateGlobalName, updateState } from '../store';
+import state, { addExcludedItem, addMetadataItem, addSubItem, addToRecentFiles, formatState, removeSubItem, resetStore, updateGlobalName, updateState } from '../store';
 import { alertController, toastController } from '@ionic/core';
 import infoToken from '../../assets/icon/InfoToken.svg';
-
-const RECENT_FILES_ITEM_NAME = '__Recent__Files__';
 
 @Component({
 	tag: 'create-config',
@@ -101,11 +99,7 @@ export class CreateConfig {
 				});
 
 				updateState(fileItem[this.fileName], false);
-				chrome.storage.local.get(RECENT_FILES_ITEM_NAME, (items) => {
-					let recentFiles = items[RECENT_FILES_ITEM_NAME] || [];
-					recentFiles = [this.fileName, ...recentFiles.filter((item) => item !== this.fileName)];
-					chrome.storage.local.set({ [RECENT_FILES_ITEM_NAME]: recentFiles });
-				});
+				await addToRecentFiles(this.fileName);
 			} else {
 				chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 					chrome.tabs.sendMessage(tabs[0].id, { type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude } });

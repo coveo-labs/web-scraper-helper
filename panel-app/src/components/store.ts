@@ -314,8 +314,23 @@ function updateSubItem(newItem: SubItems, oldItem: SubItems) {
 	});
 }
 
+const addToRecentFiles = async (filename: string): Promise<string[]> => {
+	const RECENT_FILES_ITEM_NAME = '__Recent__Files__';
+
+	return new Promise((resolve) => {
+		chrome.storage.local.get(RECENT_FILES_ITEM_NAME, (items) => {
+			let recentFiles = items[RECENT_FILES_ITEM_NAME] || [];
+			recentFiles = [filename, ...recentFiles.filter((item) => item !== filename)];
+			chrome.storage.local.set({ [RECENT_FILES_ITEM_NAME]: recentFiles });
+
+			resolve(recentFiles);
+		});
+	});
+};
+
 export default state;
 export {
+	addToRecentFiles,
 	updateState,
 	updateGlobalName,
 	addExcludedItem,
