@@ -5,14 +5,16 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
+import { Selector } from "./components/store";
+export { Selector } from "./components/store";
 export namespace Components {
     interface AppRoot {
     }
     interface CodeViewer {
     }
     interface CreateConfig {
-        "fileName": any;
-        "triggerType": any;
+        "fileName": string;
+        "triggerType": 'new-file' | 'load-file';
     }
     interface FileExplorer {
     }
@@ -22,19 +24,15 @@ export namespace Components {
         "type": string;
     }
     interface SelectElementItem {
-        "isBoolean"?: boolean;
         "name": string;
-        "selector": string;
-        "selectorType": string;
+        "selector": Selector;
         "type": string;
         "uniqueId": string;
     }
     interface SubItemInputElement {
-        "isBoolean": boolean;
         "name": string;
-        "selector": string;
-        "selectorType": string;
-        "type": string;
+        "selector": Selector;
+        "type": 'metadataItem' | 'subItem' | 'excludeItem';
         "uniqueId": string;
     }
     interface SubitemEditConfig {
@@ -137,8 +135,8 @@ declare namespace LocalJSX {
     interface CodeViewer {
     }
     interface CreateConfig {
-        "fileName"?: any;
-        "triggerType"?: any;
+        "fileName"?: string;
+        "triggerType"?: 'new-file' | 'load-file';
     }
     interface FileExplorer {
     }
@@ -148,20 +146,16 @@ declare namespace LocalJSX {
         "type"?: string;
     }
     interface SelectElementItem {
-        "isBoolean"?: boolean;
         "name"?: string;
-        "selector"?: string;
-        "selectorType"?: string;
+        "selector"?: Selector;
         "type"?: string;
         "uniqueId"?: string;
     }
     interface SubItemInputElement {
-        "isBoolean"?: boolean;
         "name"?: string;
         "onUpdateSubItem"?: (event: SubItemInputElementCustomEvent<any>) => void;
-        "selector"?: string;
-        "selectorType"?: string;
-        "type"?: string;
+        "selector"?: Selector;
+        "type"?: 'metadataItem' | 'subItem' | 'excludeItem';
         "uniqueId"?: string;
     }
     interface SubitemEditConfig {

@@ -1,5 +1,5 @@
 import { Component, Listen, Prop, State, h } from '@stencil/core';
-import state, { addExcludedItem, addMetadataItem, addSubItem, addToRecentFiles, formatState, removeSubItem, resetStore, updateGlobalName, updateState } from '../store';
+import state, { SubItem, addExcludedItem, addMetadataItem, addSubItem, addToRecentFiles, formatState, removeSubItem, resetStore, updateGlobalName, updateState } from '../store';
 import { alertController, toastController } from '@ionic/core';
 import infoToken from '../../assets/icon/InfoToken.svg';
 
@@ -9,10 +9,10 @@ import infoToken from '../../assets/icon/InfoToken.svg';
 	shadow: false,
 })
 export class CreateConfig {
-	@Prop() fileName;
-	@Prop() triggerType;
+	@Prop() fileName: string;
+	@Prop() triggerType: 'new-file' | 'load-file';
 	@State() showSubItemConfig: boolean;
-	@State() subItem: {};
+	@State() subItem: SubItem;
 
 	@Listen('updateSubItemState')
 	hideSubItemConfig() {
@@ -21,7 +21,7 @@ export class CreateConfig {
 
 	renderExcludedItems() {
 		return state.exclude.map((item) => {
-			return <select-element-item type="excludeItem" selectorType={item.type} selector={item.path} uniqueId={item.id}></select-element-item>;
+			return <select-element-item type="excludeItem" selector={item} uniqueId={item.id}></select-element-item>;
 		});
 	}
 
@@ -29,7 +29,7 @@ export class CreateConfig {
 		const metadata = state.metadata;
 		return Object.keys(metadata).map((key) => {
 			const item = metadata[key];
-			return <select-element-item type="metadataItem" uniqueId={key} name={item.name} selectorType={item.type} selector={item.path} isBoolean={item.isBoolean}></select-element-item>;
+			return <select-element-item type="metadataItem" uniqueId={key} name={item.name} selector={item}></select-element-item>;
 		});
 	}
 

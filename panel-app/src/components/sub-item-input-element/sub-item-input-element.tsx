@@ -1,4 +1,5 @@
 import { Component, Prop, h, Event, EventEmitter, State } from '@stencil/core';
+import { SelectorElement, Selector, MetadataElement } from '../store';
 
 @Component({
 	tag: 'sub-item-input-element',
@@ -8,22 +9,20 @@ import { Component, Prop, h, Event, EventEmitter, State } from '@stencil/core';
 export class SubItemInputElement {
 	@Event() updateSubItem: EventEmitter<any>;
 	@Prop() uniqueId: string;
-	@Prop() type: string;
+	@Prop() type: 'metadataItem' | 'subItem' | 'excludeItem';
 	@Prop() name: string;
-	@Prop() selectorType: string;
-	@Prop() selector: string;
-	@Prop() isBoolean: boolean = false;
+	@Prop() selector: Selector;
 	@State() selectorValidity;
 
-	updateState(action: string, newItem, oldItem = { type: '', path: '' }) {
-		this.validateSelector(newItem.path, newItem.type);
-		this.updateSubItem.emit({ action, newItem, oldItem });
+	updateState(action: 'update' | 'remove', newItem: SelectorElement | MetadataElement, oldItem: Selector = { type: 'CSS', path: '' }) {
+		this.validateSelector(newItem);
+		this.updateSubItem.emit({ action: `${action}-${this.type}`, newItem, oldItem });
 	}
 
-	async validateSelector(selector: string, selectorType: string) {
+	async validateSelector(selector: Selector) {
 		const response = await new Promise((resolve) => {
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-				chrome.tabs.sendMessage(tabs[0].id, { type: 'validate-selector', payload: { type: selectorType, selector: selector } }, null, (response) => {
+				chrome.tabs.sendMessage(tabs[0].id, { type: 'validate-selector', payload: selector }, null, (response) => {
 					resolve(response);
 				});
 			});
@@ -32,7 +31,7 @@ export class SubItemInputElement {
 	}
 
 	componentWillLoad() {
-		this.validateSelector(this.selector, this.selectorType);
+		this.validateSelector(this.selector);
 	}
 
 	render() {
@@ -52,7 +51,11 @@ export class SubItemInputElement {
 							value={this.name}
 							placeholder="Name"
 							onIonInput={(event) =>
-								this.updateState(this.type === 'metadataItem' ? 'update-metadataItem' : 'update-subItem', { id: this.uniqueId, name: event.target.value, type: this.selectorType, path: this.selector })
+								this.updateState('update', {
+									...this.selector,
+									id: this.uniqueId,
+									name: event.target.value as string,
+								})
 							}
 						></ion-input>
 					</div>
@@ -62,49 +65,33 @@ export class SubItemInputElement {
 						id="subItem-selector-type-input"
 						fill="outline"
 						class={cssClassForValidity}
-						value={this.selectorType}
-						onClick={() =>
-							this.updateState(
-								this.type === 'excludeItem' ? 'update-excludedItem' : this.type === 'metadataItem' ? 'update-metadataItem' : 'update-subItem',
-								{ id: this.uniqueId, name: this.name, type: this.selectorType === 'CSS' ? 'XPath' : 'CSS', path: this.selector },
-								{
-									type: this.selectorType,
-									path: this.selector,
-								}
-							)
-						}
+						value={this.selector.type}
+						onClick={() => this.updateState('update', { ...this.selector, id: this.uniqueId, name: this.name, type: this.selector.type === 'CSS' ? 'XPath' : 'CSS' }, this.selector)}
 					></ion-input>
 				</div>
 				<div style={{ flex: '2' }}>
 					<ion-input
 						class={this.type === 'excludeItem' ? 'selector-input' : this.type === 'metadataItem' ? 'metadata-selector-input' : 'subItem-selector-input'}
 						fill="outline"
-						value={this.selector}
+						value={this.selector.path}
 						placeholder="expression"
-						onIonInput={(event) =>
-							this.updateState(
-								this.type === 'excludeItem' ? 'update-excludedItem' : this.type === 'metadataItem' ? 'update-metadataItem' : 'update-subItem',
-								{ id: this.uniqueId, name: this.name, type: this.selectorType, path: event.detail.value },
-								{
-									type: this.selectorType,
-									path: this.selector,
-								}
-							)
-						}
+						onIonInput={(event) => this.updateState('update', { ...this.selector, id: this.uniqueId, name: this.name, path: event.detail.value }, this.selector)}
 					></ion-input>
 				</div>
 				{this.type === 'metadataItem' && (
 					<div>
 						<ion-checkbox
-							checked={this.isBoolean}
+							checked={this.selector.isBoolean}
 							onIonChange={(event) =>
 								this.updateState(
-									'update-metadataItem',
-									{ id: this.uniqueId, name: this.name, type: this.selectorType, path: this.selector, isBoolean: event.detail.checked },
+									'update',
 									{
-										type: this.selectorType,
-										path: this.selector,
-									}
+										...this.selector,
+										id: this.uniqueId,
+										name: this.name,
+										isBoolean: event.detail.checked,
+									},
+									this.selector
 								)
 							}
 						></ion-checkbox>
@@ -115,7 +102,11 @@ export class SubItemInputElement {
 					<div
 						style={{ cursor: 'pointer' }}
 						onClick={() =>
-							this.updateState(this.type === 'excludeItem' ? 'remove-excludedItem' : 'remove-metadataItem', { id: this.uniqueId, name: this.name, type: this.selectorType, path: this.selector })
+							this.updateState('remove', {
+								...this.selector,
+								id: this.uniqueId,
+								name: this.name,
+							})
 						}
 					>
 						<ion-icon name="remove-circle-outline" size="small" color="primary"></ion-icon>

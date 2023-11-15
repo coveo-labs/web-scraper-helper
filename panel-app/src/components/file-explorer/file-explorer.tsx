@@ -14,7 +14,7 @@ const RECENT_FILES_ITEM_NAME = '__Recent__Files__';
 export class FileExplorer {
 	@State() showModal = false;
 	@State() fileName = '';
-	@State() triggerType = 'new-file'; // keeps track whether a new file is created or loaded
+	@State() triggerType: 'new-file' | 'load-file' = 'new-file'; // keeps track whether a new file is created or loaded
 	@State() fileList = [];
 	@State() recentFiles = [];
 

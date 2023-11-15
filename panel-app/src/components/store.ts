@@ -1,36 +1,32 @@
 import { createStore } from '@stencil/store';
 import { v4 as uuidv4 } from 'uuid';
 
-export type ElementsToExclude = {
-	id: string;
-	type: string;
+export type Selector = {
+	type: 'CSS' | 'XPath';
 	path: string;
+	isBoolean?: boolean;
 };
 
-export type Metadata = {
-	[key: string]: {
-		name: string;
-		type: string;
-		path: string;
-		isBoolean?: boolean;
-	};
+export type SelectorElement = Selector & { id?: string; };
+export type MetadataElement = SelectorElement & { name: string; };
+
+export type MetadataMap = {
+	[key: string]: MetadataElement;
 };
 
-type SubItems = {
+export type SubItem = Selector & {
 	name: string;
-	type: string;
-	path: string;
-	exclude?: ElementsToExclude[];
-	metadata?: Metadata;
+	exclude?: SelectorElement[];
+	metadata?: MetadataMap;
 };
 
 type ConfigState = {
 	name?: string;
 	redirectToConfig: boolean;
 	hasChanges: boolean;
-	exclude: ElementsToExclude[];
-	metadata: Metadata;
-	subItems: SubItems[];
+	exclude: SelectorElement[];
+	metadata: MetadataMap;
+	subItems: SubItem[];
 };
 
 export function getId(): string {
@@ -239,7 +235,7 @@ function addExcludedItem(item) {
 	state.exclude = [...state.exclude, { ...item, id }];
 }
 
-function removeExcludedItem(item: ElementsToExclude) {
+function removeExcludedItem(item: SelectorElement) {
 	state.exclude = state.exclude.filter((excludedItem) => {
 		return excludedItem.id !== item.id;
 	});
@@ -249,7 +245,7 @@ function removeExcludedItem(item: ElementsToExclude) {
 	});
 }
 
-function addMetadataItem(item: { name: string; type: string; path: string; }) {
+function addMetadataItem(item: { name: string; type: 'CSS' | 'XPath'; path: string; }) {
 	state.metadata = { ...state.metadata, [getId()]: { name: item.name, type: item.type, path: item.path } };
 }
 
@@ -258,7 +254,7 @@ function removeMetadataItem(uid: string) {
 	state.metadata = metadata;
 }
 
-async function getMetadataResults(type = 'global', metadata: Metadata = {}, parentSelector = null) {
+async function getMetadataResults(type = 'global', metadata: MetadataMap = {}, parentSelector = null) {
 	const response = await new Promise((resolve) => {
 		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 			chrome.tabs.sendMessage(tabs[0].id, { type: 'metadata-results', payload: { metadata: type === 'global' ? state.metadata : metadata, parentSelector: parentSelector } }, (response) => {
@@ -291,7 +287,7 @@ function updateMetadataItem(newItem: { id: string; name: string; type: string; p
 	}, {});
 }
 
-function updateExcludedItem(newItem: ElementsToExclude, oldItem: ElementsToExclude) {
+function updateExcludedItem(newItem: SelectorElement, oldItem: SelectorElement) {
 	// add opacity to the element
 	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 		console.log('updateExcludedItem: ', newItem.path, oldItem.path);
@@ -305,7 +301,7 @@ function updateExcludedItem(newItem: ElementsToExclude, oldItem: ElementsToExclu
 	});
 }
 
-function updateSubItem(newItem: SubItems, oldItem: SubItems) {
+function updateSubItem(newItem: SubItem, oldItem: SubItem) {
 	state.subItems = state.subItems.map((subItem) => {
 		if (subItem.name === oldItem.name && subItem.type === oldItem.type && subItem.path === oldItem.path) {
 			return newItem;

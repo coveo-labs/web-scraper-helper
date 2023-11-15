@@ -1,5 +1,5 @@
 import { Component, Prop, h, Event, EventEmitter, State, Listen } from '@stencil/core';
-import state, { ElementsToExclude, Metadata, getId } from '../store';
+import state, { SelectorElement, MetadataMap, getId, SubItem } from '../store';
 import { toastController } from '@ionic/core';
 
 @Component({
@@ -10,9 +10,9 @@ import { toastController } from '@ionic/core';
 export class SubitemEditConfig {
 	@Prop() subItem: {};
 	@Event() updateSubItemState: EventEmitter<any>;
-	@State() excludedItems: ElementsToExclude[];
-	@State() metadata: Metadata;
-	@State() subItemState: { name: ''; type: ''; path: '' };
+	@State() excludedItems: SelectorElement[];
+	@State() metadata: MetadataMap;
+	@State() subItemState: SubItem;
 	selectorValidity;
 
 	@Listen('updateSubItem')
@@ -32,16 +32,15 @@ export class SubitemEditConfig {
 	}
 
 	onSave() {
-		state.subItems = state.subItems.map((item) => {
+		state.subItems = state.subItems.map((item: SubItem): SubItem => {
 			if (item.name === this.subItem['name']) {
 				return {
 					...this.subItemState,
 					exclude: this.excludedItems,
 					metadata: this.metadata,
 				};
-			} else {
-				return item;
 			}
+			return item;
 		});
 		this.updateSubItemState.emit();
 		toastController
@@ -76,11 +75,11 @@ export class SubitemEditConfig {
 
 	updateState(action: string, newItem, oldItem = { type: '', path: '' }) {
 		switch (action) {
-			case 'add-excludedItem': {
+			case 'add-excludeItem': {
 				this.excludedItems = [...this.excludedItems, { ...newItem, id: getId() }];
 				break;
 			}
-			case 'remove-excludedItem': {
+			case 'remove-excludeItem': {
 				this.excludedItems = this.excludedItems.filter((excludedItem) => {
 					return excludedItem.id !== newItem.id;
 				});
@@ -98,7 +97,7 @@ export class SubitemEditConfig {
 				this.metadata = rest;
 				break;
 			}
-			case 'update-excludedItem': {
+			case 'update-excludeItem': {
 				this.excludedItems = this.excludedItems.map((excludedItem) => {
 					if (excludedItem.id === newItem.id) {
 						chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -129,19 +128,19 @@ export class SubitemEditConfig {
 
 	renderExcludedItems() {
 		return this.excludedItems.map((item) => {
-			return <sub-item-input-element uniqueId={item.id} type="excludeItem" selectorType={item.type} selector={item.path}></sub-item-input-element>;
+			return <sub-item-input-element uniqueId={item.id} type="excludeItem" selector={item}></sub-item-input-element>;
 		});
 	}
 
 	renderMetadataItems() {
 		return Object.keys(this.metadata).map((key) => {
 			const item = this.metadata[key];
-			return <sub-item-input-element uniqueId={key} type="metadataItem" name={item.name} selectorType={item.type} selector={item.path} isBoolean={item.isBoolean}></sub-item-input-element>;
+			return <sub-item-input-element uniqueId={key} type="metadataItem" name={item.name} selector={item}></sub-item-input-element>;
 		});
 	}
 
 	renderSubItemInfo() {
-		return <sub-item-input-element type="subItem" name={this.subItemState.name} selectorType={this.subItemState.type} selector={this.subItemState.path}></sub-item-input-element>;
+		return <sub-item-input-element type="subItem" name={this.subItemState.name} selector={this.subItemState}></sub-item-input-element>;
 	}
 
 	render() {
@@ -160,7 +159,7 @@ export class SubitemEditConfig {
 						<div class="subItem-edit-text">Elements to exlude</div>
 						<div class="subItem-box">
 							<div id="select-subItem__wrapper">{this.renderExcludedItems()}</div>
-							<div class="add-rule" onClick={() => this.updateState('add-excludedItem', { type: 'CSS', path: '' })}>
+							<div class="add-rule" onClick={() => this.updateState('add-excludeItem', { type: 'CSS', path: '' })}>
 								<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
 								<span>Add Rule</span>
 							</div>
