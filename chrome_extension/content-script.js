@@ -108,74 +108,85 @@ function removePreviouslyExcludedStyles(parentSelector = null) {
 
 function getElements(asIs = false, type, selector, parentSelector = null) {
   try {
-    let parent = parentSelector ? document.querySelector(parentSelector) : document;
-    if (type === 'CSS') {
-      let reTextSub = /::text\b/;
-      let reAttrSub = /::attr\b/;
-      let shouldReturnAttr = false;
-      let attrToGet = '';
-      let shouldReturnText = false;
+    let parents = parentSelector ? document.querySelectorAll(parentSelector) : [document];
+    let allElements = [];
 
-      if (reAttrSub.test(selector)) {
-        shouldReturnAttr = true;
-        attrToGet = selector.match(/::attr\((.*?)\)/)[1];
-        selector = selector.replace(reAttrSub, '');
+    parents.forEach(parent => {
+      if (type === 'CSS') {
+        console.log('selector', selector)
+        let reTextSub = /::text\b/;
+        let reAttrSub = /::attr\b/;
+        let shouldReturnAttr = false;
+        let attrToGet = '';
+        let shouldReturnText = false;
+
+        if (reAttrSub.test(selector)) {
+          shouldReturnAttr = true;
+          attrToGet = selector.match(/::attr\((.*?)\)/)[1];
+          selector = selector.replace(reAttrSub, '');
+        }
+
+        if (reTextSub.test(selector)) {
+          shouldReturnText = true;
+          console.log('isText')
+          selector = selector.replace(reTextSub, '');
+        }
+
+        let elements = parent.querySelectorAll(selector);
+        if (shouldReturnAttr) {
+          let attrValues = [];
+          elements.forEach(element => {
+            attrValues.push(element.getAttribute(attrToGet));
+          });
+          allElements.push(...attrValues);
+        }
+        else if (shouldReturnText) {
+          let textValues = [];
+          elements.forEach(element => {
+            textValues.push(element.textContent);
+          });
+          allElements.push(...textValues);
+          console.log('allelements AFTER text', allElements)
+        }
+        else {
+          allElements.push(...Array.from(elements));
+        }
       }
 
-      if (reTextSub.test(selector)) {
-        shouldReturnText = true;
-        selector = selector.replace(reTextSub, '');
-      }
+      else if (type === 'XPath') {
+        let path = selector;
+        let nodes = parent.evaluate(path, document);
+        let elements = [];
+        let e;
 
-      let elements = parent.querySelectorAll(selector);
-      if (shouldReturnAttr) {
-        let attrValues = [];
-        elements.forEach(element => {
-          attrValues.push(element.getAttribute(attrToGet));
-        });
-        return attrValues;
-      }
-      else if (shouldReturnText) {
-        let textValues = [];
-        elements.forEach(element => {
-          textValues.push(element.textContent);
-        });
-        return textValues;
-      }
-      return Array.from(elements);
-    }
-
-    else if (type === 'XPath') {
-      let path = selector;
-      let nodes = parent.evaluate(path, document);
-      let elements = [];
-      let e;
-
-      switch (nodes.resultType) {
-        case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
-        case XPathResult.ORDERED_NODE_ITERATOR_TYPE:
-          while ((e = nodes.iterateNext())) {
-            let value = e.nodeValue;
-            if (asIs) {
-              value = e;
-            } else if (value === null) {
-              value = e.outerHTML;
+        switch (nodes.resultType) {
+          case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
+          case XPathResult.ORDERED_NODE_ITERATOR_TYPE:
+            while ((e = nodes.iterateNext())) {
+              let value = e.nodeValue;
+              if (asIs) {
+                value = e;
+              } else if (value === null) {
+                value = e.outerHTML;
+              }
+              elements.push(value);
             }
-            elements.push(value);
-          }
-          break;
-        case XPathResult.NUMBER_TYPE:
-          elements.push(nodes.numberValue);
-          break;
-        case XPathResult.STRING_TYPE:
-          elements.push(nodes.stringValue);
-          break;
-        case XPathResult.BOOLEAN_TYPE:
-          elements.push(nodes.booleanValue);
-          break;
+            break;
+          case XPathResult.NUMBER_TYPE:
+            elements.push(nodes.numberValue);
+            break;
+          case XPathResult.STRING_TYPE:
+            elements.push(nodes.stringValue);
+            break;
+          case XPathResult.BOOLEAN_TYPE:
+            elements.push(nodes.booleanValue);
+            break;
+        }
+        allElements.push(...elements);
       }
-      return elements;
-    }
+    });
+
+    return allElements;
 
   } catch (error) {
     console.log(error);
