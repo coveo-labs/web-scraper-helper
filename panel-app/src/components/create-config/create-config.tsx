@@ -116,6 +116,25 @@ export class CreateConfig {
 		}
 	}
 
+	async showPopover(className) {
+		const popover = document.querySelector(`.${className}`) as HTMLIonPopoverElement;
+		await popover.present();
+		setTimeout(() => {
+			popover.dismiss();
+		}, 1000);
+	}
+
+	renderInfoIcon(id, content) {
+		return (
+			<span>
+				<ion-icon name="information-circle-outline" id={id} onClick={() => this.showPopover(id)}></ion-icon>
+				<ion-popover id="info-popover" class={id} trigger={id} side="top" alignment="center" showBackdrop={false} backdropDismiss={false}>
+					<ion-content class="ion-padding"> {content}</ion-content>
+				</ion-popover>
+			</span>
+		);
+	}
+
 	render() {
 		const dirty = state.hasChanges ? (
 			<span class="is-dirty" title="Unsaved changes">
@@ -170,7 +189,10 @@ export class CreateConfig {
 													value={state.name || ''}
 													onIonInput={(e) => this.handleGlobalNameChange(e)}
 												></ion-input>
-												<div>Select page elements to exclude</div>
+												<div>
+													Select page elements to exclude
+													{this.renderInfoIcon('exclude-information-circle-outline', 'Make sure to follow syntax: //head/meta[@property="og:image"]/@content')}
+												</div>
 												<div class="select-element__container">
 													<div id="select-element__wrapper">{this.renderExcludedItems()}</div>
 													<div class="add-rule" onClick={() => addExcludedItem({ type: 'CSS', path: '' })}>
@@ -190,7 +212,10 @@ export class CreateConfig {
 													value={state.name || ''}
 													onIonInput={(e) => this.handleGlobalNameChange(e)}
 												></ion-input>
-												<div>Select metadata to extract</div>
+												<div>
+													Select metadata to extract
+													{this.renderInfoIcon('metadata-information-circle-outline', 'Create metadata from elements available on your sub-item.')}
+												</div>
 												<div class="select-element__container">
 													<div id="select-element__wrapper">{this.renderMetadataItems()}</div>
 													<div class="add-rule" onClick={() => addMetadataItem({ name: '', type: 'CSS', path: '' })}>

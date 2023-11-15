@@ -150,3 +150,27 @@ ion-toast {
 	text-transform: capitalize;
 	font-size: 16px;
 }
+
+#info-popover {
+	--min-width: 150px;
+	--width: unset;
+	--max-width: 300px;
+	--offset-y: -5px;
+
+	& ion-content{
+		--border-radius: 8px 8px 0px 0px;
+		--background: #3F3F71;
+		--color: #fff;
+		font-family: Gibson;
+		font-size: 14px;
+		font-style: normal;
+		font-weight: 300;
+		line-height: 20px; /* 150% */
+		letter-spacing: 0.042px;
+		text-align: center;
+		--padding-bottom: 2px;
+		--padding-top: 2px;
+		--padding-start: 4px;
+		--padding-end: 4px;
+	}
+}
