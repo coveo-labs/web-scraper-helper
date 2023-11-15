@@ -1,56 +1,56 @@
 .code-view-wrapper {
-  padding: 32px 24px;
-  color: #282829;
-  font-family: Gibson;
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 21px; /* 150% */
-  letter-spacing: 0.154px;
+	padding: 32px 24px;
+	color: #282829;
+	font-family: Gibson;
+	font-size: 14px;
+	font-style: normal;
+	font-weight: 500;
+	line-height: 21px; /* 150% */
+	letter-spacing: 0.154px;
 
-  .copy-to-clipboard {
-    color: #1372EC;
-    font-weight: 300;
-    letter-spacing: 0.042px;
-    display: flex;
-    cursor: pointer;
+	.copy-to-clipboard {
+		color: #1372ec;
+		font-weight: 300;
+		letter-spacing: 0.042px;
+		display: flex;
+		cursor: pointer;
 
-    ion-img::part(image) {
-      width: 12.5px;
-      margin-right: 8px;
-    }
-  }
+		ion-img::part(image) {
+			width: 12.5px;
+			margin-right: 8px;
+		}
+	}
 
-  .code-view {
-    margin-top: 16px;
-    border-radius: 8px;
-    padding: 24px 24px 24px 8px;
-    border: 1px solid #E5E8E8;
-    background: #FCFCFC;
-    color: #282829;
-    font-family: Menlo;
-    font-size: 12px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 14px; /* 116.667% */
-    letter-spacing: 0.036px;
-    height: 600px;
+	.code-view {
+		margin-top: 16px;
+		border-radius: 8px;
+		padding: 24px 24px 24px 8px;
+		border: 1px solid #e5e8e8;
+		background: #fcfcfc;
+		color: #282829;
+		font-family: Menlo;
+		font-size: 12px;
+		font-style: normal;
+		font-weight: 400;
+		line-height: 14px; /* 116.667% */
+		letter-spacing: 0.036px;
+		height: 600px;
 
-    textarea {
-      width: 100%;
-      height: 600px;
-      border: unset;
-      background-color: transparent;
-      padding: 8px;
+		textarea {
+			width: 100%;
+			height: 600px;
+			border: unset;
+			background-color: transparent;
+			padding: 8px;
 
-      &:focus-visible {
-        outline: unset;
-        background-color: #fff;
-      }
-    }
-  }
+			&:focus-visible {
+				outline: unset;
+				background-color: #fff;
+			}
+		}
+	}
 
-  .invalid-JSON {
-    color: red;
-  }
+	.invalid-JSON {
+		color: red;
+	}
 }
