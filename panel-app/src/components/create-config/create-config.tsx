@@ -3,6 +3,8 @@ import state, { addExcludedItem, addMetadataItem, addSubItem, formatState, remov
 import { alertController, toastController } from '@ionic/core';
 import infoToken from '../../assets/icon/InfoToken.svg';
 
+const RECENT_FILES_ITEM_NAME = '__Recent__Files__';
+
 @Component({
 	tag: 'create-config',
 	styleUrl: 'create-config.scss',
@@ -45,7 +47,8 @@ export class CreateConfig {
 		if (state.hasChanges) {
 			const alert = await alertController.create({
 				header: 'Unsaved Changes',
-				message: 'You have unsaved changes. Are you sure you want to close the file?',
+				cssClass: 'alert-unsaved',
+				message: 'You have unsaved changes.\n\nAre you sure you want to close the file?',
 				buttons: [
 					{
 						text: 'Cancel',
@@ -97,7 +100,12 @@ export class CreateConfig {
 					chrome.storage.local.get(this.fileName, (items) => resolve(items));
 				});
 
-				updateState(fileItem[this.fileName]);
+				updateState(fileItem[this.fileName], false);
+				chrome.storage.local.get(RECENT_FILES_ITEM_NAME, (items) => {
+					let recentFiles = items[RECENT_FILES_ITEM_NAME] || [];
+					recentFiles = [this.fileName, ...recentFiles.filter((item) => item !== this.fileName)];
+					chrome.storage.local.set({ [RECENT_FILES_ITEM_NAME]: recentFiles });
+				});
 			} else {
 				chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 					chrome.tabs.sendMessage(tabs[0].id, { type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude } });
@@ -109,12 +117,23 @@ export class CreateConfig {
 	}
 
 	render() {
+		const dirty = state.hasChanges ? (
+			<span class="is-dirty" title="Unsaved changes">
+				*
+			</span>
+		) : (
+			''
+		);
 		return (
 			<div id="create-config">
 				<div class="header-section">
 					<div class="header_text-container">
 						<div class="header_title-text">
-							Web Scraper file name: <span style={{ marginLeft: '4px', textTransform: 'capitalize' }}>{this.fileName}</span>
+							Web Scraper file name:{' '}
+							<span style={{ marginLeft: '4px', textTransform: 'capitalize' }}>
+								{this.fileName}
+								{dirty}
+							</span>
 							<a href="https://github.com/coveo-labs/web-scraper-helper" target="web-scraper-help">
 								<ion-img id="infoToken-img" src={infoToken}></ion-img>
 							</a>
