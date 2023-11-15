@@ -79,7 +79,7 @@ export class FileExplorer {
 			));
 
 			return (
-				<div>
+				<div class="recent-files-container">
 					<div class="recent-title">Your recent files</div>
 					<div class="recent-subtitle">Choose one of recently created file or search for more in the list above.</div>
 					<div class="recent-files-section">
