@@ -1,4 +1,4 @@
-import { Component, State, h } from '@stencil/core';
+import { Component, Host, State, h } from '@stencil/core';
 import '@ionic/core';
 import noFileImage from '../../assets/icon/NotFoundImage.svg';
 import infoToken from '../../assets/icon/InfoToken.svg';
@@ -12,9 +12,8 @@ const RECENT_FILES_ITEM_NAME = '__Recent__Files__';
 	shadow: false,
 })
 export class FileExplorer {
+	@State() newFileName: string = '';
 	@State() showModal = false;
-	@State() fileName = '';
-	@State() triggerType = 'new-file'; // keeps track whether a new file is created or loaded
 	@State() fileList = [];
 	@State() recentFiles = [];
 
@@ -25,13 +24,16 @@ export class FileExplorer {
 
 		// save the default state right away
 		try {
-			chrome.storage.local.set({ [this.fileName]: JSON.stringify(formatState(), null, 2) });
-			this.recentFiles = await addToRecentFiles(this.fileName);
+			chrome.storage.local.set({ [this.newFileName]: JSON.stringify(formatState(), null, 2) });
+			this.recentFiles = await addToRecentFiles(this.newFileName);
+
+			state.currentFile = {
+				name: this.newFileName,
+				triggerType: 'new-file',
+			};
 		} catch (e) {
 			console.log(e);
 		}
-
-		state.redirectToConfig = true;
 	}
 
 	async componentWillRender() {
@@ -61,9 +63,8 @@ export class FileExplorer {
 					})}
 				</div>
 			);
-		} else {
-			return <ion-select-option class="no-files-option">Sorry, you haven’t created any files yet.</ion-select-option>;
 		}
+		return <ion-select-option class="no-files-option">Sorry, you haven’t created any files yet.</ion-select-option>;
 	}
 
 	renderRecentFiles() {
@@ -97,7 +98,13 @@ export class FileExplorer {
 				<div class="createFile-wrapper">
 					<div class="info-text">You have no files</div>
 					<div>
-						<ion-button class="create-file-btn" onClick={() => (this.showModal = true)}>
+						<ion-button
+							class="create-file-btn"
+							onClick={() => {
+								this.newFileName = '';
+								this.showModal = true;
+							}}
+						>
 							<ion-icon slot="start" name="add-circle-outline"></ion-icon>
 							Create a new file
 						</ion-button>
@@ -114,10 +121,11 @@ export class FileExplorer {
 		this.loadFile(event.target.value);
 	}
 
-	loadFile(fileName) {
-		this.fileName = fileName;
-		this.triggerType = 'load-file';
-		state.redirectToConfig = true;
+	loadFile(name) {
+		state.currentFile = {
+			name,
+			triggerType: 'load-file',
+		};
 	}
 
 	async removeFile(filename) {
@@ -145,8 +153,8 @@ export class FileExplorer {
 	}
 
 	render() {
-		return state.redirectToConfig === false ? (
-			<div id="file-explorer">
+		return (
+			<Host id="file-explorer">
 				<div class="header-section">
 					<div class="header_text-container">
 						<div class="header_title-text">
@@ -180,21 +188,19 @@ export class FileExplorer {
 						</div>
 						<div class="modal-content">
 							<div>Enter a name for your Web Scraper file.</div>
-							<ion-input fill="outline" placeholder="Name" onIonInput={(event) => (this.fileName = (event.target as HTMLIonInputElement).value as string)} value={this.fileName}></ion-input>
+							<ion-input fill="outline" placeholder="Name" onIonInput={(event) => (this.newFileName = (event.target as HTMLIonInputElement).value as string)} value={this.newFileName}></ion-input>
 						</div>
 						<div class="modal-footer">
 							<ion-button fill="outline" onClick={() => (this.showModal = false)}>
 								Cancel
 							</ion-button>
-							<ion-button fill="outline" onClick={() => this.onSaveClick()} disabled={!this.fileName}>
+							<ion-button fill="outline" onClick={() => this.onSaveClick()} disabled={!this.newFileName}>
 								Save
 							</ion-button>
 						</div>
 					</ion-modal>
 				</div>
-			</div>
-		) : (
-			<create-config fileName={this.fileName} triggerType={this.triggerType}></create-config>
+			</Host>
 		);
 	}
 }

@@ -1,5 +1,6 @@
 import { Component, Prop, State, h } from '@stencil/core';
 import { getMetadataResults } from '../store';
+import { Selector } from '../types';
 @Component({
 	tag: 'metadata-results',
 	styleUrl: 'metadata-results.scss',
@@ -8,7 +9,7 @@ import { getMetadataResults } from '../store';
 export class MetadataResults {
 	@Prop() metadata: any;
 	@Prop() type = 'global';
-	@Prop() parentSelector;
+	@Prop() parentSelector: Selector;
 	@State() results: any;
 
 	async componentWillRender() {

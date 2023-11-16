@@ -1,7 +1,8 @@
-import { Component, Listen, Prop, State, h } from '@stencil/core';
+import { Component, Host, Listen, State, h } from '@stencil/core';
 import state, { addExcludedItem, addMetadataItem, addSubItem, addToRecentFiles, formatState, removeSubItem, resetStore, updateGlobalName, updateState } from '../store';
 import { alertController, toastController } from '@ionic/core';
 import infoToken from '../../assets/icon/InfoToken.svg';
+import { SubItem } from '../types';
 
 @Component({
 	tag: 'create-config',
@@ -9,10 +10,8 @@ import infoToken from '../../assets/icon/InfoToken.svg';
 	shadow: false,
 })
 export class CreateConfig {
-	@Prop() fileName;
-	@Prop() triggerType;
 	@State() showSubItemConfig: boolean;
-	@State() subItem: {};
+	@State() subItem: SubItem;
 
 	@Listen('updateSubItemState')
 	hideSubItemConfig() {
@@ -21,7 +20,7 @@ export class CreateConfig {
 
 	renderExcludedItems() {
 		return state.exclude.map((item) => {
-			return <select-element-item type="excludeItem" selectorType={item.type} selector={item.path} uniqueId={item.id}></select-element-item>;
+			return <select-element-item type="excludeItem" selector={item} uniqueId={item.id}></select-element-item>;
 		});
 	}
 
@@ -29,12 +28,12 @@ export class CreateConfig {
 		const metadata = state.metadata;
 		return Object.keys(metadata).map((key) => {
 			const item = metadata[key];
-			return <select-element-item type="metadataItem" uniqueId={key} name={item.name} selectorType={item.type} selector={item.path} isBoolean={item.isBoolean}></select-element-item>;
+			return <select-element-item type="metadataItem" uniqueId={key} name={item.name} selector={item}></select-element-item>;
 		});
 	}
 
 	redirectAndReset() {
-		state.redirectToConfig = false;
+		state.currentFile = null;
 		resetStore();
 		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 			chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-excluded-on-file-close', payload: { parentSelector: null } });
@@ -49,11 +48,12 @@ export class CreateConfig {
 				message: 'You have unsaved changes.\n\nAre you sure you want to close the file?',
 				buttons: [
 					{
-						text: 'Cancel',
+						text: 'No',
 						role: 'cancel',
 					},
 					{
 						text: 'Yes',
+						role: 'destructive',
 						handler: () => {
 							this.redirectAndReset();
 						},
@@ -70,7 +70,7 @@ export class CreateConfig {
 	onSave() {
 		try {
 			chrome.storage.local.set({
-				[this.fileName]: JSON.stringify(formatState(), null, 2),
+				[state.currentFile.name]: JSON.stringify(formatState(), null, 2),
 			});
 			toastController
 				.create({
@@ -93,13 +93,14 @@ export class CreateConfig {
 
 	async componentWillLoad() {
 		try {
-			if (this.triggerType === 'load-file') {
+			if (state.currentFile.triggerType === 'load-file') {
+				const fileName = state.currentFile.name;
 				const fileItem = await new Promise((resolve) => {
-					chrome.storage.local.get(this.fileName, (items) => resolve(items));
+					chrome.storage.local.get(fileName, (items) => resolve(items));
 				});
 
-				updateState(fileItem[this.fileName], false);
-				await addToRecentFiles(this.fileName);
+				updateState(fileItem[fileName], false);
+				await addToRecentFiles(fileName);
 			} else {
 				chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 					chrome.tabs.sendMessage(tabs[0].id, { type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude } });
@@ -108,6 +109,25 @@ export class CreateConfig {
 		} catch (e) {
 			console.log(e);
 		}
+	}
+
+	async showPopover(className) {
+		const popover = document.querySelector(`.${className}`) as HTMLIonPopoverElement;
+		await popover.present();
+		setTimeout(() => {
+			popover.dismiss();
+		}, 1000);
+	}
+
+	renderInfoIcon(id, content) {
+		return (
+			<span>
+				<ion-icon name="information-circle-outline" id={id} onClick={() => this.showPopover(id)}></ion-icon>
+				<ion-popover id="info-popover" class={id} trigger={id} side="top" alignment="center" showBackdrop={false} backdropDismiss={false}>
+					<ion-content class="ion-padding"> {content}</ion-content>
+				</ion-popover>
+			</span>
+		);
 	}
 
 	render() {
@@ -119,13 +139,13 @@ export class CreateConfig {
 			''
 		);
 		return (
-			<div id="create-config">
+			<Host id="create-config">
 				<div class="header-section">
 					<div class="header_text-container">
 						<div class="header_title-text">
 							Web Scraper file name:{' '}
 							<span style={{ marginLeft: '4px', textTransform: 'capitalize' }}>
-								{this.fileName}
+								{state.currentFile.name}
 								{dirty}
 							</span>
 							<a href="https://github.com/coveo-labs/web-scraper-helper" target="web-scraper-help">
@@ -164,7 +184,10 @@ export class CreateConfig {
 													value={state.name || ''}
 													onIonInput={(e) => this.handleGlobalNameChange(e)}
 												></ion-input>
-												<div>Select page elements to exclude</div>
+												<div>
+													Select page elements to exclude
+													{this.renderInfoIcon('exclude-information-circle-outline', 'Make sure to follow syntax: //head/meta[@property="og:image"]/@content')}
+												</div>
 												<div class="select-element__container">
 													<div id="select-element__wrapper">{this.renderExcludedItems()}</div>
 													<div class="add-rule" onClick={() => addExcludedItem({ type: 'CSS', path: '' })}>
@@ -184,7 +207,10 @@ export class CreateConfig {
 													value={state.name || ''}
 													onIonInput={(e) => this.handleGlobalNameChange(e)}
 												></ion-input>
-												<div>Select metadata to extract</div>
+												<div>
+													Select metadata to extract
+													{this.renderInfoIcon('metadata-information-circle-outline', 'Create metadata from elements available on your sub-item.')}
+												</div>
 												<div class="select-element__container">
 													<div id="select-element__wrapper">{this.renderMetadataItems()}</div>
 													<div class="add-rule" onClick={() => addMetadataItem({ name: '', type: 'CSS', path: '' })}>
@@ -266,18 +292,18 @@ export class CreateConfig {
 							<subitem-edit-config subItem={this.subItem}></subitem-edit-config>
 						)}
 					</div>
-					{!this.showSubItemConfig && (
-						<div class="config-action-btns">
-							<ion-button onClick={() => this.onDone()} fill="outline" class="cancel-btn">
-								Cancel
-							</ion-button>
-							<ion-button onClick={() => this.onSave()} fill="outline" class="save-btn">
-								Save
-							</ion-button>
-						</div>
-					)}
 				</div>
-			</div>
+				{!this.showSubItemConfig && (
+					<div class="config-action-btns">
+						<ion-button onClick={() => this.onDone()} fill="outline" class="cancel-btn">
+							Cancel
+						</ion-button>
+						<ion-button onClick={() => this.onSave()} fill="outline" class="save-btn">
+							Save
+						</ion-button>
+					</div>
+				)}
+			</Host>
 		);
 	}
 }

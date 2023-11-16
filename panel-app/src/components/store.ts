@@ -1,37 +1,6 @@
 import { createStore } from '@stencil/store';
 import { v4 as uuidv4 } from 'uuid';
-
-export type ElementsToExclude = {
-	id: string;
-	type: string;
-	path: string;
-};
-
-export type Metadata = {
-	[key: string]: {
-		name: string;
-		type: string;
-		path: string;
-		isBoolean?: boolean;
-	};
-};
-
-type SubItems = {
-	name: string;
-	type: string;
-	path: string;
-	exclude?: ElementsToExclude[];
-	metadata?: Metadata;
-};
-
-type ConfigState = {
-	name?: string;
-	redirectToConfig: boolean;
-	hasChanges: boolean;
-	exclude: ElementsToExclude[];
-	metadata: Metadata;
-	subItems: SubItems[];
-};
+import { ConfigState, MetadataMap, Selector, SelectorElement, SelectorType, SubItem } from './types';
 
 export function getId(): string {
 	let uniqueId = uuidv4();
@@ -39,7 +8,7 @@ export function getId(): string {
 }
 
 const { reset, state, onChange }: { reset: Function; state: ConfigState; onChange: Function; } = createStore({
-	redirectToConfig: false,
+	currentFile: null,
 	hasChanges: false,
 	exclude: [
 		{
@@ -239,7 +208,7 @@ function addExcludedItem(item) {
 	state.exclude = [...state.exclude, { ...item, id }];
 }
 
-function removeExcludedItem(item: ElementsToExclude) {
+function removeExcludedItem(item: SelectorElement) {
 	state.exclude = state.exclude.filter((excludedItem) => {
 		return excludedItem.id !== item.id;
 	});
@@ -249,7 +218,7 @@ function removeExcludedItem(item: ElementsToExclude) {
 	});
 }
 
-function addMetadataItem(item: { name: string; type: string; path: string; }) {
+function addMetadataItem(item: { name: string; type: SelectorType; path: string; }) {
 	state.metadata = { ...state.metadata, [getId()]: { name: item.name, type: item.type, path: item.path } };
 }
 
@@ -258,7 +227,7 @@ function removeMetadataItem(uid: string) {
 	state.metadata = metadata;
 }
 
-async function getMetadataResults(type = 'global', metadata: Metadata = {}, parentSelector = null) {
+async function getMetadataResults(type = 'global', metadata: MetadataMap = {}, parentSelector: Selector = null) {
 	const response = await new Promise((resolve) => {
 		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 			chrome.tabs.sendMessage(tabs[0].id, { type: 'metadata-results', payload: { metadata: type === 'global' ? state.metadata : metadata, parentSelector: parentSelector } }, (response) => {
@@ -291,7 +260,7 @@ function updateMetadataItem(newItem: { id: string; name: string; type: string; p
 	}, {});
 }
 
-function updateExcludedItem(newItem: ElementsToExclude, oldItem: ElementsToExclude) {
+function updateExcludedItem(newItem: SelectorElement, oldItem: SelectorElement) {
 	// add opacity to the element
 	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 		console.log('updateExcludedItem: ', newItem.path, oldItem.path);
@@ -305,7 +274,7 @@ function updateExcludedItem(newItem: ElementsToExclude, oldItem: ElementsToExclu
 	});
 }
 
-function updateSubItem(newItem: SubItems, oldItem: SubItems) {
+function updateSubItem(newItem: SubItem, oldItem: SubItem) {
 	state.subItems = state.subItems.map((subItem) => {
 		if (subItem.name === oldItem.name && subItem.type === oldItem.type && subItem.path === oldItem.path) {
 			return newItem;
@@ -330,19 +299,20 @@ const addToRecentFiles = async (filename: string): Promise<string[]> => {
 
 export default state;
 export {
-	addToRecentFiles,
-	updateState,
-	updateGlobalName,
 	addExcludedItem,
-	removeExcludedItem,
 	addMetadataItem,
-	removeMetadataItem,
 	addSubItem,
-	removeSubItem,
-	updateExcludedItem,
-	updateMetadataItem,
-	updateSubItem,
+	addToRecentFiles,
 	formatState,
 	getMetadataResults,
+	removeExcludedItem,
+	removeMetadataItem,
+	removeSubItem,
 	resetStore,
+	updateExcludedItem,
+	updateGlobalName,
+	updateMetadataItem,
+	updateState,
+	updateSubItem,
 };
+

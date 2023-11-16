@@ -1,6 +1,7 @@
 /*global chrome*/
 import { Component, h, Prop, State } from '@stencil/core';
 import { removeExcludedItem, removeMetadataItem, updateExcludedItem, updateMetadataItem } from '../store';
+import { Selector, SelectorType } from '../types';
 
 @Component({
 	tag: 'select-element-item',
@@ -11,65 +12,71 @@ export class SelectElementItem {
 	@Prop() uniqueId: string;
 	@Prop() type: string;
 	@Prop() name: string;
-	@Prop() selectorType: string;
-	@Prop() selector: string;
-	@Prop() isBoolean?: boolean;
-	@State() selectorValidity;
+	@Prop() selector: Selector;
+	@State() selectorValidity: 'No element found' | 'Invalid' | 'Valid';
 
-	async validateSelector(selector: string, selectorType: string) {
+	async validateSelector(selector: Selector) {
 		const response = await new Promise((resolve) => {
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-				chrome.tabs.sendMessage(tabs[0].id, { type: 'validate-selector', payload: { type: selectorType, selector: selector } }, null, (response) => {
+				chrome.tabs.sendMessage(tabs[0].id, { type: 'validate-selector', payload: selector }, null, (response) => {
 					resolve(response);
 				});
 			});
 		});
-		this.selectorValidity = response;
+		this.selectorValidity = response as any;
 	}
 
 	handleSelectorTypeChange = () => {
-		const newSelectorType = this.selectorType === 'CSS' ? 'XPath' : 'CSS';
-		this.validateSelector(this.selector, newSelectorType);
+		const newSelectorType: SelectorType = this.selector.type === 'CSS' ? 'XPATH' : 'CSS';
+		this.validateSelector({ ...this.selector, type: newSelectorType });
 
 		if (this.type === 'excludeItem') {
-			updateExcludedItem({ id: this.uniqueId, type: newSelectorType, path: this.selector }, { id: this.uniqueId, type: this.selectorType, path: this.selector });
+			updateExcludedItem({ ...this.selector, id: this.uniqueId, type: newSelectorType }, { ...this.selector, id: this.uniqueId });
 		} else {
-			updateMetadataItem({ id: this.uniqueId, name: this.name, type: newSelectorType, path: this.selector });
+			updateMetadataItem({ ...this.selector, id: this.uniqueId, name: this.name, type: newSelectorType });
 		}
 	};
 
 	handleSelectorChange = (event: CustomEvent) => {
 		console.log('handleSelectorChange: ', event);
-		const newSelector = event.detail.value;
-		this.validateSelector(newSelector, this.selectorType);
+		const newPath: string = event.detail.value;
+		this.validateSelector({ ...this.selector, path: newPath });
 
 		if (this.type === 'excludeItem') {
-			updateExcludedItem({ id: this.uniqueId, type: this.selectorType, path: newSelector }, { id: this.uniqueId, type: this.selectorType, path: this.selector });
+			updateExcludedItem({ ...this.selector, id: this.uniqueId, path: newPath }, { ...this.selector, id: this.uniqueId });
 		} else {
-			updateMetadataItem({ id: this.uniqueId, name: this.name, type: this.selectorType, path: newSelector });
+			updateMetadataItem({ ...this.selector, id: this.uniqueId, name: this.name, path: newPath });
 		}
 	};
 
 	handleNameChange = (event: CustomEvent) => {
 		const newName = event.detail.value;
-		updateMetadataItem({ id: this.uniqueId, name: newName, type: this.selectorType, path: this.selector });
+		updateMetadataItem({ ...this.selector, id: this.uniqueId, name: newName });
 	};
 
 	handleCheckboxChange = (event: CustomEvent) => {
 		const isChecked = event.detail.checked;
-		updateMetadataItem({ id: this.uniqueId, name: this.name, type: this.selectorType, path: this.selector, isBoolean: isChecked });
+		updateMetadataItem({ ...this.selector, id: this.uniqueId, name: this.name, isBoolean: isChecked });
 	};
 
 	removeItem = () => {
 		if (this.type === 'excludeItem') {
-			removeExcludedItem({ id: this.uniqueId, type: this.selectorType, path: this.selector });
+			removeExcludedItem({ ...this.selector, id: this.uniqueId });
 		} else {
 			removeMetadataItem(this.uniqueId);
 		}
 	};
 
+	async showPopover(className) {
+		const popover = document.querySelector(`.${className}`) as HTMLIonPopoverElement;
+		await popover.present();
+		setTimeout(() => {
+			popover.dismiss();
+		}, 1000);
+	}
+
 	componentWillRender() {
-		this.validateSelector(this.selector, this.selectorType);
+		this.validateSelector(this.selector);
 	}
 
 	render() {
@@ -88,21 +95,32 @@ export class SelectElementItem {
 					</div>
 				)}
 				<div>
-					<ion-input id="selector-type-input" class={cssClassForValidity} fill="outline" value={this.selectorType} onClick={this.handleSelectorTypeChange}></ion-input>
+					<ion-input id="selector-type-input" class={cssClassForValidity} fill="outline" value={this.selector.type} onClick={this.handleSelectorTypeChange}></ion-input>
 				</div>
 				<div style={{ flex: '2' }}>
 					<ion-input
 						class={this.type === 'excludeItem' ? 'selector-input' : 'metadata-selector-input'}
 						fill="outline"
-						value={this.selector}
+						value={this.selector.path}
 						placeholder="expression"
 						onIonInput={this.handleSelectorChange}
 					></ion-input>
 				</div>
 				{this.type === 'metadataItem' && (
 					<div>
-						<ion-checkbox onIonChange={this.handleCheckboxChange} checked={this.isBoolean}></ion-checkbox>
-						<ion-icon name="information-circle-outline"></ion-icon>
+						<ion-checkbox onIonChange={this.handleCheckboxChange} checked={this.selector.isBoolean}></ion-checkbox>
+						<ion-icon name="information-circle-outline" id="boolean-information-circle-outline" onClick={() => this.showPopover('boolean-information-circle-outline')}></ion-icon>
+						<ion-popover
+							id="info-popover"
+							class="boolean-information-circle-outline"
+							trigger="boolean-information-circle-outline"
+							side="top"
+							alignment="center"
+							showBackdrop={false}
+							backdropDismiss={false}
+						>
+							<ion-content class="ion-padding">Boolean option</ion-content>
+						</ion-popover>
 					</div>
 				)}
 				<div class="remove-icon" onClick={this.removeItem}>
