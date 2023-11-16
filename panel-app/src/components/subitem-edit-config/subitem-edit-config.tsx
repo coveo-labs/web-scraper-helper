@@ -136,12 +136,12 @@ export class SubitemEditConfig {
 	renderMetadataItems() {
 		return Object.keys(this.metadata).map((key) => {
 			const item = this.metadata[key];
-			return <sub-item-input-element uniqueId={key} type="metadataItem" name={item.name} selector={item}></sub-item-input-element>;
+			return <sub-item-input-element uniqueId={key} type="metadataItem" selector={item}></sub-item-input-element>;
 		});
 	}
 
 	renderSubItemInfo() {
-		return <sub-item-input-element type="subItem" name={this.subItemState.name} selector={this.subItemState}></sub-item-input-element>;
+		return <sub-item-input-element type="subItem" selector={this.subItemState}></sub-item-input-element>;
 	}
 
 	render() {
