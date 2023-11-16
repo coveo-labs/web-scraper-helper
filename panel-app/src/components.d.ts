@@ -5,8 +5,8 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { Selector } from "./components/types";
-export { Selector } from "./components/types";
+import { MetadataElement, Selector } from "./components/types";
+export { MetadataElement, Selector } from "./components/types";
 export namespace Components {
     interface AppRoot {
     }
@@ -28,8 +28,7 @@ export namespace Components {
         "uniqueId": string;
     }
     interface SubItemInputElement {
-        "name": string;
-        "selector": Selector;
+        "selector": Selector | MetadataElement;
         "type": 'metadataItem' | 'subItem' | 'excludeItem';
         "uniqueId": string;
     }
@@ -148,9 +147,8 @@ declare namespace LocalJSX {
         "uniqueId"?: string;
     }
     interface SubItemInputElement {
-        "name"?: string;
         "onUpdateSubItem"?: (event: SubItemInputElementCustomEvent<any>) => void;
-        "selector"?: Selector;
+        "selector"?: Selector | MetadataElement;
         "type"?: 'metadataItem' | 'subItem' | 'excludeItem';
         "uniqueId"?: string;
     }
