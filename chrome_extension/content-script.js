@@ -236,6 +236,17 @@ let createRule = (obj, title, subItemKey, container) => {
   return new ErrorRule(obj, title);
 };
 
+let getParentsElements = (parentSelector) => {
+  let parents = null;
+  if (parentSelector) {
+    parents = createRule(parentSelector).getElements(true);
+  }
+  if (!parents) {
+    parents = [document];
+  }
+  return parents;
+};
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'exclude-selector') {
     const { newItem, oldItem, parentSelector } = message.payload;
@@ -290,13 +301,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     for (const [, value] of Object.entries(metadata)) {
       const { name } = value;
 
-      let parents = null;
-      if (parentSelector) {
-        parents = createRule(parentSelector).getElements(true);
-      }
-      if (!parents) {
-        parents = [document];
-      }
+      let parents = getParentsElements(parentSelector);
       parents.forEach(parent => {
         const rule = createRule(value, null, null, parent);
         results.push({ "name": name, "values": rule.getElements() });
@@ -309,16 +314,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 function applyStylesToElements(newItem, oldItem = null, parentSelector = null) {
   try {
+    let parents = getParentsElements(parentSelector);
     if (oldItem && oldItem.path !== newItem.path) {
-      const oldElements = createRule(oldItem, null, null, parentSelector).getElements(true);
-      oldElements?.forEach(element => {
-        element.classList.remove('web-scraper-helper-exclude');
+      parents.forEach(parent => {
+        const oldElements = createRule(oldItem, null, null, parent).getElements(true);
+        oldElements?.forEach(element => {
+          element.classList.remove('web-scraper-helper-exclude');
+        });
       });
     }
 
-    let newElements = createRule(newItem, null, null, parentSelector).getElements(true);;
-    newElements?.forEach(element => {
-      element?.classList?.add('web-scraper-helper-exclude');
+    parents.forEach(parent => {
+      let newElements = createRule(newItem, null, null, parent).getElements(true);;
+      newElements?.forEach(element => {
+        element?.classList?.add('web-scraper-helper-exclude');
+      });
     });
 
   } catch (error) {
