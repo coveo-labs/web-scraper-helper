@@ -134,8 +134,6 @@ export class CreateConfig {
 	renderElementsToExcludeTab() {
 		return (
 			<div class="collection-subContainer">
-				<div>Global section name</div>
-				<ion-input class="global-section-input" fill="outline" placeholder="Name your global section" value={state.name || ''} onIonInput={(e) => this.handleGlobalNameChange(e)}></ion-input>
 				<div>
 					Select page elements to exclude
 					{this.renderInfoIcon('exclude-information-circle-outline', 'Make sure to follow syntax: //head/meta[@property="og:image"]/@content')}
@@ -147,6 +145,8 @@ export class CreateConfig {
 						<span>Add Rule</span>
 					</div>
 				</div>
+				<div style={{ marginTop: '32px' }}>Global section name</div>
+				<ion-input class="global-section-input" fill="outline" placeholder="Name your global section" value={state.name || ''} onIonInput={(e) => this.handleGlobalNameChange(e)}></ion-input>
 			</div>
 		);
 	}
@@ -154,8 +154,6 @@ export class CreateConfig {
 	renderMetadataToExtractTab() {
 		return (
 			<div class="collection-subContainer">
-				<div>Global section name</div>
-				<ion-input class="global-section-input" fill="outline" placeholder="Name your global section" value={state.name || ''} onIonInput={(e) => this.handleGlobalNameChange(e)}></ion-input>
 				<div>
 					Select metadata to extract
 					{this.renderInfoIcon('metadata-information-circle-outline', 'Create metadata from elements available on your sub-item.')}
