@@ -288,10 +288,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const { metadata, parentSelector } = message.payload;
     const results = [];
     for (const [, value] of Object.entries(metadata)) {
-      const { name, type, path, isBoolean } = value;
+      const { name } = value;
 
-      const rule = createRule(value, null, null, parentSelector);
-      results.push({ "name": name, "values": rule.getElements() });
+      let parents = null;
+      if (parentSelector) {
+        parents = createRule(parentSelector).getElements(true);
+      }
+      if (!parents) {
+        parents = [document];
+      }
+      parents.forEach(parent => {
+        const rule = createRule(value, null, null, parent);
+        results.push({ "name": name, "values": rule.getElements() });
+      });
     }
     console.log('metadata-result-array', message, results);
     sendResponse(results);

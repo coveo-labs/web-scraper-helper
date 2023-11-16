@@ -67,6 +67,14 @@ export class SelectElementItem {
 		}
 	};
 
+	async showPopover(className) {
+		const popover = document.querySelector(`.${className}`) as HTMLIonPopoverElement;
+		await popover.present();
+		setTimeout(() => {
+			popover.dismiss();
+		}, 1000);
+	}
+
 	componentWillRender() {
 		this.validateSelector(this.selector);
 	}
@@ -101,7 +109,18 @@ export class SelectElementItem {
 				{this.type === 'metadataItem' && (
 					<div>
 						<ion-checkbox onIonChange={this.handleCheckboxChange} checked={this.selector.isBoolean}></ion-checkbox>
-						<ion-icon name="information-circle-outline"></ion-icon>
+						<ion-icon name="information-circle-outline" id="boolean-information-circle-outline" onClick={() => this.showPopover('boolean-information-circle-outline')}></ion-icon>
+						<ion-popover
+							id="info-popover"
+							class="boolean-information-circle-outline"
+							trigger="boolean-information-circle-outline"
+							side="top"
+							alignment="center"
+							showBackdrop={false}
+							backdropDismiss={false}
+						>
+							<ion-content class="ion-padding">Boolean option</ion-content>
+						</ion-popover>
 					</div>
 				)}
 				<div class="remove-icon" onClick={this.removeItem}>

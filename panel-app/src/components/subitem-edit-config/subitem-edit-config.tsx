@@ -177,7 +177,7 @@ export class SubitemEditConfig {
 						</div>
 					</div>
 					<div class="subItem-metadata-container">
-						<metadata-results metadata={this.metadata} type="sub-item" parentSelector={this.subItemState.path}></metadata-results>
+						<metadata-results metadata={this.metadata} type="sub-item" parentSelector={this.subItemState}></metadata-results>
 					</div>
 				</div>
 				<div class="action-btn-container">

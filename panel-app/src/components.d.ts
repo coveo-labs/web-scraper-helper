@@ -18,7 +18,7 @@ export namespace Components {
     }
     interface MetadataResults {
         "metadata": any;
-        "parentSelector": any;
+        "parentSelector": Selector;
         "type": string;
     }
     interface SelectElementItem {
@@ -137,7 +137,7 @@ declare namespace LocalJSX {
     }
     interface MetadataResults {
         "metadata"?: any;
-        "parentSelector"?: any;
+        "parentSelector"?: Selector;
         "type"?: string;
     }
     interface SelectElementItem {

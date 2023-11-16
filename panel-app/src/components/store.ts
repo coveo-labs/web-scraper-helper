@@ -1,6 +1,6 @@
 import { createStore } from '@stencil/store';
 import { v4 as uuidv4 } from 'uuid';
-import { ConfigState, MetadataMap, SelectorElement, SelectorType, SubItem } from './types';
+import { ConfigState, MetadataMap, Selector, SelectorElement, SelectorType, SubItem } from './types';
 
 export function getId(): string {
 	let uniqueId = uuidv4();
@@ -227,7 +227,7 @@ function removeMetadataItem(uid: string) {
 	state.metadata = metadata;
 }
 
-async function getMetadataResults(type = 'global', metadata: MetadataMap = {}, parentSelector = null) {
+async function getMetadataResults(type = 'global', metadata: MetadataMap = {}, parentSelector: Selector = null) {
 	const response = await new Promise((resolve) => {
 		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 			chrome.tabs.sendMessage(tabs[0].id, { type: 'metadata-results', payload: { metadata: type === 'global' ? state.metadata : metadata, parentSelector: parentSelector } }, (response) => {
