@@ -133,6 +133,7 @@ export class CreateConfig {
 								<ion-img id="infoToken-img" src={infoToken}></ion-img>
 							</a>
 						</div>
+						<div class="header_sub-text">Start creating Web Scraper configuration for this file.</div>
 					</div>
 					<div class="header_btn">
 						<ion-button onClick={() => this.onDone()}>Done</ion-button>

@@ -282,30 +282,30 @@
 				}
 			}
 		}
+	}
 
-		.config-action-btns {
-			// max-width: 530px;
-			display: flex;
-			justify-content: end;
-			padding: 8px 0px;
+	.config-action-btns {
+		// max-width: 530px;
+		display: flex;
+		justify-content: end;
+		padding: 8px 0px;
 
-			ion-button.cancel-btn::part(native),
-			ion-button.save-btn::part(native) {
-				border-radius: 8px;
-				border: 1px solid #1372ec;
-				margin-right: 8px;
-				width: 70px;
-				font-family: Gibson;
-				font-size: 14px;
-				font-style: normal;
-				font-weight: 300;
-				text-transform: capitalize;
-				--background-hover: #1372ec;
-				--background-hover-opacity: 1;
+		ion-button.cancel-btn::part(native),
+		ion-button.save-btn::part(native) {
+			border-radius: 8px;
+			border: 1px solid #1372ec;
+			margin-right: 8px;
+			width: 70px;
+			font-family: Gibson;
+			font-size: 14px;
+			font-style: normal;
+			font-weight: 300;
+			text-transform: capitalize;
+			--background-hover: #1372ec;
+			--background-hover-opacity: 1;
 
-				&:hover {
-					color: #fff;
-				}
+			&:hover {
+				color: #fff;
 			}
 		}
 	}
