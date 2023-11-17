@@ -283,10 +283,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'remove-exclude-selector') {
     const { item, parentSelector } = message.payload;
     try {
-      const elements = createRule(item, null, null, parentSelector).getElements(true);
-      elements?.forEach(element => {
-        element.classList?.remove('web-scraper-helper-exclude');
-      });
+      let parents = getParentsElements(parentSelector);
+      parents.forEach(parent => {
+        const elements = createRule(item, null, null, parent).getElements(true);
+        elements?.forEach(element => {
+          element.classList?.remove('web-scraper-helper-exclude');
+        });
+      })
     } catch (e) {
       console.log(e);
     }
@@ -338,12 +341,14 @@ function applyStylesToElements(newItem, oldItem = null, parentSelector = null) {
 
 function removePreviouslyExcludedStyles(parentSelector = null) {
   try {
-    let parent = parentSelector ? document.querySelector(parentSelector) : document;
-    parent.querySelectorAll('.web-scraper-helper-exclude').forEach(e => {
-      if (e && e.classList) {
-        e.classList.remove('web-scraper-helper-exclude');
-      }
-    });
+    let parents = getParentsElements(parentSelector);
+    parents.forEach(parent => {
+      parent.querySelectorAll('.web-scraper-helper-exclude').forEach(e => {
+        if (e && e.classList) {
+          e.classList.remove('web-scraper-helper-exclude');
+        }
+      });
+    })
   } catch (e) {
     console.log(e);
   }
