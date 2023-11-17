@@ -22,16 +22,6 @@ export class SubitemEditConfig {
 		this.updateState(action, newItem, oldItem);
 	}
 
-	removeExcludeStyleOnClose() {
-		try {
-			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-				chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-excluded-on-file-close', payload: { parentSelector: this.subItemState } });
-			});
-		} catch (e) {
-			console.log(e);
-		}
-	}
-
 	onSave() {
 		state.subItems = state.subItems.map((item: SubItem): SubItem => {
 			if (item.name === this.subItem['name']) {
@@ -53,25 +43,16 @@ export class SubitemEditConfig {
 			.then((toast) => {
 				toast.present();
 			});
-		this.removeExcludeStyleOnClose();
 	}
 
 	onCancel() {
 		this.updateSubItemState.emit();
-		this.removeExcludeStyleOnClose();
 	}
 
 	componentWillLoad() {
 		this.subItemState = { name: this.subItem['name'], type: this.subItem['type'], path: this.subItem['path'] };
 		this.excludedItems = this.subItem['exclude'];
 		this.metadata = this.subItem['metadata'];
-		try {
-			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-				chrome.tabs.sendMessage(tabs[0].id, { type: 'update-excludeSubItem-onLoad', payload: { exclude: this.excludedItems, parentSelector: this.subItemState } });
-			});
-		} catch (e) {
-			console.log(e);
-		}
 	}
 
 	updateState(action: string, newItem, oldItem = { type: '', path: '' }) {

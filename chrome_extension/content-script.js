@@ -273,12 +273,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendResponse(response);
   }
   if (message.type === 'update-excludeItem-onLoad') {
-    const { exclude } = message.payload;
+    const { exclude, subItems } = message.payload;
     exclude.length && exclude.map((element) => applyStylesToElements(element));
-  }
-  if (message.type === 'update-excludeSubItem-onLoad') {
-    const { exclude, parentSelector } = message.payload;
-    exclude.length && exclude.map((element) => applyStylesToElements(element, null, parentSelector));
+    subItems.map(subItem => {
+      subItem.exclude.length && subItem.exclude.map((element) => applyStylesToElements(element, null, { type: subItem.type, path: subItem.path }));
+    })
   }
   if (message.type === 'remove-exclude-selector') {
     const { item, parentSelector } = message.payload;
@@ -295,8 +294,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
   }
   if (message.type === 'remove-excluded-on-file-close') {
-    const { parentSelector } = message.payload;
-    removePreviouslyExcludedStyles(parentSelector);
+    removePreviouslyExcludedStyles();
   }
   if (message.type === 'metadata-results') {
     const { metadata, parentSelector } = message.payload;
@@ -339,16 +337,13 @@ function applyStylesToElements(newItem, oldItem = null, parentSelector = null) {
   }
 }
 
-function removePreviouslyExcludedStyles(parentSelector = null) {
+function removePreviouslyExcludedStyles() {
   try {
-    let parents = getParentsElements(parentSelector);
-    parents.forEach(parent => {
-      parent.querySelectorAll('.web-scraper-helper-exclude').forEach(e => {
-        if (e && e.classList) {
-          e.classList.remove('web-scraper-helper-exclude');
-        }
-      });
-    })
+    document.querySelectorAll('.web-scraper-helper-exclude').forEach(e => {
+      if (e && e.classList) {
+        e.classList.remove('web-scraper-helper-exclude');
+      }
+    });
   } catch (e) {
     console.log(e);
   }

@@ -36,7 +36,7 @@ export class CreateConfig {
 		state.currentFile = null;
 		resetStore();
 		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-			chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-excluded-on-file-close', payload: { parentSelector: null } });
+			chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-excluded-on-file-close' });
 		});
 	}
 
@@ -103,7 +103,7 @@ export class CreateConfig {
 				await addToRecentFiles(fileName);
 			} else {
 				chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-					chrome.tabs.sendMessage(tabs[0].id, { type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude } });
+					chrome.tabs.sendMessage(tabs[0].id, { type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude, subItems: state.subItems } });
 				});
 			}
 		} catch (e) {
