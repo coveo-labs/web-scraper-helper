@@ -43,16 +43,35 @@ export class SubitemEditConfig {
 			.then((toast) => {
 				toast.present();
 			});
+		this.removeParentSelectorStyle();
 	}
 
 	onCancel() {
 		this.updateSubItemState.emit();
+		this.removeParentSelectorStyle();
+	}
+
+	removeParentSelectorStyle() {
+		try {
+			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+				chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-parentSelector-style', payload: { parentSelector: this.subItemState } });
+			});
+		} catch (e) {
+			console.log(e);
+		}
 	}
 
 	componentWillLoad() {
 		this.subItemState = { name: this.subItem['name'], type: this.subItem['type'], path: this.subItem['path'] };
 		this.excludedItems = this.subItem['exclude'];
 		this.metadata = this.subItem['metadata'];
+		try {
+			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+				chrome.tabs.sendMessage(tabs[0].id, { type: 'update-parentSelector-style', payload: { newSelector: this.subItemState, oldSelector: null } });
+			});
+		} catch (e) {
+			console.log(e);
+		}
 	}
 
 	updateState(action: string, newItem, oldItem = { type: '', path: '' }) {
@@ -102,6 +121,16 @@ export class SubitemEditConfig {
 				break;
 			}
 			case 'update-subItem': {
+				if (this.subItemState.path !== newItem.path || this.subItemState.type !== newItem.type) {
+					try {
+						chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+							chrome.tabs.sendMessage(tabs[0].id, { type: 'update-parentSelector-style', payload: { newSelector: newItem, oldSelector: oldItem } });
+						});
+					} catch (e) {
+						console.log(e);
+					}
+				}
+
 				this.subItemState = { name: newItem.name as '', type: newItem.type, path: newItem.path };
 				break;
 			}

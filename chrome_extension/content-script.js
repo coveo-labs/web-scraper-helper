@@ -311,6 +311,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log('metadata-result-array', message, results);
     sendResponse(results);
   }
+  if (message.type === 'update-parentSelector-style') {
+    const { newSelector, oldSelector } = message.payload;
+    if (oldSelector && oldSelector.path !== newSelector.path) {
+      const oldElements = createRule(oldSelector, null, null, null).getElements(true);
+      oldElements?.forEach(element => {
+        element.classList.remove('web-scrapper-subItem-parentSelector');
+      });
+    }
+
+    const newElements = createRule(newSelector, null, null, null).getElements(true);
+    newElements?.forEach(element => {
+      element.classList.add('web-scrapper-subItem-parentSelector');
+    });
+  }
+  if (message.type === 'remove-parentSelector-style') {
+    const { parentSelector } = message.payload;
+    const parents = createRule(parentSelector, null, null, null).getElements(true);
+    parents?.forEach(element => {
+      element.classList.remove('web-scraper-subItem-parentSelector');
+    });
+  }
 });
 
 function applyStylesToElements(newItem, oldItem = null, parentSelector = null) {
