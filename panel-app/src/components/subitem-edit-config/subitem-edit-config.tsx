@@ -1,6 +1,6 @@
 import { toastController } from '@ionic/core';
 import { Component, Event, EventEmitter, Listen, Prop, State, h } from '@stencil/core';
-import state, { getId } from '../store';
+import state, { getId, sendMessageToContentScript } from '../store';
 import { MetadataMap, SelectorElement, SubItem } from '../types';
 
 @Component({
@@ -52,26 +52,15 @@ export class SubitemEditConfig {
 	}
 
 	removeParentSelectorStyle() {
-		try {
-			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-				chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-parentSelector-style', payload: { parentSelector: this.subItemState } });
-			});
-		} catch (e) {
-			console.log(e);
-		}
+		sendMessageToContentScript({ type: 'remove-parentSelector-style', payload: { parentSelector: this.subItemState } });
 	}
 
 	componentWillLoad() {
 		this.subItemState = { name: this.subItem['name'], type: this.subItem['type'], path: this.subItem['path'] };
 		this.excludedItems = this.subItem['exclude'];
 		this.metadata = this.subItem['metadata'];
-		try {
-			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-				chrome.tabs.sendMessage(tabs[0].id, { type: 'update-parentSelector-style', payload: { newSelector: this.subItemState, oldSelector: null } });
-			});
-		} catch (e) {
-			console.log(e);
-		}
+
+		sendMessageToContentScript({ type: 'update-parentSelector-style', payload: { newSelector: this.subItemState, oldSelector: null } });
 	}
 
 	updateState(action: string, newItem, oldItem = { type: '', path: '' }) {
@@ -84,9 +73,7 @@ export class SubitemEditConfig {
 				this.excludedItems = this.excludedItems.filter((excludedItem) => {
 					return excludedItem.id !== newItem.id;
 				});
-				chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-					chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-exclude-selector', payload: { item: newItem, parentSelector: this.subItemState } });
-				});
+				sendMessageToContentScript({ type: 'remove-exclude-selector', payload: { item: newItem, parentSelector: this.subItemState } });
 				break;
 			}
 			case 'add-metadataItem': {
@@ -101,10 +88,7 @@ export class SubitemEditConfig {
 			case 'update-excludeItem': {
 				this.excludedItems = this.excludedItems.map((excludedItem) => {
 					if (excludedItem.id === newItem.id) {
-						chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-							console.log('updateExcludedSubItem: ', newItem.path, oldItem.path);
-							chrome.tabs.sendMessage(tabs[0].id, { type: 'exclude-selector', payload: { newItem: newItem, oldItem: oldItem, parentSelector: this.subItemState } });
-						});
+						sendMessageToContentScript({ type: 'exclude-selector', payload: { newItem, oldItem, parentSelector: this.subItemState } });
 						return { id: newItem.id, type: newItem.type, path: newItem.path };
 					} else {
 						return excludedItem;
@@ -122,13 +106,7 @@ export class SubitemEditConfig {
 			}
 			case 'update-subItem': {
 				if (this.subItemState.path !== newItem.path || this.subItemState.type !== newItem.type) {
-					try {
-						chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-							chrome.tabs.sendMessage(tabs[0].id, { type: 'update-parentSelector-style', payload: { newSelector: newItem, oldSelector: oldItem } });
-						});
-					} catch (e) {
-						console.log(e);
-					}
+					sendMessageToContentScript({ type: 'update-parentSelector-style', payload: { newSelector: newItem, oldSelector: oldItem } });
 				}
 
 				this.subItemState = { name: newItem.name as '', type: newItem.type, path: newItem.path };

@@ -1,6 +1,6 @@
 /*global chrome*/
 import { Component, h, Prop, State } from '@stencil/core';
-import { removeExcludedItem, removeMetadataItem, updateExcludedItem, updateMetadataItem } from '../store';
+import { removeExcludedItem, removeMetadataItem, sendMessageToContentScript, updateExcludedItem, updateMetadataItem } from '../store';
 import { Selector, SelectorType } from '../types';
 
 @Component({
@@ -15,15 +15,10 @@ export class SelectElementItem {
 	@Prop() selector: Selector;
 	@State() selectorValidity: 'No element found' | 'Invalid' | 'Valid';
 
-	async validateSelector(selector: Selector) {
-		const response = await new Promise((resolve) => {
-			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-				chrome.tabs.sendMessage(tabs[0].id, { type: 'validate-selector', payload: selector }, null, (response) => {
-					resolve(response);
-				});
-			});
+	validateSelector(selector: Selector) {
+		sendMessageToContentScript({ type: 'validate-selector', payload: selector }, (response) => {
+			this.selectorValidity = response as any;
 		});
-		this.selectorValidity = response as any;
 	}
 
 	handleSelectorTypeChange = () => {

@@ -1,5 +1,6 @@
 import { Component, Prop, h, Event, EventEmitter, State } from '@stencil/core';
 import { SelectorElement, Selector, MetadataElement } from '../types';
+import { sendMessageToContentScript } from '../store';
 
 @Component({
 	tag: 'sub-item-input-element',
@@ -19,15 +20,10 @@ export class SubItemInputElement {
 		this.updateSubItem.emit({ action: `${action}-${this.type}`, newItem, oldItem });
 	}
 
-	async validateSelector(selector: Selector) {
-		const response = await new Promise((resolve) => {
-			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-				chrome.tabs.sendMessage(tabs[0].id, { type: 'validate-selector', payload: selector }, null, (response) => {
-					resolve(response);
-				});
-			});
+	validateSelector(selector: Selector) {
+		sendMessageToContentScript({ type: 'validate-selector', payload: selector }, (response) => {
+			this.selectorValidity = response;
 		});
-		this.selectorValidity = response;
 	}
 
 	componentWillLoad() {

@@ -1,5 +1,5 @@
 import { Component, Host, Listen, State, h } from '@stencil/core';
-import state, { addExcludedItem, addMetadataItem, addSubItem, addToRecentFiles, formatState, removeSubItem, resetStore, updateGlobalName, updateState } from '../store';
+import state, { addExcludedItem, addMetadataItem, addSubItem, addToRecentFiles, formatState, removeSubItem, resetStore, sendMessageToContentScript, updateGlobalName, updateState } from '../store';
 import { alertController, toastController } from '@ionic/core';
 import infoToken from '../../assets/icon/InfoToken.svg';
 import { SubItem } from '../types';
@@ -36,9 +36,7 @@ export class CreateConfig {
 	redirectAndReset() {
 		state.currentFile = null;
 		resetStore();
-		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-			chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-excluded-on-file-close' });
-		});
+		sendMessageToContentScript({ type: 'remove-excluded-on-file-close' });
 	}
 
 	async onDone() {
@@ -94,7 +92,7 @@ export class CreateConfig {
 
 	async componentWillLoad() {
 		try {
-			if (state.currentFile.triggerType === 'load-file') {
+			if (state.currentFile?.triggerType === 'load-file') {
 				const fileName = state.currentFile.name;
 				const fileItem = await new Promise((resolve) => {
 					chrome.storage.local.get(fileName, (items) => resolve(items));
@@ -103,9 +101,7 @@ export class CreateConfig {
 				updateState(fileItem[fileName], false);
 				await addToRecentFiles(fileName);
 			} else {
-				chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-					chrome.tabs.sendMessage(tabs[0].id, { type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude, subItems: state.subItems } });
-				});
+				sendMessageToContentScript({ type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude, subItems: state.subItems } });
 			}
 		} catch (e) {
 			console.log(e);
@@ -272,7 +268,7 @@ export class CreateConfig {
 						<div class="header_title-text">
 							Web Scraper file name:{' '}
 							<span style={{ marginLeft: '4px', textTransform: 'capitalize' }}>
-								{state.currentFile.name}
+								{state.currentFile?.name}
 								{dirty}
 							</span>
 							<a href="https://github.com/coveo-labs/web-scraper-helper" target="web-scraper-help">
