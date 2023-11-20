@@ -1,6 +1,6 @@
 # Web Scraper panel - Install
 
-You can boost search result relevance by taking advantage of this feature. Read more information on the official Coveo documentation site - [Web Scraping Configuration](https://docs.coveo.com/en/1874/index-content/web-scraping-configuration).
+You can boost search result relevance by taking advantage of this feature. Read more information on the official Coveo documentation site - [Web Scraping Configuration](https://docs.coveo.com/en/mc1f3573/index-content/web-scraping-configuration).
 
 ## How to install
 
