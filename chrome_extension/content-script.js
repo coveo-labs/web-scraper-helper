@@ -6,7 +6,7 @@ class RulePath {
   constructor(spec, title, subItemName, container) {
     this.path = spec.path;
     this.isBoolean = spec.isBoolean ? true : false;
-    if (title !== undefined) {
+    if (title) {
       this.title = title;
     } else if (spec.name) {
       this.title = spec.name;
@@ -277,7 +277,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     exclude.length && exclude.map((element) => applyStylesToElements(element));
     subItems.map(subItem => {
       subItem.exclude.length && subItem.exclude.map((element) => applyStylesToElements(element, null, { type: subItem.type, path: subItem.path }));
-    })
+    });
   }
   if (message.type === 'remove-exclude-selector') {
     const { item, parentSelector } = message.payload;
@@ -288,7 +288,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         elements?.forEach(element => {
           element.classList?.remove('web-scraper-helper-exclude');
         });
-      })
+      });
     } catch (e) {
       console.log(e);
     }
@@ -314,21 +314,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'update-parentSelector-style') {
     const { newSelector, oldSelector } = message.payload;
     if (oldSelector && oldSelector.path !== newSelector.path) {
-      const oldElements = createRule(oldSelector, null, null, null).getElements(true);
+      const oldElements = createRule(oldSelector).getElements(true);
       oldElements?.forEach(element => {
-        element.classList.remove('web-scrapper-subItem-parentSelector');
+        element.classList.remove('web-scraper-subItem-parentSelector');
       });
     }
 
-    const newElements = createRule(newSelector, null, null, null).getElements(true);
+    const newElements = createRule(newSelector).getElements(true);
     newElements?.forEach(element => {
-      element.classList.add('web-scrapper-subItem-parentSelector');
+      element.classList.add('web-scraper-subItem-parentSelector');
     });
   }
   if (message.type === 'remove-parentSelector-style') {
-    const { parentSelector } = message.payload;
-    const parents = createRule(parentSelector, null, null, null).getElements(true);
-    parents?.forEach(element => {
+    document.querySelectorAll('.web-scraper-subItem-parentSelector').forEach(element => {
       element.classList.remove('web-scraper-subItem-parentSelector');
     });
   }
@@ -360,9 +358,9 @@ function applyStylesToElements(newItem, oldItem = null, parentSelector = null) {
 
 function removePreviouslyExcludedStyles() {
   try {
-    document.querySelectorAll('.web-scraper-helper-exclude').forEach(e => {
+    document.querySelectorAll('.web-scraper-helper-exclude, .web-scraper-subItem-parentSelector').forEach(e => {
       if (e && e.classList) {
-        e.classList.remove('web-scraper-helper-exclude');
+        e.classList.remove('web-scraper-helper-exclude', 'web-scraper-subItem-parentSelector');
       }
     });
   } catch (e) {
