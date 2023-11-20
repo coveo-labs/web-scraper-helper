@@ -22,16 +22,6 @@ export class SubitemEditConfig {
 		this.updateState(action, newItem, oldItem);
 	}
 
-	removeExcludeStyleOnClose() {
-		try {
-			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-				chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-excluded-on-file-close', payload: { parentSelector: this.subItemState.path } });
-			});
-		} catch (e) {
-			console.log(e);
-		}
-	}
-
 	onSave() {
 		state.subItems = state.subItems.map((item: SubItem): SubItem => {
 			if (item.name === this.subItem['name']) {
@@ -53,12 +43,22 @@ export class SubitemEditConfig {
 			.then((toast) => {
 				toast.present();
 			});
-		this.removeExcludeStyleOnClose();
+		this.removeParentSelectorStyle();
 	}
 
 	onCancel() {
 		this.updateSubItemState.emit();
-		this.removeExcludeStyleOnClose();
+		this.removeParentSelectorStyle();
+	}
+
+	removeParentSelectorStyle() {
+		try {
+			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+				chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-parentSelector-style', payload: { parentSelector: this.subItemState } });
+			});
+		} catch (e) {
+			console.log(e);
+		}
 	}
 
 	componentWillLoad() {
@@ -67,7 +67,7 @@ export class SubitemEditConfig {
 		this.metadata = this.subItem['metadata'];
 		try {
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-				chrome.tabs.sendMessage(tabs[0].id, { type: 'update-excludeSubItem-onLoad', payload: { exclude: this.excludedItems, parentSelector: this.subItemState.path } });
+				chrome.tabs.sendMessage(tabs[0].id, { type: 'update-parentSelector-style', payload: { newSelector: this.subItemState, oldSelector: null } });
 			});
 		} catch (e) {
 			console.log(e);
@@ -85,7 +85,7 @@ export class SubitemEditConfig {
 					return excludedItem.id !== newItem.id;
 				});
 				chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-					chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-exclude-selector', payload: { item: newItem, parentSelector: this.subItemState.path } });
+					chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-exclude-selector', payload: { item: newItem, parentSelector: this.subItemState } });
 				});
 				break;
 			}
@@ -103,7 +103,7 @@ export class SubitemEditConfig {
 					if (excludedItem.id === newItem.id) {
 						chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 							console.log('updateExcludedSubItem: ', newItem.path, oldItem.path);
-							chrome.tabs.sendMessage(tabs[0].id, { type: 'exclude-selector', payload: { newItem: newItem, oldItem: oldItem, parentSelector: this.subItemState.path } });
+							chrome.tabs.sendMessage(tabs[0].id, { type: 'exclude-selector', payload: { newItem: newItem, oldItem: oldItem, parentSelector: this.subItemState } });
 						});
 						return { id: newItem.id, type: newItem.type, path: newItem.path };
 					} else {
@@ -121,6 +121,16 @@ export class SubitemEditConfig {
 				break;
 			}
 			case 'update-subItem': {
+				if (this.subItemState.path !== newItem.path || this.subItemState.type !== newItem.type) {
+					try {
+						chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+							chrome.tabs.sendMessage(tabs[0].id, { type: 'update-parentSelector-style', payload: { newSelector: newItem, oldSelector: oldItem } });
+						});
+					} catch (e) {
+						console.log(e);
+					}
+				}
+
 				this.subItemState = { name: newItem.name as '', type: newItem.type, path: newItem.path };
 				break;
 			}
