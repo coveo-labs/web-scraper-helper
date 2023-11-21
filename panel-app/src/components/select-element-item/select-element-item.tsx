@@ -33,7 +33,6 @@ export class SelectElementItem {
 	};
 
 	handleSelectorChange = (event: CustomEvent) => {
-		console.log('handleSelectorChange: ', event);
 		const newPath: string = event.detail.value;
 		this.validateSelector({ ...this.selector, path: newPath });
 
