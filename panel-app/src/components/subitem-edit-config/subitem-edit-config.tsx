@@ -148,9 +148,17 @@ export class SubitemEditConfig {
 						<div class="subItem-edit-text">Elements to exlude</div>
 						<div class="subItem-box">
 							<div id="select-subItem__wrapper">{this.renderExcludedItems()}</div>
-							<div class="add-rule" onClick={() => this.updateState('add-excludeItem', { type: 'CSS', path: '' })}>
-								<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
-								<span>Add Rule</span>
+							<div class="action-info-container">
+								<div class="add-rule" onClick={() => this.updateState('add-excludeItem', { type: 'CSS', path: '' })}>
+									<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
+									<span>Add Rule</span>
+								</div>
+								<div class="info-message">
+									Learn more about the validation states{' '}
+									<a href="https://github.com/coveo-labs/web-scraper-helper/blob/Update_readme/docs/howto.md#validation-states" target="web-scraper-help">
+										here.
+									</a>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -158,9 +166,17 @@ export class SubitemEditConfig {
 						<div class="subItem-edit-text">Metadata to extract</div>
 						<div class="subItem-box">
 							<div id="select-subItem__wrapper">{this.renderMetadataItems()}</div>
-							<div class="add-rule" onClick={() => this.updateState('add-metadataItem', { name: '', type: 'CSS', path: '' })}>
-								<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
-								<span>Add Rule</span>
+							<div class="action-info-container">
+								<div class="add-rule" onClick={() => this.updateState('add-metadataItem', { name: '', type: 'CSS', path: '' })}>
+									<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
+									<span>Add Rule</span>
+								</div>
+								<div class="info-message">
+									Learn more about the validation states{' '}
+									<a href="https://github.com/coveo-labs/web-scraper-helper/blob/Update_readme/docs/howto.md#validation-states" target="web-scraper-help">
+										here.
+									</a>
+								</div>
 							</div>
 						</div>
 					</div>
