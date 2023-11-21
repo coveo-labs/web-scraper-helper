@@ -81,4 +81,24 @@
 			margin: -2px 8px 0 0;
 		}
 	}
+
+	.action-info-container {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.info-message {
+		color: darkgrey;
+		font-style: italic;
+		font-size: 12px;
+		font-family: 'Gibson';
+		margin-right: 6px;
+		font-weight: 300;
+
+		a {
+			color: inherit;
+			font-weight: 400;
+		}
+	}
 }

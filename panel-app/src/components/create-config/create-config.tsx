@@ -132,21 +132,21 @@ export class CreateConfig {
 			<div class="collection-subContainer">
 				<div>
 					Select page elements to exclude
-					{this.renderInfoIcon(
-						'exclude-information-circle-outline',
-						<div>
-							The border color on the toggle button indicates the validity of the selector. Learn more about the validation states{' '}
-							<a href="https://github.com/coveo-labs/web-scraper-helper/blob/Update_readme/docs/howto.md#validation-states" target="web-scraper-help">
-								here
-							</a>
-						</div>
-					)}
+					{this.renderInfoIcon('exclude-information-circle-outline', 'Exclude specific parts of the page from being indexed')}
 				</div>
 				<div class="select-element__container">
 					<div id="select-element__wrapper">{this.renderExcludedItems()}</div>
-					<div class="add-rule" onClick={() => addExcludedItem({ type: 'CSS', path: '' })}>
-						<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
-						<span>Add Rule</span>
+					<div class="action-info-container">
+						<div class="add-rule" onClick={() => addExcludedItem({ type: 'CSS', path: '' })}>
+							<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
+							<span>Add Rule</span>
+						</div>
+						<div class="info-message">
+							Learn more about the validation states{' '}
+							<a href="https://github.com/coveo-labs/web-scraper-helper/blob/Update_readme/docs/howto.md#validation-states" target="web-scraper-help">
+								here.
+							</a>
+						</div>
 					</div>
 				</div>
 				<div style={{ marginTop: '32px' }}>Global section name</div>
@@ -160,13 +160,21 @@ export class CreateConfig {
 			<div class="collection-subContainer">
 				<div>
 					Select metadata to extract
-					{this.renderInfoIcon('metadata-information-circle-outline', 'Create metadata from elements available on your sub-item.')}
+					{this.renderInfoIcon('metadata-information-circle-outline', 'Create metadata from elements on the page.')}
 				</div>
 				<div class="select-element__container">
 					<div id="select-element__wrapper">{this.renderMetadataItems()}</div>
-					<div class="add-rule" onClick={() => addMetadataItem({ name: '', type: 'CSS', path: '' })}>
-						<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
-						<span>Add Rule</span>
+					<div class="action-info-container">
+						<div class="add-rule" onClick={() => addMetadataItem({ name: '', type: 'CSS', path: '' })}>
+							<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
+							<span>Add Rule</span>
+						</div>
+						<div class="info-message">
+							Learn more about the validation states{' '}
+							<a href="https://github.com/coveo-labs/web-scraper-helper/blob/Update_readme/docs/howto.md#validation-states" target="web-scraper-help">
+								here.
+							</a>
+						</div>
 					</div>
 				</div>
 				<div style={{ marginTop: '24px' }}>Results</div>
