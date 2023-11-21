@@ -113,7 +113,7 @@ export class CreateConfig {
 		await popover.present();
 		setTimeout(() => {
 			popover.dismiss();
-		}, 1000);
+		}, 10000);
 	}
 
 	renderInfoIcon(id, content) {
@@ -132,7 +132,15 @@ export class CreateConfig {
 			<div class="collection-subContainer">
 				<div>
 					Select page elements to exclude
-					{this.renderInfoIcon('exclude-information-circle-outline', 'Exclude specific parts of the page from being indexed')}
+					{this.renderInfoIcon(
+						'exclude-information-circle-outline',
+						<div>
+							The border color on the toggle button indicates the validity of the selector. Learn more about the validation states{' '}
+							<a href="https://github.com/coveo-labs/web-scraper-helper/blob/Update_readme/docs/howto.md#validation-states" target="web-scraper-help">
+								here
+							</a>
+						</div>
+					)}
 				</div>
 				<div class="select-element__container">
 					<div id="select-element__wrapper">{this.renderExcludedItems()}</div>
