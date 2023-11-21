@@ -12,7 +12,7 @@ _To install this extension in your Chrome browser, follow these [installation st
 
 1. Find a Web Scraping tab (like shown on the screenshot below)
 
-   <img src="./panel.png" alt="Web Scraper panel" width="400" height="400">
+   <img src="./panel.png" alt="Web Scraper panel" width="350" height="400">
 
 1. Click “Create New File” to start a new Web Scraping configuration for your site and source
 1. To pick a specific part of the desired web page, use Select Element (as on screenshot or `Ctrl + Shift + C`)

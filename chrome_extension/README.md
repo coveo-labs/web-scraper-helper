@@ -49,7 +49,7 @@ The UI in the Developer tools is done using Stencil. You need to build the Stenc
       The extracted value appears in the **Metadata name** and **Value** table.
 
       Demo:
-      ![demo](../misc/screenshots/sports.gif)
+      <img src="../misc/screenshots/sports.gif" alt="demo" width="600" height="400">
 
    1. Click **Save** once you are happy with your web scraping configuration.
 
