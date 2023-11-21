@@ -269,7 +269,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     } catch (e) {
       response = 'Invalid';
     }
-    console.log('validate-selector', message, response);
+    // console.log('validate-selector', message, response);
     sendResponse(response);
   }
   if (message.type === 'update-excludeItem-onLoad') {
@@ -308,7 +308,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         results.push({ "name": name, "values": rule.getElements() });
       });
     }
-    console.log('metadata-result-array', message, results);
+    // console.log('metadata-result-array', message, results);
     sendResponse(results);
   }
   if (message.type === 'update-parentSelector-style') {
