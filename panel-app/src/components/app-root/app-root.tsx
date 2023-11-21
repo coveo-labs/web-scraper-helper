@@ -17,7 +17,7 @@ export class AppRoot {
 					<div class="header-container">
 						<ion-img id="coveo-logo-img" src={logo}></ion-img>
 						<div id="header-separator"></div>
-						<div class="top-bar-text">Web Scrapper</div>
+						<div class="top-bar-text">Web Scraper</div>
 					</div>
 				</header>
 

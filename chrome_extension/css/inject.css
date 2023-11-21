@@ -1,3 +1,7 @@
 .web-scraper-helper-exclude {
-  opacity: 0.1 !important;
+	opacity: 0.1 !important;
+}
+
+.web-scraper-subItem-parentSelector {
+	border: 3px dashed red !important;
 }

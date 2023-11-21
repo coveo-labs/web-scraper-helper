@@ -6,7 +6,7 @@ class RulePath {
   constructor(spec, title, subItemName, container) {
     this.path = spec.path;
     this.isBoolean = spec.isBoolean ? true : false;
-    if (title !== undefined) {
+    if (title) {
       this.title = title;
     } else if (spec.name) {
       this.title = spec.name;
@@ -273,27 +273,28 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendResponse(response);
   }
   if (message.type === 'update-excludeItem-onLoad') {
-    const { exclude } = message.payload;
+    const { exclude, subItems } = message.payload;
     exclude.length && exclude.map((element) => applyStylesToElements(element));
-  }
-  if (message.type === 'update-excludeSubItem-onLoad') {
-    const { exclude, parentSelector } = message.payload;
-    exclude.length && exclude.map((element) => applyStylesToElements(element, null, parentSelector));
+    subItems.map(subItem => {
+      subItem.exclude.length && subItem.exclude.map((element) => applyStylesToElements(element, null, { type: subItem.type, path: subItem.path }));
+    });
   }
   if (message.type === 'remove-exclude-selector') {
     const { item, parentSelector } = message.payload;
     try {
-      const elements = createRule(item, null, null, parentSelector).getElements(true);
-      elements?.forEach(element => {
-        element.classList?.remove('web-scraper-helper-exclude');
+      let parents = getParentsElements(parentSelector);
+      parents.forEach(parent => {
+        const elements = createRule(item, null, null, parent).getElements(true);
+        elements?.forEach(element => {
+          element.classList?.remove('web-scraper-helper-exclude');
+        });
       });
     } catch (e) {
       console.log(e);
     }
   }
   if (message.type === 'remove-excluded-on-file-close') {
-    const { parentSelector } = message.payload;
-    removePreviouslyExcludedStyles(parentSelector);
+    removePreviouslyExcludedStyles();
   }
   if (message.type === 'metadata-results') {
     const { metadata, parentSelector } = message.payload;
@@ -309,6 +310,25 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
     console.log('metadata-result-array', message, results);
     sendResponse(results);
+  }
+  if (message.type === 'update-parentSelector-style') {
+    const { newSelector, oldSelector } = message.payload;
+    if (oldSelector && oldSelector.path !== newSelector.path) {
+      const oldElements = createRule(oldSelector).getElements(true);
+      oldElements?.forEach(element => {
+        element.classList.remove('web-scraper-subItem-parentSelector');
+      });
+    }
+
+    const newElements = createRule(newSelector).getElements(true);
+    newElements?.forEach(element => {
+      element.classList.add('web-scraper-subItem-parentSelector');
+    });
+  }
+  if (message.type === 'remove-parentSelector-style') {
+    document.querySelectorAll('.web-scraper-subItem-parentSelector').forEach(element => {
+      element.classList.remove('web-scraper-subItem-parentSelector');
+    });
   }
 });
 
@@ -336,12 +356,11 @@ function applyStylesToElements(newItem, oldItem = null, parentSelector = null) {
   }
 }
 
-function removePreviouslyExcludedStyles(parentSelector = null) {
+function removePreviouslyExcludedStyles() {
   try {
-    let parent = parentSelector ? document.querySelector(parentSelector) : document;
-    parent.querySelectorAll('.web-scraper-helper-exclude').forEach(e => {
+    document.querySelectorAll('.web-scraper-helper-exclude, .web-scraper-subItem-parentSelector').forEach(e => {
       if (e && e.classList) {
-        e.classList.remove('web-scraper-helper-exclude');
+        e.classList.remove('web-scraper-helper-exclude', 'web-scraper-subItem-parentSelector');
       }
     });
   } catch (e) {
