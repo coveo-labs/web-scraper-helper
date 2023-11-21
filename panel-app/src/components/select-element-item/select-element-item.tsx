@@ -66,7 +66,7 @@ export class SelectElementItem {
 		await popover.present();
 		setTimeout(() => {
 			popover.dismiss();
-		}, 1000);
+		}, 10000);
 	}
 
 	componentWillRender() {
