@@ -299,6 +299,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'metadata-results') {
     const { metadata, parentSelector } = message.payload;
     const results = [];
+    let groupedByParent = new Map(); // Create a new Map to hold the grouped elements
     for (const [, value] of Object.entries(metadata)) {
       const { name } = value;
 
@@ -306,9 +307,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       parents.forEach(parent => {
         const rule = createRule(value, null, null, parent);
         results.push({ "name": name, "values": rule.getElements() });
+
+        // Group elements by their parent node
+        let asIsElements = rule.getElements(true);
+        console.log('asIs', asIsElements)
+        asIsElements.forEach(element => {
+          let parentNode = element.parentNode; // Get the parent node of the element
+          if (!groupedByParent.has(parentNode)) {
+            // Initialize with an empty array if this parent node hasn't been seen before
+            groupedByParent.set(parentNode, []);
+          }
+          // Push an object that includes the name and element
+          groupedByParent.get(parentNode).push({ name, element });
+        });
+
+        groupedByParent.forEach((value, key) => {
+          console.log('Parent Node:', key);
+          console.log('Grouped Items:', value);
+        });
       });
     }
-    // console.log('metadata-result-array', message, results);
+    console.log('metadata-result-array', message, results);
     sendResponse(results);
   }
   if (message.type === 'update-parentSelector-style') {
