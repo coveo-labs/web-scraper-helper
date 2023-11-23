@@ -299,16 +299,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'metadata-results') {
     const { metadata, parentSelector } = message.payload;
     const results = [];
-    for (const [, value] of Object.entries(metadata)) {
-      const { name } = value;
-
-      let parents = getParentsElements(parentSelector);
-      parents.forEach(parent => {
+    let parents = getParentsElements(parentSelector);
+    parents.forEach(parent => {
+      const result = [];
+      for (const [, value] of Object.entries(metadata)) {
+        const { name } = value;
         const rule = createRule(value, null, null, parent);
-        results.push({ "name": name, "values": rule.getElements() });
-      });
-    }
-    // console.log('metadata-result-array', message, results);
+        result.push({ "name": name, "values": rule.getElements() });
+      }
+      results.push(result);
+    });
+    console.log('metadata-result-array', message, results);
     sendResponse(results);
   }
   if (message.type === 'update-parentSelector-style') {

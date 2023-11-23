@@ -3,6 +3,7 @@
 	width: 100%;
 	border-radius: 8px;
 	border: 1px solid #e5e8e8;
+	overflow: hidden; /* to prevent bleed through with rounded corners */
 
 	table {
 		width: inherit;
@@ -24,8 +25,20 @@
 		padding: 12px 0px;
 	}
 
-	table tr {
-		border-bottom: 1px solid #e5e8e8;
+	table {
+		tr {
+			border-bottom: 1px solid #e5e8e8;
+		}
+
+		tr.even {
+			background-color: #e0e0e0;
+		}
+
+		tr.even:has(+ tr.even),
+		tr.odd:has(+ tr.odd),
+		tr:last-child {
+			border-bottom: none;
+		}
 	}
 
 	table td {
