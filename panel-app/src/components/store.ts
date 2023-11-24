@@ -7,7 +7,7 @@ export function getId(): string {
 	return `uid-${uniqueId}-${Date.now()}`;
 }
 
-const { reset, state, onChange }: { reset: Function; state: ConfigState; onChange: Function } = createStore({
+const { reset, state, onChange }: { reset: Function; state: ConfigState; onChange: Function; } = createStore({
 	currentFile: null,
 	hasChanges: false,
 	exclude: [
@@ -127,9 +127,7 @@ function updateState(newState, hasChanges?: boolean): boolean {
 			state.subItems = formattedValue.subItems && formattedValue.subItems;
 
 			// add opacity to the elements onLoad
-			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-				chrome.tabs.sendMessage(tabs[0].id, { type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude, subItems: state.subItems } });
-			});
+			sendMessageToContentScript({ type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude, subItems: state.subItems } });
 
 			if (hasChanges !== undefined) {
 				state.hasChanges = hasChanges;
@@ -213,12 +211,10 @@ function removeExcludedItem(item: SelectorElement) {
 		return excludedItem.id !== item.id;
 	});
 
-	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-		chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-exclude-selector', payload: { item: item } });
-	});
+	sendMessageToContentScript({ type: 'remove-exclude-selector', payload: { item } });
 }
 
-function addMetadataItem(item: { name: string; type: SelectorType; path: string }) {
+function addMetadataItem(item: { name: string; type: SelectorType; path: string; }) {
 	state.metadata = { ...state.metadata, [getId()]: { name: item.name, type: item.type, path: item.path } };
 }
 
@@ -229,13 +225,12 @@ function removeMetadataItem(uid: string) {
 
 async function getMetadataResults(type = 'global', metadata: MetadataMap = {}, parentSelector: Selector = null) {
 	const response = await new Promise((resolve) => {
-		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-			chrome.tabs.sendMessage(tabs[0].id, { type: 'metadata-results', payload: { metadata: type === 'global' ? state.metadata : metadata, parentSelector: parentSelector } }, (response) => {
-				resolve(response);
-			});
-		});
+		sendMessageToContentScript(
+			{ type: 'metadata-results', payload: { metadata: type === 'global' ? state.metadata : metadata, parentSelector: parentSelector } },
+			resolve
+		);
 	});
-	console.log('response', response);
+	console.log('getMetadataResults-response', response);
 	return response;
 }
 
@@ -249,7 +244,7 @@ function removeSubItem(itemName: string) {
 	});
 }
 
-function updateMetadataItem(newItem: { id: string; name: string; type: string; path: string; isBoolean?: boolean }) {
+function updateMetadataItem(newItem: { id: string; name: string; type: string; path: string; isBoolean?: boolean; }) {
 	state.metadata = Object.keys(state.metadata).reduce((acc, key) => {
 		if (key === newItem.id) {
 			acc[key] = { name: newItem.name, type: newItem.type, path: newItem.path, ...(newItem.isBoolean && { isBoolean: newItem.isBoolean }) };
@@ -262,10 +257,7 @@ function updateMetadataItem(newItem: { id: string; name: string; type: string; p
 
 function updateExcludedItem(newItem: SelectorElement, oldItem: SelectorElement) {
 	// add opacity to the element
-	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-		console.log('updateExcludedItem: ', newItem.path, oldItem.path);
-		chrome.tabs.sendMessage(tabs[0].id, { type: 'exclude-selector', payload: { newItem: newItem, oldItem: oldItem } });
-	});
+	sendMessageToContentScript({ type: 'exclude-selector', payload: { newItem, oldItem } });
 	state.exclude = state.exclude.map((excludedItem) => {
 		if (excludedItem.id === oldItem.id) {
 			return newItem;
@@ -297,6 +289,16 @@ const addToRecentFiles = async (filename: string): Promise<string[]> => {
 	});
 };
 
+const sendMessageToContentScript = (message: any, callback: any = null): any => {
+	try {
+		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+			chrome.tabs.sendMessage(tabs[0].id, message, null, callback);
+		});
+	} catch (e) {
+		console.log(e);
+	}
+};
+
 export default state;
 export {
 	addExcludedItem,
@@ -309,6 +311,7 @@ export {
 	removeMetadataItem,
 	removeSubItem,
 	resetStore,
+	sendMessageToContentScript,
 	updateExcludedItem,
 	updateGlobalName,
 	updateMetadataItem,

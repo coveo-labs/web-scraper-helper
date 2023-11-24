@@ -1,5 +1,5 @@
 import { Component, Host, Listen, State, h } from '@stencil/core';
-import state, { addExcludedItem, addMetadataItem, addSubItem, addToRecentFiles, formatState, removeSubItem, resetStore, updateGlobalName, updateState } from '../store';
+import state, { addExcludedItem, addMetadataItem, addSubItem, addToRecentFiles, formatState, removeSubItem, resetStore, sendMessageToContentScript, updateGlobalName, updateState } from '../store';
 import { alertController, toastController } from '@ionic/core';
 import infoToken from '../../assets/icon/InfoToken.svg';
 import { SubItem } from '../types';
@@ -36,9 +36,7 @@ export class CreateConfig {
 	redirectAndReset() {
 		state.currentFile = null;
 		resetStore();
-		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-			chrome.tabs.sendMessage(tabs[0].id, { type: 'remove-excluded-on-file-close' });
-		});
+		sendMessageToContentScript({ type: 'remove-excluded-on-file-close' });
 	}
 
 	async onDone() {
@@ -94,7 +92,7 @@ export class CreateConfig {
 
 	async componentWillLoad() {
 		try {
-			if (state.currentFile.triggerType === 'load-file') {
+			if (state.currentFile?.triggerType === 'load-file') {
 				const fileName = state.currentFile.name;
 				const fileItem = await new Promise((resolve) => {
 					chrome.storage.local.get(fileName, (items) => resolve(items));
@@ -103,9 +101,7 @@ export class CreateConfig {
 				updateState(fileItem[fileName], false);
 				await addToRecentFiles(fileName);
 			} else {
-				chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-					chrome.tabs.sendMessage(tabs[0].id, { type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude, subItems: state.subItems } });
-				});
+				sendMessageToContentScript({ type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude, subItems: state.subItems } });
 			}
 		} catch (e) {
 			console.log(e);
@@ -117,7 +113,7 @@ export class CreateConfig {
 		await popover.present();
 		setTimeout(() => {
 			popover.dismiss();
-		}, 1000);
+		}, 10000);
 	}
 
 	renderInfoIcon(id, content) {
@@ -136,13 +132,21 @@ export class CreateConfig {
 			<div class="collection-subContainer">
 				<div>
 					Select page elements to exclude
-					{this.renderInfoIcon('exclude-information-circle-outline', 'Make sure to follow syntax: //head/meta[@property="og:image"]/@content')}
+					{this.renderInfoIcon('exclude-information-circle-outline', 'Exclude specific parts of the page from being indexed')}
 				</div>
 				<div class="select-element__container">
 					<div id="select-element__wrapper">{this.renderExcludedItems()}</div>
-					<div class="add-rule" onClick={() => addExcludedItem({ type: 'CSS', path: '' })}>
-						<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
-						<span>Add Rule</span>
+					<div class="action-info-container">
+						<div class="add-rule" onClick={() => addExcludedItem({ type: 'CSS', path: '' })}>
+							<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
+							<span>Add Rule</span>
+						</div>
+						<div class="info-message">
+							Learn more about the validation states{' '}
+							<a href="https://github.com/coveo-labs/web-scraper-helper/blob/Update_readme/docs/howto.md#validation-states" target="web-scraper-help">
+								here.
+							</a>
+						</div>
 					</div>
 				</div>
 				<div style={{ marginTop: '32px' }}>Global section name</div>
@@ -156,13 +160,21 @@ export class CreateConfig {
 			<div class="collection-subContainer">
 				<div>
 					Select metadata to extract
-					{this.renderInfoIcon('metadata-information-circle-outline', 'Create metadata from elements available on your sub-item.')}
+					{this.renderInfoIcon('metadata-information-circle-outline', 'Create metadata from elements on the page.')}
 				</div>
 				<div class="select-element__container">
 					<div id="select-element__wrapper">{this.renderMetadataItems()}</div>
-					<div class="add-rule" onClick={() => addMetadataItem({ name: '', type: 'CSS', path: '' })}>
-						<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
-						<span>Add Rule</span>
+					<div class="action-info-container">
+						<div class="add-rule" onClick={() => addMetadataItem({ name: '', type: 'CSS', path: '' })}>
+							<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
+							<span>Add Rule</span>
+						</div>
+						<div class="info-message">
+							Learn more about the validation states{' '}
+							<a href="https://github.com/coveo-labs/web-scraper-helper/blob/Update_readme/docs/howto.md#validation-states" target="web-scraper-help">
+								here.
+							</a>
+						</div>
 					</div>
 				</div>
 				<div style={{ marginTop: '24px' }}>Results</div>
@@ -272,7 +284,7 @@ export class CreateConfig {
 						<div class="header_title-text">
 							Web Scraper file name:{' '}
 							<span style={{ marginLeft: '4px', textTransform: 'capitalize' }}>
-								{state.currentFile.name}
+								{state.currentFile?.name}
 								{dirty}
 							</span>
 							<a href="https://github.com/coveo-labs/web-scraper-helper" target="web-scraper-help">
