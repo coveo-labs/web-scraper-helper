@@ -33,10 +33,14 @@ export class MetadataResults {
 				rows.push(
 					<tr class={index % 2 ? 'even' : 'odd'}>
 						<td class="metadata-name-section">{item.name}</td>
-						<td class="values-section" colSpan={item.values?.length}>
+						<td class="values-section">
 							{item.values?.length ? (
 								item.values.map((val, idx) => {
-									return <div key={idx}>{val}</div>;
+									return (
+										<div class={'valueItem'} key={idx}>
+											{val}
+										</div>
+									);
 								})
 							) : (
 								<div></div>

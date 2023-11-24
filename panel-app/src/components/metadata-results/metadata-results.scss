@@ -8,6 +8,7 @@
 	table {
 		width: inherit;
 		border-collapse: collapse !important;
+		table-layout: fixed !important;
 	}
 
 	.table-header {
@@ -59,5 +60,11 @@
 
 	table td.values-section {
 		text-align: left;
+
+		.valueItem {
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
 	}
 }
