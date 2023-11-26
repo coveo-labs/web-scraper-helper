@@ -1,7 +1,7 @@
-node_modules
 .eslintcache
+.stencil
+.DS_store
+node_modules
 *zip
 tests
 www
-.stencil
-.DS_store
