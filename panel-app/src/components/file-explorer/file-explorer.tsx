@@ -171,7 +171,7 @@ export class FileExplorer {
 							toggleIcon="caret-down-sharp"
 							aria-label="Files"
 							interface="popover"
-							placeholder="File name"
+							placeholder="Files..."
 							fill="outline"
 							onIonChange={(event) => this.handleFileSelection(event)}
 						>
