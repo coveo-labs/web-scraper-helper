@@ -30,16 +30,6 @@
 		tr {
 			border-bottom: 1px solid #e5e8e8;
 		}
-
-		tr.even {
-			background-color: #e0e0e0;
-		}
-
-		tr.even:has(+ tr.even),
-		tr.odd:has(+ tr.odd),
-		tr:last-child {
-			border-bottom: none;
-		}
 	}
 
 	table td {
@@ -65,6 +55,20 @@
 			white-space: nowrap;
 			overflow: hidden;
 			text-overflow: ellipsis;
+		}
+	}
+}
+
+.subItem-metadata-container table {
+	tr.even {
+		background-color: #e0e0e0;
+	}
+
+	tbody {
+		tr.even:has(+ tr.even),
+		tr.odd:has(+ tr.odd),
+		tr:last-child {
+			border-bottom: none;
 		}
 	}
 }
