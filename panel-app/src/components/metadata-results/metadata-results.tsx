@@ -23,6 +23,34 @@ export class MetadataResults {
 	}
 
 	render() {
+		let rows = [];
+		this.results.forEach((groupedItems, index: number) => {
+			if (!(groupedItems instanceof Array)) {
+				groupedItems = [groupedItems];
+			}
+
+			groupedItems.forEach((item) => {
+				rows.push(
+					<tr class={index % 2 ? 'even' : 'odd'}>
+						<td class="metadata-name-section">{item.name}</td>
+						<td class="values-section">
+							{item.values?.length ? (
+								item.values.map((val, idx) => {
+									return (
+										<div class={'valueItem'} key={idx}>
+											{val}
+										</div>
+									);
+								})
+							) : (
+								<div></div>
+							)}
+						</td>
+					</tr>
+				);
+			});
+		});
+
 		return (
 			<div class="result-container">
 				<table id="resultGlobalTable">
@@ -32,28 +60,7 @@ export class MetadataResults {
 							<th style={{ textAlign: 'left' }}>Value(s)</th>
 						</tr>
 					</thead>
-					<tbody>
-						{this.results?.length ? (
-							this.results.map((item) => {
-								return (
-									<tr>
-										<td class="metadata-name-section">{item.name}</td>
-										<td class="values-section" colSpan={item.values?.length}>
-											{item.values?.length ? (
-												item.values.map((val, idx) => {
-													return <div key={idx}>{val}</div>;
-												})
-											) : (
-												<div></div>
-											)}
-										</td>
-									</tr>
-								);
-							})
-						) : (
-							<div></div>
-						)}
-					</tbody>
+					<tbody>{rows}</tbody>
 				</table>
 			</div>
 		);

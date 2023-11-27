@@ -142,7 +142,6 @@
 			gap: 32px;
 			.recent-file {
 				display: flex;
-				padding: 16px 32px;
 				justify-content: center;
 				align-items: center;
 				gap: 8px;
@@ -164,7 +163,6 @@
 
 				.recent-file-name {
 					flex: 1;
-
 					font-family: Gibson;
 					font-size: 16px;
 					font-style: normal;
@@ -172,10 +170,12 @@
 					line-height: 28px; /* 155.556% */
 					letter-spacing: 0.198px;
 					text-transform: capitalize;
+					padding: 16px 16px 16px 32px;
 				}
 
 				ion-icon {
 					--ion-color-base: #b7bcc0;
+					padding: 16px 16px 16px 0px;
 					&:hover {
 						--ion-color-base: #1372ec;
 					}
