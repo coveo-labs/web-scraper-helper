@@ -1,6 +1,6 @@
 /*global chrome*/
 
-import { Component, Host, h } from '@stencil/core';
+import { Component, Host, State, h } from '@stencil/core';
 import logo from '../../assets/icon/CoveoLogo.svg';
 import state from '../store';
 
@@ -10,6 +10,17 @@ import state from '../store';
 	shadow: false,
 })
 export class AppRoot {
+	@State() version: string = '';
+
+	componentDidLoad() {
+		try {
+			let manifest = chrome.runtime.getManifest();
+			this.version = 'v' + manifest.version;
+		} catch (e) {
+			// 'chrome' is undefined in unit tests.
+		}
+	}
+
 	render() {
 		return (
 			<Host>
@@ -22,6 +33,7 @@ export class AppRoot {
 				</header>
 
 				{state.currentFile?.name ? <create-config /> : <file-explorer />}
+				{this.version && <div id="version">{this.version}</div>}
 			</Host>
 		);
 	}
