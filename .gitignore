@@ -1,6 +1,7 @@
-node_modules
 .eslintcache
-chrome_extension/panel-app
-chrome_extension/static
+.stencil
+.DS_store
+node_modules
 *zip
 tests
+www

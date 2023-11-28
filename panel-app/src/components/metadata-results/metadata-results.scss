@@ -1,0 +1,74 @@
+.result-container {
+	margin-top: 8px;
+	width: 100%;
+	border-radius: 8px;
+	border: 1px solid #e5e8e8;
+	overflow: hidden; /* to prevent bleed through with rounded corners */
+
+	table {
+		width: inherit;
+		border-collapse: collapse !important;
+		table-layout: fixed !important;
+	}
+
+	.table-header {
+		background: #fcfcfc;
+		color: #6c727b;
+		font-family: Gibson;
+		font-size: 12px;
+		font-style: normal;
+		font-weight: 500;
+		line-height: 16px;
+	}
+
+	table th {
+		width: 50%;
+		padding: 12px 0px;
+	}
+
+	table {
+		tr {
+			border-bottom: 1px solid #e5e8e8;
+		}
+	}
+
+	table td {
+		text-align: center;
+		color: #565b66;
+		font-family: Gibson;
+		font-size: 14px;
+		font-style: normal;
+		font-weight: 300;
+		line-height: 21px;
+		letter-spacing: 0.042px;
+		padding: 6px 0px;
+	}
+
+	table td.metadata-name-section {
+		vertical-align: top;
+	}
+
+	table td.values-section {
+		text-align: left;
+
+		.valueItem {
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+	}
+}
+
+.subItem-metadata-container table {
+	tr.even {
+		background-color: #e0e0e0;
+	}
+
+	tbody {
+		tr.even:has(+ tr.even),
+		tr.odd:has(+ tr.odd),
+		tr:last-child {
+			border-bottom: none;
+		}
+	}
+}

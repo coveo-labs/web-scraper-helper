@@ -1,0 +1,104 @@
+.subItem-edit-container {
+	color: #282829;
+	font-family: Gibson;
+	font-style: normal;
+	font-weight: 500;
+	line-height: 20px; /* 125% */
+
+	.subItem-edit-titleText {
+		padding: 32px 24px;
+		font-size: 16px;
+		border-bottom: 1px solid #e5e8e8;
+	}
+
+	.subItem-config-wrapper {
+		max-height: 765px;
+		overflow: scroll;
+		margin: 24px 0px;
+	}
+
+	.subItem-selector-container,
+	.subItem-exclude-container,
+	.subItem-metadata-container {
+		padding: 32px 24px;
+	}
+
+	.subItem-selector-container {
+		padding-top: 0px;
+	}
+
+	.subItem-box {
+		padding: 24px;
+		margin-top: 8px;
+		border-radius: 8px;
+		border: 1px solid #e5e8e8;
+		background: #fcfcfc;
+		box-shadow: 0px 4px 2px -2px rgba(55, 55, 55, 0.03) inset, 0px 1px 0px -1px #e5e8e8 inset;
+	}
+
+	.subItem-edit-text {
+		font-size: 14px;
+	}
+
+	.action-btn-container {
+		padding: 0 24px;
+		display: flex;
+		justify-content: end;
+
+		ion-button::part(native) {
+			border-radius: 8px;
+			border: 1px solid #1372ec;
+			margin-right: 8px;
+			width: 70px;
+			font-family: Gibson;
+			font-size: 14px;
+			font-style: normal;
+			font-weight: 300;
+			text-transform: capitalize;
+			--background-hover: #1372ec;
+			--background-hover-opacity: 1;
+		}
+
+		ion-button::part(native):hover {
+			color: #fff;
+		}
+	}
+
+	.add-rule {
+		display: flex;
+		align-items: center;
+		color: #1372ec;
+		font-family: Gibson;
+		font-size: 14px;
+		font-style: normal;
+		font-weight: 300;
+		line-height: 21px; /* 150% */
+		letter-spacing: 0.042px;
+		cursor: pointer;
+		width: fit-content;
+
+		ion-icon {
+			margin: -2px 8px 0 0;
+		}
+	}
+
+	.action-info-container {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.info-message {
+		color: darkgrey;
+		font-style: italic;
+		font-size: 12px;
+		font-family: 'Gibson';
+		margin-right: 6px;
+		font-weight: 300;
+
+		a {
+			color: inherit;
+			font-weight: 400;
+		}
+	}
+}

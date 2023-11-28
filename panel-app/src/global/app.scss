@@ -1,0 +1,181 @@
+/*
+  Global App CSS
+  ----------------------
+  Use this file for styles that should be applied to all components.
+  For example, "font-family" within the "body" selector is a CSS property
+  most apps will want applied to all components.
+
+  Any global CSS variables should also be applied here.
+*/
+
+body {
+	margin: 0px;
+	padding: 0px;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+}
+
+ion-popover .no-files-option {
+	color: #565b66;
+	font-family: Gibson;
+	font-size: 14px;
+	font-style: normal;
+	font-weight: 300;
+	line-height: 21px; /* 150% */
+	letter-spacing: 0.042px;
+	padding: 0px 16px !important;
+}
+
+ion-popover .file-list-names {
+	color: #565b66;
+	font-family: Gibson;
+	font-size: 14px;
+	font-style: normal;
+	font-weight: 300;
+	line-height: 21px; /* 150% */
+	letter-spacing: 0.042px;
+}
+
+ion-modal#create-file-modal {
+	--height: 280px;
+	--width: 430px;
+	--border-radius: 8px;
+}
+
+ion-modal#create-file-modal .modal-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 24px 32px;
+	color: #282829;
+	font-family: Gibson;
+	font-size: 24px;
+	font-style: normal;
+	font-weight: 500;
+	line-height: 36px;
+	letter-spacing: 0.264px;
+	border-bottom: 1px solid #e5e8e8;
+}
+
+ion-modal#create-file-modal .modal-header ion-icon {
+	cursor: pointer;
+}
+
+ion-modal#create-file-modal .modal-content {
+	border-bottom: 1px solid #e5e8e8;
+	padding: 24px 32px;
+	color: #565b66;
+	font-family: Gibson;
+	font-size: 14px;
+	font-style: normal;
+	font-weight: 300;
+	line-height: 21px; /* 150% */
+	letter-spacing: 0.042px;
+}
+
+ion-modal#create-file-modal .modal-content ion-input {
+	height: 36px;
+	width: 300px;
+	border-radius: 8px;
+	// --border-color: #E5E8E8;
+	padding: 0px 16px;
+	margin-top: 8px;
+	min-height: 36px;
+}
+
+ion-modal#create-file-modal .modal-footer {
+	display: flex;
+	justify-content: end;
+	padding: 24px;
+}
+
+ion-modal#create-file-modal .modal-footer ion-button.ion-activatable {
+	--border-radius: 8px;
+	--border-color: #1372ec;
+	--border-style: solid;
+	--border-width: 1px;
+	height: 32px;
+	color: #1372ec;
+	font-family: Gibson;
+	font-size: 14px;
+	font-style: normal;
+	font-weight: 300;
+	line-height: 21px; /* 150% */
+	letter-spacing: 0.042px;
+	margin-left: 16px;
+	text-transform: capitalize;
+}
+
+ion-modal#create-file-modal .modal-footer ion-button.button-disabled {
+	--border-color: unset;
+	--background: #f3f3f3;
+	color: #b7bcc0;
+}
+
+ion-toast {
+	--max-width: 400px;
+	position: fixed;
+}
+
+// Alert
+.alert-wrapper.sc-ion-alert-md {
+	--max-width: 400px;
+}
+.alert-unsaved .alert-message.sc-ion-alert-md {
+	white-space: pre;
+}
+
+.alert-title.sc-ion-alert-md {
+	color: #282829;
+	font-family: Gibson;
+	font-size: 24px;
+	font-style: normal;
+	font-weight: 500;
+	line-height: 36px; /* 150% */
+	letter-spacing: 0.264px;
+}
+
+.alert-message.sc-ion-alert-md {
+	color: #565b66;
+	font-family: Gibson;
+	font-size: 16px;
+	font-style: normal;
+	font-weight: 300;
+	line-height: 21px; /* 150% */
+	letter-spacing: 0.042px;
+	padding-bottom: 14px;
+}
+
+.alert-button-group .alert-button-inner {
+	cursor: pointer;
+	text-transform: capitalize;
+	font-size: 16px;
+}
+
+#info-popover {
+	--min-width: 150px;
+	--width: unset;
+	--max-width: 310px;
+	--offset-y: -5px;
+
+	& ion-content{
+		--border-radius: 8px 8px 0px 0px;
+		--background: #3F3F71;
+		--color: #fff;
+		font-family: Gibson;
+		font-size: 14px;
+		font-style: normal;
+		font-weight: 300;
+		line-height: 20px; /* 150% */
+		letter-spacing: 0.042px;
+		text-align: center;
+		--padding-bottom: 2px;
+		--padding-top: 2px;
+		--padding-start: 4px;
+		--padding-end: 4px;
+
+		a {
+			color: white;
+			// font-style: italic;
+		}
+	}
+}

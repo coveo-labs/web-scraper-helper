@@ -2,7 +2,7 @@
 
 Now available from the [Chrome Web Store](https://chrome.google.com/webstore/detail/web-scraper-helper-for-co/demelhhhnkocnphihjbhpafjnknknkdf?hl=en-US)
 
-The Coveo Cloud V2 Web and Sitemap source types can use a web scraping configuration to exclude web page sections, extract metadata, and create sub-items for web pages to index (see [Web Scraping Configuration](http://www.coveo.com/go?dest=cloudhelp&lcid=9&context=277)).
+The Coveo Cloud V2 Web and Sitemap source types can use a web scraping configuration to exclude web page sections, extract metadata, and create sub-items for web pages to index (see [Web Scraping Configuration](https://docs.coveo.com/en/mc1f3573/index-content/web-scraping-configuration)).
 
 The web-scraper-helper works directly in your browser allowing you to easily create and test your web scraping configuration when visiting web site pages requiring web scraping.
 
