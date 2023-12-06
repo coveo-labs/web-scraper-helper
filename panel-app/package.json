@@ -24,6 +24,7 @@
 		"rollup-plugin-dotenv": "0.5.0"
 	},
 	"dependencies": {
+		"@amplitude/analytics-browser": "^2.3.6",
 		"@types/babel__traverse": "^7.20.4",
 		"uuid": "^9.0.1"
 	},
