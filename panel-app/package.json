@@ -1,7 +1,7 @@
 {
 	"name": "web-scraper-helper-panel",
 	"private": true,
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"description": "Stencil App for the Dev Tools panel of the Web Scraper Helper Chrome Extension",
 	"scripts": {
 		"build": "stencil build && rm -rf ../chrome_extension/www && cp -R www ../chrome_extension/www && cp index.html ../chrome_extension/www/index.html",
@@ -11,18 +11,20 @@
 		"generate": "stencil generate"
 	},
 	"devDependencies": {
-		"@ionic/core": "^7.5.6",
+		"@ionic/core": "^7.6.0",
 		"@stencil-community/router": "^1.0.2",
-		"@stencil/core": "4.7.2",
+		"@stencil/core": "4.8.1",
 		"@stencil/sass": "^3.0.7",
 		"@stencil/store": "^2.0.11",
 		"@types/chrome": "^0.0.253",
-		"@types/jest": "^29.5.10",
+		"@types/jest": "^29.5.11",
 		"jest": "^29.7.0",
 		"jest-cli": "^29.7.0",
-		"puppeteer": "^21.5.2"
+		"puppeteer": "^21.6.0",
+		"rollup-plugin-dotenv": "0.5.0"
 	},
 	"dependencies": {
+		"@amplitude/analytics-browser": "^2.3.6",
 		"@types/babel__traverse": "^7.20.4",
 		"uuid": "^9.0.1"
 	},
