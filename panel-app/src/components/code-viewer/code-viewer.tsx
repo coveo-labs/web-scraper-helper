@@ -1,6 +1,7 @@
 import { Component, State, h } from '@stencil/core';
 import { formatState, updateState } from '../store';
 import copyToClipboardIcon from '../../assets/icon/CopyToClipboard.svg';
+import { logEvent } from '../analytics';
 
 @Component({
 	tag: 'code-viewer',
@@ -20,6 +21,7 @@ export class CodeViewer {
 		if (textarea) {
 			(textarea as HTMLTextAreaElement).select();
 			document.execCommand('copy');
+			logEvent('clicked file json copy to clipboard');
 		}
 	}
 
