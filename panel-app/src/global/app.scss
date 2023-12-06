@@ -27,6 +27,12 @@ ion-popover .no-files-option {
 	line-height: 21px; /* 150% */
 	letter-spacing: 0.042px;
 	padding: 0px 16px !important;
+	--background-hover: white;
+	--color-hover: unset;
+
+	ion-radio {
+		cursor: initial;
+	}
 }
 
 ion-popover .file-list-names {
