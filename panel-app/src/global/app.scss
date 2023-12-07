@@ -19,6 +19,7 @@ body:has(ion-modal.show-modal){
 }
 
 ion-popover .no-files-option {
+	pointer-events: none;
 	color: #565b66;
 	font-family: Gibson;
 	font-size: 14px;
@@ -167,9 +168,9 @@ ion-toast {
 	--max-width: 310px;
 	--offset-y: -5px;
 
-	& ion-content{
+	& ion-content {
 		--border-radius: 8px 8px 0px 0px;
-		--background: #3F3F71;
+		--background: #3f3f71;
 		--color: #fff;
 		font-family: Gibson;
 		font-size: 14px;
