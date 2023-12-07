@@ -1,13 +1,14 @@
 import { createStore } from '@stencil/store';
 import { v4 as uuidv4 } from 'uuid';
 import { ConfigState, MetadataMap, Selector, SelectorElement, SelectorType, SubItem } from './types';
+import { logEvent } from './analytics';
 
 export function getId(): string {
 	let uniqueId = uuidv4();
 	return `uid-${uniqueId}-${Date.now()}`;
 }
 
-const { reset, state, onChange }: { reset: Function; state: ConfigState; onChange: Function; } = createStore({
+const { reset, state, onChange }: { reset: Function; state: ConfigState; onChange: Function } = createStore({
 	currentFile: null,
 	hasChanges: false,
 	exclude: [
@@ -214,7 +215,7 @@ function removeExcludedItem(item: SelectorElement) {
 	sendMessageToContentScript({ type: 'remove-exclude-selector', payload: { item } });
 }
 
-function addMetadataItem(item: { name: string; type: SelectorType; path: string; }) {
+function addMetadataItem(item: { name: string; type: SelectorType; path: string }) {
 	state.metadata = { ...state.metadata, [getId()]: { name: item.name, type: item.type, path: item.path } };
 }
 
@@ -225,10 +226,7 @@ function removeMetadataItem(uid: string) {
 
 async function getMetadataResults(type = 'global', metadata: MetadataMap = {}, parentSelector: Selector = null) {
 	const response = await new Promise((resolve) => {
-		sendMessageToContentScript(
-			{ type: 'metadata-results', payload: { metadata: type === 'global' ? state.metadata : metadata, parentSelector: parentSelector } },
-			resolve
-		);
+		sendMessageToContentScript({ type: 'metadata-results', payload: { metadata: type === 'global' ? state.metadata : metadata, parentSelector: parentSelector } }, resolve);
 	});
 	console.log('getMetadataResults-response', response);
 	return response;
@@ -236,15 +234,17 @@ async function getMetadataResults(type = 'global', metadata: MetadataMap = {}, p
 
 function addSubItem() {
 	state.subItems = [...state.subItems, { name: 'subItem', type: 'CSS', path: '', exclude: [], metadata: {} }];
+	logEvent('added subitem');
 }
 
 function removeSubItem(itemName: string) {
 	state.subItems = state.subItems.filter((subItem) => {
 		return subItem.name !== itemName;
 	});
+	logEvent('deleted subitem');
 }
 
-function updateMetadataItem(newItem: { id: string; name: string; type: string; path: string; isBoolean?: boolean; }) {
+function updateMetadataItem(newItem: { id: string; name: string; type: string; path: string; isBoolean?: boolean }) {
 	state.metadata = Object.keys(state.metadata).reduce((acc, key) => {
 		if (key === newItem.id) {
 			acc[key] = { name: newItem.name, type: newItem.type, path: newItem.path, ...(newItem.isBoolean && { isBoolean: newItem.isBoolean }) };
