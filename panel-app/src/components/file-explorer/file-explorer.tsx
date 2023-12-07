@@ -119,9 +119,7 @@ export class FileExplorer {
 	}
 
 	handleFileSelection(event) {
-		if (event?.target.value !== 'Sorry, you haven’t created any files yet.') {
-			this.loadFile(event.target.value);
-		}
+		this.loadFile(event.target.value);
 	}
 
 	loadFile(name) {
