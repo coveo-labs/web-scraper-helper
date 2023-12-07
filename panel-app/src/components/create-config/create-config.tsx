@@ -3,7 +3,7 @@ import state, { addExcludedItem, addMetadataItem, addSubItem, addToRecentFiles, 
 import { alertController, toastController } from '@ionic/core';
 import infoToken from '../../assets/icon/InfoToken.svg';
 import { SubItem } from '../types';
-import { logEvent } from '../analytics';
+import { createPayloadOnSave, logEvent } from '../analytics';
 
 @Component({
 	tag: 'create-config',
@@ -83,7 +83,7 @@ export class CreateConfig {
 				});
 			state.hasChanges = false; // changes have been saved
 
-			logEvent('completed file edit');
+			logEvent('completed file edit', createPayloadOnSave());
 		} catch (e) {
 			console.log(e);
 		}
@@ -276,7 +276,7 @@ export class CreateConfig {
 
 	tabClicked(index: number) {
 		this.activeTab = index;
-		logEvent(`viewed file ${this.tabs[this.activeTab].toLowerCase()}`);
+		logEvent(`viewed ${this.tabs[this.activeTab].toLowerCase()}`);
 	}
 
 	tabs = ['Elements to exclude', 'Metadata to extract', 'SubItems', 'JSON'];

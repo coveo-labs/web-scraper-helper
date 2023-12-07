@@ -50,7 +50,7 @@ export class FileExplorer {
 	}
 
 	componentDidLoad() {
-		logEvent('viewed home page');
+		logEvent('viewed home');
 	}
 
 	async componentWillRender() {
