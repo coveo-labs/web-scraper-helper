@@ -32,6 +32,7 @@ export class FileExplorer {
 				name: this.newFileName,
 				triggerType: 'new-file',
 			};
+			state.hasChanges = false;
 		} catch (e) {
 			console.log(e);
 		}
@@ -83,6 +84,13 @@ export class FileExplorer {
 		return <ion-select-option class="no-files-option">Sorry, you haven’t created any files yet.</ion-select-option>;
 	}
 
+	private openModal() {
+		this.newFileName = '';
+		this.showModal = true;
+		setTimeout(() => (document.querySelector('#form-new-file-input-name input') as any)?.focus(), 250);
+		logEvent('viewed create new file');
+	}
+
 	renderRecentFiles() {
 		if (this.recentFiles?.length) {
 			const recentFiles = this.recentFiles.map((item) => (
@@ -100,13 +108,7 @@ export class FileExplorer {
 					<div class="recent-subtitle">Choose one of recently created file or search for more in the list above.</div>
 					<div class="recent-files-section">
 						{recentFiles}
-						<div
-							class="recent-file create-new"
-							onClick={() => {
-								this.showModal = true;
-								logEvent('viewed create new file');
-							}}
-						>
+						<div class="recent-file create-new" onClick={() => this.openModal()}>
 							<div class="recent-file-name">Create a new file</div>
 							<ion-icon name="add-circle-outline" size="small" color="primary"></ion-icon>
 						</div>
@@ -120,14 +122,7 @@ export class FileExplorer {
 				<div class="createFile-wrapper">
 					<div class="info-text">You have no files</div>
 					<div>
-						<ion-button
-							class="create-file-btn"
-							onClick={() => {
-								this.newFileName = '';
-								this.showModal = true;
-								logEvent('viewed create new file');
-							}}
-						>
+						<ion-button class="create-file-btn" onClick={() => this.openModal()}>
 							<ion-icon slot="start" name="add-circle-outline"></ion-icon>
 							Create a new file
 						</ion-button>
@@ -211,24 +206,39 @@ export class FileExplorer {
 							<div>Create new file</div>
 							<ion-icon name="close-outline" onClick={() => (this.showModal = false)}></ion-icon>
 						</div>
-						<div class="modal-content">
-							<div>Enter a name for your Web Scraper file.</div>
-							<ion-input fill="outline" placeholder="Name" onIonInput={(event) => (this.newFileName = (event.target as HTMLIonInputElement).value as string)} value={this.newFileName}></ion-input>
-						</div>
-						<div class="modal-footer">
-							<ion-button
-								fill="outline"
-								onClick={() => {
-									this.showModal = false;
-									logEvent('cancelled create new file');
-								}}
-							>
-								Cancel
-							</ion-button>
-							<ion-button fill="outline" onClick={() => this.onSaveClick()} disabled={!this.newFileName}>
-								Save
-							</ion-button>
-						</div>
+						<form
+							onSubmit={(e) => {
+								e.preventDefault();
+								this.onSaveClick();
+								return true;
+							}}
+						>
+							<div class="modal-content">
+								<div>Enter a name for your Web Scraper file.</div>
+								<ion-input
+									id="form-new-file-input-name"
+									required={true}
+									fill="outline"
+									placeholder="Name"
+									onIonInput={(event) => (this.newFileName = (event.target as HTMLIonInputElement).value as string)}
+									value={this.newFileName}
+								></ion-input>
+							</div>
+							<div class="modal-footer">
+								<ion-button
+									fill="outline"
+									onClick={() => {
+										this.showModal = false;
+										logEvent('cancelled create new file');
+									}}
+								>
+									Cancel
+								</ion-button>
+								<ion-button fill="outline" onClick={() => this.onSaveClick()} disabled={!this.newFileName}>
+									Save
+								</ion-button>
+							</div>
+						</form>
 					</ion-modal>
 				</div>
 			</Host>

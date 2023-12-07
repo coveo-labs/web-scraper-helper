@@ -30,6 +30,7 @@
     }
   ],
   "permissions": [
+    "scripting",
     "storage",
     "activeTab"
   ],
