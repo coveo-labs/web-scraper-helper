@@ -13,11 +13,11 @@ export class AppRoot {
 	@State() version: string = '';
 
 	componentDidLoad() {
-		let amplitudeKey = null;
-		try {
-			amplitudeKey = process.env.AMPLITUDE_KEY;
-		} catch (e) {}
-		console.log(amplitudeKey);
+		// let amplitudeKey = null;
+		// try {
+		// 	amplitudeKey = process.env.AMPLITUDE_KEY;
+		// } catch (e) {}
+		// console.log(amplitudeKey);
 
 		try {
 			let manifest = chrome.runtime.getManifest();
