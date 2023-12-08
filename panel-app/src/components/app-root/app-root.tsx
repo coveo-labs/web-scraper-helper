@@ -3,6 +3,7 @@
 import { Component, Host, State, h } from '@stencil/core';
 import logo from '../../assets/icon/CoveoLogo.svg';
 import state from '../store';
+import { initializeAmplitude } from '../analytics';
 
 @Component({
 	tag: 'app-root',
@@ -13,12 +14,7 @@ export class AppRoot {
 	@State() version: string = '';
 
 	componentDidLoad() {
-		// let amplitudeKey = null;
-		// try {
-		// 	amplitudeKey = process.env.AMPLITUDE_KEY;
-		// } catch (e) {}
-		// console.log(amplitudeKey);
-
+		initializeAmplitude();
 		try {
 			let manifest = chrome.runtime.getManifest();
 			this.version = 'v' + manifest.version;

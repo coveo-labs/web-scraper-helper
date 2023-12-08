@@ -3,7 +3,7 @@
 Now available from the [Chrome Web Store](https://chrome.google.com/webstore/detail/web-scraper-helper-for-co/demelhhhnkocnphihjbhpafjnknknkdf?hl=en-US)
 
 > **:warning: Experimental, use at your own risk.**
-> 
+>
 > This repository is shared to be helpful and for informational purposes (not officially supported, not for production use).  
 > For assistance, _refrain from contacting Coveo support_ and use Github issues instead.
 
@@ -16,6 +16,8 @@ The web-scraper-helper works directly in your browser allowing you to easily cre
 Information about the project is in the [README](chrome_extension/README.md).
 
 The [How-To Guide](docs/howto.md) is also useful.
+
+The web-scraper-helper uses Amplitude to understand user behavior and improve the extension based on these insights. We respect user privacy and only track non-personal identifiable information. This [document](docs/amplitude_taxonomy.md) contains a detailed overview about the specific events.
 
 ## Contribution
 

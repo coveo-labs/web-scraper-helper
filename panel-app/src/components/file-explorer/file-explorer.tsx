@@ -4,6 +4,7 @@ import noFileImage from '../../assets/icon/NotFoundImage.svg';
 import infoToken from '../../assets/icon/InfoToken.svg';
 import state, { addToRecentFiles, formatState } from '../store';
 import { alertController } from '@ionic/core';
+import { logEvent } from '../analytics';
 
 const RECENT_FILES_ITEM_NAME = '__Recent__Files__';
 @Component({
@@ -35,6 +36,21 @@ export class FileExplorer {
 		} catch (e) {
 			console.log(e);
 		}
+
+		// for local development
+		if (window.location.hostname === 'localhost') {
+			this.newFileName = 'local test file';
+			state.currentFile = {
+				name: this.newFileName,
+				triggerType: 'new-file',
+			};
+		}
+
+		logEvent('completed create new file');
+	}
+
+	componentDidLoad() {
+		logEvent('viewed home');
 	}
 
 	async componentWillRender() {
@@ -72,6 +88,7 @@ export class FileExplorer {
 		this.newFileName = '';
 		this.showModal = true;
 		setTimeout(() => (document.querySelector('#form-new-file-input-name input') as any)?.focus(), 250);
+		logEvent('viewed create new file');
 	}
 
 	renderRecentFiles() {
@@ -145,6 +162,8 @@ export class FileExplorer {
 						chrome.storage.local.remove(filename);
 						this.recentFiles = this.recentFiles.filter((item) => item !== filename);
 						this.fileList = this.fileList.filter((item) => item !== filename);
+
+						logEvent('deleted file');
 					},
 				},
 			],
@@ -160,7 +179,7 @@ export class FileExplorer {
 					<div class="header_text-container">
 						<div class="header_title-text">
 							Your Web Scraper files
-							<a href="https://github.com/coveo-labs/web-scraper-helper" target="web-scraper-help">
+							<a href="https://github.com/coveo-labs/web-scraper-helper" target="web-scraper-help" onClick={() => logEvent('clicked documentation link', { page: 'home' })}>
 								<ion-img id="infoToken-img" src={infoToken}></ion-img>
 							</a>
 						</div>
@@ -206,7 +225,13 @@ export class FileExplorer {
 								></ion-input>
 							</div>
 							<div class="modal-footer">
-								<ion-button fill="outline" onClick={() => (this.showModal = false)}>
+								<ion-button
+									fill="outline"
+									onClick={() => {
+										this.showModal = false;
+										logEvent('cancelled create new file');
+									}}
+								>
 									Cancel
 								</ion-button>
 								<ion-button fill="outline" onClick={() => this.onSaveClick()} disabled={!this.newFileName}>

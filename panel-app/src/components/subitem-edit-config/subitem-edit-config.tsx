@@ -2,6 +2,7 @@ import { toastController } from '@ionic/core';
 import { Component, Event, EventEmitter, Listen, Prop, State, h } from '@stencil/core';
 import state, { getId, sendMessageToContentScript } from '../store';
 import { MetadataMap, SelectorElement, SubItem } from '../types';
+import { logEvent } from '../analytics';
 
 @Component({
 	tag: 'subitem-edit-config',
@@ -44,11 +45,13 @@ export class SubitemEditConfig {
 				toast.present();
 			});
 		this.removeParentSelectorStyle();
+		logEvent('cancelled subitem config');
 	}
 
 	onCancel() {
 		this.updateSubItemState.emit();
 		this.removeParentSelectorStyle();
+		logEvent('saved subitem config');
 	}
 
 	removeParentSelectorStyle() {
