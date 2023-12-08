@@ -1,4 +1,5 @@
 .eslintcache
+.env
 .stencil
 .DS_store
 node_modules

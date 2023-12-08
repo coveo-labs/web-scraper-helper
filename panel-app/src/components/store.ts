@@ -1,6 +1,7 @@
 import { createStore } from '@stencil/store';
 import { v4 as uuidv4 } from 'uuid';
 import { ConfigState, MetadataMap, Selector, SelectorElement, SelectorType, SubItem } from './types';
+import { logEvent } from './analytics';
 
 export function getId(): string {
 	let uniqueId = uuidv4();
@@ -225,10 +226,7 @@ function removeMetadataItem(uid: string) {
 
 async function getMetadataResults(type = 'global', metadata: MetadataMap = {}, parentSelector: Selector = null) {
 	const response = await new Promise((resolve) => {
-		sendMessageToContentScript(
-			{ type: 'metadata-results', payload: { metadata: type === 'global' ? state.metadata : metadata, parentSelector: parentSelector } },
-			resolve
-		);
+		sendMessageToContentScript({ type: 'metadata-results', payload: { metadata: type === 'global' ? state.metadata : metadata, parentSelector: parentSelector } }, resolve);
 	});
 	console.log('getMetadataResults-response', response);
 	return response;
@@ -236,12 +234,14 @@ async function getMetadataResults(type = 'global', metadata: MetadataMap = {}, p
 
 function addSubItem() {
 	state.subItems = [...state.subItems, { name: 'subItem', type: 'CSS', path: '', exclude: [], metadata: {} }];
+	logEvent('added subitem');
 }
 
 function removeSubItem(itemName: string) {
 	state.subItems = state.subItems.filter((subItem) => {
 		return subItem.name !== itemName;
 	});
+	logEvent('deleted subitem');
 }
 
 function updateMetadataItem(newItem: { id: string; name: string; type: string; path: string; isBoolean?: boolean; }) {
@@ -292,7 +292,8 @@ const addToRecentFiles = async (filename: string): Promise<string[]> => {
 const sendMessageToContentScript = (message: any, callback: any = null): any => {
 	try {
 		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-			chrome.tabs.sendMessage(tabs[0].id, message, null, callback);
+			console.log('tabs', tabs);
+			if (tabs?.length && tabs[0].id) chrome.tabs.sendMessage(tabs[0].id, message, null, callback);
 		});
 	} catch (e) {
 		console.log(e);

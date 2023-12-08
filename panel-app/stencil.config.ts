@@ -1,5 +1,6 @@
 import { Config } from '@stencil/core';
 import { sass } from '@stencil/sass';
+import dotenvPlugin from 'rollup-plugin-dotenv';
 
 // https://stenciljs.com/docs/config
 
@@ -9,6 +10,7 @@ export const config: Config = {
 	taskQueue: 'async',
 	namespace: 'web-scraper-helper',
 	plugins: [
+		dotenvPlugin(),
 		sass({
 			includePaths: ['./node_modules'],
 		}),

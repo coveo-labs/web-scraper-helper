@@ -3,6 +3,7 @@ import state, { addExcludedItem, addMetadataItem, addSubItem, addToRecentFiles, 
 import { alertController, toastController } from '@ionic/core';
 import infoToken from '../../assets/icon/InfoToken.svg';
 import { SubItem } from '../types';
+import { getScraperConfigMetrics, logEvent } from '../analytics';
 
 @Component({
 	tag: 'create-config',
@@ -81,6 +82,8 @@ export class CreateConfig {
 					toast.present();
 				});
 			state.hasChanges = false; // changes have been saved
+
+			logEvent('completed file edit', getScraperConfigMetrics());
 		} catch (e) {
 			console.log(e);
 		}
@@ -100,6 +103,7 @@ export class CreateConfig {
 
 				updateState(fileItem[fileName], false);
 				await addToRecentFiles(fileName);
+				logEvent('completed file open', getScraperConfigMetrics());
 			} else {
 				sendMessageToContentScript({ type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude, subItems: state.subItems } });
 			}
@@ -143,7 +147,11 @@ export class CreateConfig {
 						</div>
 						<div class="info-message">
 							Learn more about the validation states{' '}
-							<a href="https://github.com/coveo-labs/web-scraper-helper/blob/Update_readme/docs/howto.md#validation-states" target="web-scraper-help">
+							<a
+								href="https://github.com/coveo-labs/web-scraper-helper/blob/Update_readme/docs/howto.md#validation-states"
+								target="web-scraper-help"
+								onClick={() => logEvent('clicked file learn more about the validation states', { tab: 'elements to exclude' })}
+							>
 								here.
 							</a>
 						</div>
@@ -171,7 +179,11 @@ export class CreateConfig {
 						</div>
 						<div class="info-message">
 							Learn more about the validation states{' '}
-							<a href="https://github.com/coveo-labs/web-scraper-helper/blob/Update_readme/docs/howto.md#validation-states" target="web-scraper-help">
+							<a
+								href="https://github.com/coveo-labs/web-scraper-helper/blob/Update_readme/docs/howto.md#validation-states"
+								target="web-scraper-help"
+								onClick={() => logEvent('clicked file learn more about the validation states', { tab: 'metadata to extract' })}
+							>
 								here.
 							</a>
 						</div>
@@ -265,11 +277,12 @@ export class CreateConfig {
 
 	tabClicked(index: number) {
 		this.activeTab = index;
+		logEvent(`viewed ${this.tabs[this.activeTab].toLowerCase()}`);
 	}
 
-	render() {
-		const tabs = ['Elements to exclude', 'Metadata to extract', 'SubItems', 'JSON'];
+	tabs = ['Elements to exclude', 'Metadata to extract', 'SubItems', 'JSON'];
 
+	render() {
 		const dirty = state.hasChanges ? (
 			<span class="is-dirty" title="Unsaved changes">
 				*
@@ -287,7 +300,7 @@ export class CreateConfig {
 								{state.currentFile?.name}
 								{dirty}
 							</span>
-							<a href="https://github.com/coveo-labs/web-scraper-helper" target="web-scraper-help">
+							<a href="https://github.com/coveo-labs/web-scraper-helper" target="web-scraper-help" onClick={() => logEvent('clicked documentation link', { page: 'file' })}>
 								<ion-img id="infoToken-img" src={infoToken}></ion-img>
 							</a>
 						</div>
@@ -304,7 +317,7 @@ export class CreateConfig {
 								{/* <div class="content-text">Create a Web Scraping configuration</div> */}
 								<div class="content-tabs">
 									<div class="custom-tab-bar">
-										{tabs.map((tab, index) => (
+										{this.tabs.map((tab, index) => (
 											<div class={this.activeTab === index ? 'active tab-btn' : 'tab-btn'} onClick={() => this.tabClicked(index)}>
 												{tab}
 											</div>
@@ -320,7 +333,14 @@ export class CreateConfig {
 				</div>
 				{!this.showSubItemConfig && (
 					<div class="config-action-btns">
-						<ion-button onClick={() => this.onDone()} fill="outline" class="cancel-btn">
+						<ion-button
+							onClick={() => {
+								this.onDone();
+								logEvent('cancelled file edit');
+							}}
+							fill="outline"
+							class="cancel-btn"
+						>
 							Cancel
 						</ion-button>
 						<ion-button onClick={() => this.onSave()} fill="outline" class="save-btn">

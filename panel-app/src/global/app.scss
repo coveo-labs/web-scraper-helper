@@ -14,7 +14,12 @@ body {
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
 }
 
+body:has(ion-modal.show-modal){
+	overflow: hidden;
+}
+
 ion-popover .no-files-option {
+	pointer-events: none;
 	color: #565b66;
 	font-family: Gibson;
 	font-size: 14px;
@@ -23,6 +28,12 @@ ion-popover .no-files-option {
 	line-height: 21px; /* 150% */
 	letter-spacing: 0.042px;
 	padding: 0px 16px !important;
+	--background-hover: white;
+	--color-hover: unset;
+
+	ion-radio {
+		cursor: initial;
+	}
 }
 
 ion-popover .file-list-names {
@@ -157,9 +168,9 @@ ion-toast {
 	--max-width: 310px;
 	--offset-y: -5px;
 
-	& ion-content{
+	& ion-content {
 		--border-radius: 8px 8px 0px 0px;
-		--background: #3F3F71;
+		--background: #3f3f71;
 		--color: #fff;
 		font-family: Gibson;
 		font-size: 14px;
