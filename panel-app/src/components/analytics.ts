@@ -17,7 +17,6 @@ export function initializeAmplitude() {
 				fileDownloads: false,
 			},
 			identityStorage: 'localStorage',
-			// disableCookies: false,
 			trackingOptions: {
 				ipAddress: false,
 			},

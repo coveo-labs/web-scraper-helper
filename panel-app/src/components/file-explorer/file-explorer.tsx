@@ -4,7 +4,7 @@ import noFileImage from '../../assets/icon/NotFoundImage.svg';
 import infoToken from '../../assets/icon/InfoToken.svg';
 import state, { addToRecentFiles, formatState } from '../store';
 import { alertController } from '@ionic/core';
-import { logEvent } from '../analytics';
+import { getScraperConfigMetrics, logEvent } from '../analytics';
 
 const RECENT_FILES_ITEM_NAME = '__Recent__Files__';
 @Component({
@@ -46,7 +46,7 @@ export class FileExplorer {
 			};
 		}
 
-		logEvent('completed create new file');
+		logEvent('completed create new file', getScraperConfigMetrics());
 	}
 
 	async componentWillRender() {
@@ -159,7 +159,7 @@ export class FileExplorer {
 						this.recentFiles = this.recentFiles.filter((item) => item !== filename);
 						this.fileList = this.fileList.filter((item) => item !== filename);
 
-						logEvent('deleted file');
+						logEvent('deleted file', getScraperConfigMetrics());
 					},
 				},
 			],
