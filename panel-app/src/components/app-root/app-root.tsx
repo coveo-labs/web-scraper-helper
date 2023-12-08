@@ -3,7 +3,7 @@
 import { Component, Host, State, h } from '@stencil/core';
 import logo from '../../assets/icon/CoveoLogo.svg';
 import state from '../store';
-import { initializeAmplitude } from '../analytics';
+import { initializeAmplitude, logEvent } from '../analytics';
 
 @Component({
 	tag: 'app-root',
@@ -18,6 +18,8 @@ export class AppRoot {
 		try {
 			let manifest = chrome.runtime.getManifest();
 			this.version = 'v' + manifest.version;
+
+			logEvent('viewed home', { version: manifest.version });
 		} catch (e) {
 			// 'chrome' is undefined in unit tests.
 		}

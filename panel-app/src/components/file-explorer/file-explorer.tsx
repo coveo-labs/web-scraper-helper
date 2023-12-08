@@ -49,10 +49,6 @@ export class FileExplorer {
 		logEvent('completed create new file');
 	}
 
-	componentDidLoad() {
-		logEvent('viewed home');
-	}
-
 	async componentWillRender() {
 		try {
 			const items = await new Promise((resolve) => {
