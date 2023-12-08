@@ -6,15 +6,29 @@ export function initializeAmplitude() {
 	let amplitudeKey = null;
 	try {
 		amplitudeKey = process.env.AMPLITUDE_KEY;
-		amplitude.init(amplitudeKey, { defaultTracking: false });
-	} catch (e) {}
+		amplitude.init(amplitudeKey, {
+			// logLevel: amplitude.Types.LogLevel.Debug,
+			transport: 'beacon',
+			defaultTracking: {
+				attribution: false,
+				pageViews: false,
+				sessions: true,
+				formInteractions: false,
+				fileDownloads: false,
+			},
+			identityStorage: 'localStorage',
+			trackingOptions: {
+				ipAddress: false,
+			},
+		});
+	} catch (e) { }
 }
 
 export function logEvent(name: string, payload = {}) {
 	amplitude.track(name, payload);
 }
 
-export function createPayloadOnSave() {
+export function getScraperConfigMetrics() {
 	let payload: PayloadForFileSave = { for: 0, exclude: 0, metadata: 0, subItems: 0, excludeSelectors: [], name: 0 };
 	let formattedState = formatState();
 	formattedState.forEach((i) => {

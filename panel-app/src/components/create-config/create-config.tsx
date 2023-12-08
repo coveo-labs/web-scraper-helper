@@ -3,7 +3,7 @@ import state, { addExcludedItem, addMetadataItem, addSubItem, addToRecentFiles, 
 import { alertController, toastController } from '@ionic/core';
 import infoToken from '../../assets/icon/InfoToken.svg';
 import { SubItem } from '../types';
-import { createPayloadOnSave, logEvent } from '../analytics';
+import { getScraperConfigMetrics, logEvent } from '../analytics';
 
 @Component({
 	tag: 'create-config',
@@ -83,7 +83,7 @@ export class CreateConfig {
 				});
 			state.hasChanges = false; // changes have been saved
 
-			logEvent('completed file edit', createPayloadOnSave());
+			logEvent('completed file edit', getScraperConfigMetrics());
 		} catch (e) {
 			console.log(e);
 		}
@@ -103,6 +103,7 @@ export class CreateConfig {
 
 				updateState(fileItem[fileName], false);
 				await addToRecentFiles(fileName);
+				logEvent('completed file open', getScraperConfigMetrics());
 			} else {
 				sendMessageToContentScript({ type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude, subItems: state.subItems } });
 			}
