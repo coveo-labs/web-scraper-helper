@@ -17,7 +17,7 @@ Information about the project is in the [README](chrome_extension/README.md).
 
 The [How-To Guide](docs/howto.md) is also useful.
 
-The web-scraper-helper uses Amplitude to understand user behavior and improve the extension based on these insights. We respect user privacy and only track non-personal identifiable information. This [document](docs/Amplitude-Taxonomy.pdf) contains a detailed overview about the specific events.
+The web-scraper-helper uses Amplitude to understand user behavior and improve the extension based on these insights. We respect user privacy and only track non-personal identifiable information. This [document](docs/amplitude_taxonomy.md) contains a detailed overview about the specific events.
 
 ## Contribution
 

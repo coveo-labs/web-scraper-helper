@@ -21,7 +21,7 @@ export class CodeViewer {
 		if (textarea) {
 			(textarea as HTMLTextAreaElement).select();
 			document.execCommand('copy');
-			logEvent('clicked file json copy to clipboard');
+			logEvent('clicked json copy to clipboard');
 		}
 	}
 
