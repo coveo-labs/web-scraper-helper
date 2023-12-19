@@ -45,7 +45,7 @@ export class SelectElementItem {
 
 	handleNameChange = (event: CustomEvent) => {
 		const newName = event.detail.value;
-		// if name is cleared after selector value is filled, simply clear the field - TBD if to go ahead with it
+		// if name is cleared after selector value is filled, simply clear the field
 		updateMetadataItem({ ...this.selector, id: this.uniqueId, name: newName, path: newName ? this.selector.path : '' });
 	};
 
