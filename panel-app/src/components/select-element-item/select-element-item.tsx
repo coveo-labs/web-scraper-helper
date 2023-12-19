@@ -106,7 +106,7 @@ export class SelectElementItem {
 						value={this.selector.path}
 						placeholder="expression"
 						onIonInput={this.handleSelectorChange}
-						disabled={this.name ? false : true}
+						disabled={this.type === 'metadataItem' && !this.name ? true : false}
 					></ion-input>
 				</div>
 				{this.type === 'metadataItem' && (
