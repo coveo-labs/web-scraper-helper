@@ -45,7 +45,8 @@ export class SelectElementItem {
 
 	handleNameChange = (event: CustomEvent) => {
 		const newName = event.detail.value;
-		updateMetadataItem({ ...this.selector, id: this.uniqueId, name: newName });
+		// if name is cleared after selector value is filled, simply clear the field - TBD if to go ahead with it
+		updateMetadataItem({ ...this.selector, id: this.uniqueId, name: newName, path: newName ? this.selector.path : '' });
 	};
 
 	handleCheckboxChange = (event: CustomEvent) => {
@@ -85,7 +86,14 @@ export class SelectElementItem {
 			<div class="select-element-item">
 				{this.type === 'metadataItem' && (
 					<div style={{ flex: '1' }}>
-						<ion-input class="name-input" fill="outline" value={this.name} placeholder="Name" onIonInput={this.handleNameChange}></ion-input>
+						<ion-input
+							class={`name-input ${!this.name ? 'ion-invalid ion-touched' : ''}`}
+							fill="outline"
+							value={this.name}
+							placeholder="Name"
+							onIonInput={this.handleNameChange}
+							errorText="Required"
+						></ion-input>
 					</div>
 				)}
 				<div>
@@ -98,6 +106,7 @@ export class SelectElementItem {
 						value={this.selector.path}
 						placeholder="expression"
 						onIonInput={this.handleSelectorChange}
+						disabled={this.name ? false : true}
 					></ion-input>
 				</div>
 				{this.type === 'metadataItem' && (
