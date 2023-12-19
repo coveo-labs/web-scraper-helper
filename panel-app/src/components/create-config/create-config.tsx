@@ -112,6 +112,11 @@ export class CreateConfig {
 		}
 	}
 
+	componentDidLoad() {
+		// log tab view on eeach current/new-file open
+		logEvent('viewed elements to exclude');
+	}
+
 	async showPopover(className) {
 		const popover = document.querySelector(`.${className}`) as HTMLIonPopoverElement;
 		await popover.present();
