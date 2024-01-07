@@ -369,3 +369,10 @@ function removePreviouslyExcludedStyles() {
   }
 }
 
+window.onload = () => {
+  chrome.runtime.sendMessage({
+    type: 'page-loaded',
+  }, (res) => {
+    console.log('RES:', res);
+  });
+};

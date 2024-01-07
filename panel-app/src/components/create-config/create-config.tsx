@@ -93,7 +93,7 @@ export class CreateConfig {
 		updateGlobalName(e.detail.value);
 	}
 
-	async componentWillLoad() {
+	async loadFile() {
 		try {
 			if (state.currentFile?.triggerType === 'load-file') {
 				const fileName = state.currentFile.name;
@@ -110,6 +110,19 @@ export class CreateConfig {
 		} catch (e) {
 			console.log(e);
 		}
+	}
+
+	addPageLoadListener() {
+		chrome.runtime.onMessage.addListener((message) => {
+			if (message.type === 'page-loaded') {
+				this.loadFile();
+			}
+		});
+	}
+
+	async componentWillLoad() {
+		this.loadFile();
+		this.addPageLoadListener();
 	}
 
 	componentDidLoad() {
