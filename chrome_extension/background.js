@@ -25,3 +25,18 @@ chrome.runtime.onInstalled.addListener(async () => {
   }
 });
 
+let devtoolsOpened = false;
+
+chrome.runtime.onConnect.addListener(port => {
+  port.onMessage.addListener(message => {
+    if (message.type === 'devtools-opened') {
+      devtoolsOpened = true;
+    }
+  });
+});
+
+chrome.runtime.onMessage.addListener((message, sender) => {
+  if (message.type === 'page-loaded' && devtoolsOpened) {
+    chrome.tabs.sendMessage(sender.tab.id, { type: 'page-loaded' });
+  }
+});

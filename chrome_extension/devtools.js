@@ -5,3 +5,6 @@ chrome.devtools.panels.create(
   "icons/16.png",
   "www/index.html"
 );
+
+const port = chrome.runtime.connect({ name: "devtools" });
+port.postMessage({ type: "devtools-opened" });
