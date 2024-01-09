@@ -142,7 +142,6 @@
 
 					.add-rule {
 						display: flex;
-						align-items: center;
 						color: #1372ec;
 						font-family: Gibson;
 						font-size: 14px;
@@ -251,12 +250,14 @@
 
 						.add-subItem {
 							display: flex;
-							align-items: center;
 							cursor: pointer;
+							align-items: center;
 
 							ion-icon {
 								margin-right: 6px;
 								margin-top: -2px;
+								height: 16px;
+								width: 16px;
 							}
 						}
 					}

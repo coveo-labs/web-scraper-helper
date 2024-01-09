@@ -96,4 +96,14 @@
 		cursor: pointer;
 		vertical-align: middle;
 	}
+
+	.input-bottom{
+		padding-top: 0px;
+		padding-inline-start: 5px;
+	}
+
+	.input-disabled.input-fill-outline:hover {
+		--border-color: #b3b3b3;
+	}
+
 }
