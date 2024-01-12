@@ -5,6 +5,7 @@ import logo from '../../assets/icon/CoveoLogo.svg';
 import state from '../store';
 import { initializeAmplitude, logEvent } from '../analytics';
 
+// This function is run in the context of the inspected page, to set the tabID used in the event handlers.
 function injectedFunction(tabId: number) {
 	(window as any).__WSH_tabid = tabId;
 	// console.log('set tabID: ', (window as any).__WSH_tabid);

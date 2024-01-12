@@ -5,6 +5,7 @@ import infoToken from '../../assets/icon/InfoToken.svg';
 import { SubItem } from '../types';
 import { getScraperConfigMetrics, logEvent } from '../analytics';
 
+// This function is run in the context of the inspected page, to set the tabID used in the event handlers.
 function injectedFunction(tabId: number) {
 	(window as any).__WSH_tabid = tabId;
 }
@@ -147,11 +148,6 @@ export class CreateConfig {
 		await this.loadFile();
 		this.addPageLoadListener();
 	}
-
-	// disconnectedCallback() {
-	// 	console.log('CC-UNLOAD: ', this.tabId);
-	// 	chrome.runtime.onMessage.removeListener(this.pageLoadListener);
-	// }
 
 	componentDidLoad() {
 		// log tab view on eeach current/new-file open
