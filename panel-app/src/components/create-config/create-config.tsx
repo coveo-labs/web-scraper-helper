@@ -27,7 +27,6 @@ export class CreateConfig {
 		this.pageLoadListener = (message) => {
 			if (message.type === 'page-loaded') {
 				const tabId = this.tabId;
-				chrome.scripting.insertCSS({ target: { tabId }, files: ['css/inject.css'] });
 				chrome.scripting.executeScript({ target: { tabId }, files: ['content-script.js'] });
 				chrome.scripting.executeScript({ target: { tabId }, func: injectedFunction, args: [this.tabId] });
 				this.loadFile();
@@ -119,7 +118,6 @@ export class CreateConfig {
 		}
 
 		const tabId = this.tabId;
-		await chrome.scripting.insertCSS({ target: { tabId }, files: ['css/inject.css'] });
 		await chrome.scripting.executeScript({ target: { tabId }, files: ['content-script.js'] });
 
 		try {

@@ -252,7 +252,7 @@ if (!window.__WSH_content_script_loaded) {
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (!(window.__WSH_tabid && window.__WSH_tabid === message.tabId)) {
-      // console.log('not mine, ignoring', window.__WSH_tabid, '!==', message.tabId);
+      // console.log('Message is not for this tab, ignoring.', window.__WSH_tabid, '!==', message.tabId);
       return;
     }
     // console.log('onMessage', window.__WSH_tabid, message);
@@ -278,7 +278,7 @@ if (!window.__WSH_content_script_loaded) {
       } catch (e) {
         response = 'Invalid';
       }
-      // console.log('validate-selector', message, response);
+
       sendResponse(response);
     }
     if (message.type === 'update-excludeItem-onLoad') {
@@ -379,6 +379,3 @@ if (!window.__WSH_content_script_loaded) {
   }
 
 }
-// // else {
-// //   console.log('content-script already loaded');
-// }

@@ -21,8 +21,6 @@ export class AppRoot {
 
 	componentDidLoad() {
 		const tabId = chrome.devtools?.inspectedWindow?.tabId;
-		// chrome.scripting.executeScript({ target: { tabId }, files: ['content-script.js'] });
-		// chrome.scripting.insertCSS({ target: { tabId }, files: ['css/inject.css'] });
 		chrome.scripting.executeScript({ target: { tabId }, func: injectedFunction, args: [tabId] });
 
 		initializeAmplitude();
