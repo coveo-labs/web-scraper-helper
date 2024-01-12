@@ -291,9 +291,10 @@ const addToRecentFiles = async (filename: string): Promise<string[]> => {
 
 const sendMessageToContentScript = (message: any, callback: any = null): any => {
 	try {
+		const tabId = chrome.devtools?.inspectedWindow?.tabId;
 		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 			console.log('tabs', tabs);
-			if (tabs?.length && tabs[0].id) chrome.tabs.sendMessage(tabs[0].id, message, null, callback);
+			if (tabs?.length && tabs[0].id) chrome.tabs.sendMessage(tabs[0].id, { tabId, ...message }, null, callback);
 		});
 	} catch (e) {
 		console.log(e);

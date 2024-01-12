@@ -5,6 +5,12 @@ import logo from '../../assets/icon/CoveoLogo.svg';
 import state from '../store';
 import { initializeAmplitude, logEvent } from '../analytics';
 
+// This function is run in the context of the inspected page, to set the tabID used in the event handlers.
+function injectedFunction(tabId: number) {
+	(window as any).__WSH_tabid = tabId;
+	// console.log('set tabID: ', (window as any).__WSH_tabid);
+}
+
 @Component({
 	tag: 'app-root',
 	styleUrl: 'app-root.scss',
@@ -14,6 +20,9 @@ export class AppRoot {
 	@State() version: string = '';
 
 	componentDidLoad() {
+		const tabId = chrome.devtools?.inspectedWindow?.tabId;
+		chrome.scripting.executeScript({ target: { tabId }, func: injectedFunction, args: [tabId] });
+
 		initializeAmplitude();
 		try {
 			let manifest = chrome.runtime.getManifest();
