@@ -5,6 +5,10 @@ import infoToken from '../../assets/icon/InfoToken.svg';
 import { SubItem } from '../types';
 import { getScraperConfigMetrics, logEvent } from '../analytics';
 
+function injectedFunction(tabId: number) {
+	(window as any).__WSH_tabid = tabId;
+}
+
 @Component({
 	tag: 'create-config',
 	styleUrl: 'create-config.scss',
@@ -14,6 +18,21 @@ export class CreateConfig {
 	@State() showSubItemConfig: boolean;
 	@State() subItem: SubItem;
 	@State() activeTab: number = 0;
+
+	private tabId: number = chrome.devtools?.inspectedWindow?.tabId;
+	private pageLoadListener: (message: any, sender: any) => void;
+
+	constructor() {
+		this.pageLoadListener = (message) => {
+			if (message.type === 'page-loaded') {
+				const tabId = this.tabId;
+				chrome.scripting.insertCSS({ target: { tabId }, files: ['css/inject.css'] });
+				chrome.scripting.executeScript({ target: { tabId }, files: ['content-script.js'] });
+				chrome.scripting.executeScript({ target: { tabId }, func: injectedFunction, args: [this.tabId] });
+				this.loadFile();
+			}
+		};
+	}
 
 	@Listen('updateSubItemState')
 	hideSubItemConfig() {
@@ -94,8 +113,16 @@ export class CreateConfig {
 	}
 
 	async loadFile() {
+		if (!state.currentFile) {
+			return;
+		}
+
+		const tabId = this.tabId;
+		await chrome.scripting.insertCSS({ target: { tabId }, files: ['css/inject.css'] });
+		await chrome.scripting.executeScript({ target: { tabId }, files: ['content-script.js'] });
+
 		try {
-			if (state.currentFile?.triggerType === 'load-file') {
+			if (state.currentFile.triggerType === 'load-file') {
 				const fileName = state.currentFile.name;
 				const fileItem = await new Promise((resolve) => {
 					chrome.storage.local.get(fileName, (items) => resolve(items));
@@ -113,17 +140,18 @@ export class CreateConfig {
 	}
 
 	addPageLoadListener() {
-		chrome.runtime.onMessage.addListener((message) => {
-			if (message.type === 'page-loaded') {
-				this.loadFile();
-			}
-		});
+		chrome.runtime.onMessage.addListener(this.pageLoadListener);
 	}
 
 	async componentWillLoad() {
-		this.loadFile();
+		await this.loadFile();
 		this.addPageLoadListener();
 	}
+
+	// disconnectedCallback() {
+	// 	console.log('CC-UNLOAD: ', this.tabId);
+	// 	chrome.runtime.onMessage.removeListener(this.pageLoadListener);
+	// }
 
 	componentDidLoad() {
 		// log tab view on eeach current/new-file open

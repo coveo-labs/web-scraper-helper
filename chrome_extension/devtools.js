@@ -6,5 +6,5 @@ chrome.devtools.panels.create(
   "www/index.html"
 );
 
-const port = chrome.runtime.connect({ name: "devtools" });
+const port = chrome.runtime.connect({ name: "web-scraper-helper-v2" });
 port.postMessage({ type: "devtools-opened" });

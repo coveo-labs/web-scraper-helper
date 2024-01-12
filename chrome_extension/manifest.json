@@ -16,12 +16,25 @@
 	"content_scripts": [
 		{
 			"run_at": "document_end",
-			"matches": ["http://*/*", "https://*/*"],
-			"js": ["content-script.js"],
-			"css": ["css/inject.css"],
+			"matches": [
+				"http://*/*",
+				"https://*/*"
+			],
+			"js": [
+				"content-reload.js"
+			],
+			"css": [
+				"css/inject.css"
+			],
 			"all_frames": false
 		}
 	],
-	"permissions": ["scripting", "storage", "activeTab"],
-	"host_permissions": ["<all_urls>"]
+	"permissions": [
+		"scripting",
+		"storage",
+		"activeTab"
+	],
+	"host_permissions": [
+		"<all_urls>"
+	]
 }

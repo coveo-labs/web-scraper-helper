@@ -5,6 +5,11 @@ import logo from '../../assets/icon/CoveoLogo.svg';
 import state from '../store';
 import { initializeAmplitude, logEvent } from '../analytics';
 
+function injectedFunction(tabId: number) {
+	(window as any).__WSH_tabid = tabId;
+	// console.log('set tabID: ', (window as any).__WSH_tabid);
+}
+
 @Component({
 	tag: 'app-root',
 	styleUrl: 'app-root.scss',
@@ -14,6 +19,11 @@ export class AppRoot {
 	@State() version: string = '';
 
 	componentDidLoad() {
+		const tabId = chrome.devtools?.inspectedWindow?.tabId;
+		// chrome.scripting.executeScript({ target: { tabId }, files: ['content-script.js'] });
+		// chrome.scripting.insertCSS({ target: { tabId }, files: ['css/inject.css'] });
+		chrome.scripting.executeScript({ target: { tabId }, func: injectedFunction, args: [tabId] });
+
 		initializeAmplitude();
 		try {
 			let manifest = chrome.runtime.getManifest();
