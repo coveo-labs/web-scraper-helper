@@ -25,6 +25,7 @@ export class AppRoot {
 			this.checkTab();
 		} catch (e) {
 			// 'chrome' is undefined in unit tests.
+			logEvent('error app init', e);
 		}
 	}
 

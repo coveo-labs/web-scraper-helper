@@ -136,6 +136,7 @@ function updateState(newState, hasChanges?: boolean): boolean {
 		}
 	} catch (error) {
 		console.log(error);
+		logEvent('error state update', error);
 		return true;
 	}
 
@@ -296,6 +297,7 @@ const sendMessageToContentScript = (message: any, callback: any = null): any => 
 		chrome.tabs.sendMessage(tabId, { tabId, ...message }, null, callback);
 	} catch (e) {
 		console.log('sendMessage-error:', e);
+		logEvent('error send message', e);
 	}
 };
 

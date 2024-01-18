@@ -33,15 +33,19 @@ export class CreateConfig {
 	private pageLoadListener: (message: any, sender: any) => void;
 
 	async componentDidLoad() {
-		this.addPageLoadListener();
-		await this.loadFile();
-		// log tab view on eeach current/new-file open
-		logEvent('viewed elements to exclude');
+		try {
+			this.addPageLoadListener();
+			await this.loadFile();
+			// log tab view on eeach current/new-file open
+			logEvent('viewed elements to exclude');
 
-		// listeners for changes
-		['name', 'exclude', 'metadata', 'subItems'].forEach((key) => {
-			this._unsubscribes.push(onStateChange(key, () => this.setAutoSave()));
-		});
+			// listeners for changes
+			['name', 'exclude', 'metadata', 'subItems'].forEach((key) => {
+				this._unsubscribes.push(onStateChange(key, () => this.setAutoSave()));
+			});
+		} catch (e) {
+			logEvent('error file init', e);
+		}
 	}
 
 	disconnectedCallback() {
@@ -135,6 +139,7 @@ export class CreateConfig {
 			logEvent('completed file edit', getScraperConfigMetrics());
 		} catch (e) {
 			console.log(e);
+			logEvent('error file save', e);
 		}
 	}
 
@@ -162,6 +167,7 @@ export class CreateConfig {
 			}
 		} catch (e) {
 			console.log('LoadFile: error', e);
+			logEvent('error file load', e);
 		}
 	}
 
