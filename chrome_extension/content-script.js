@@ -379,5 +379,22 @@ if (!window.__WSH_content_script_loaded) {
     });
 
     chrome.runtime.sendMessage({ newPage: 1 }, (res) => { console.log('RES:', res); });
+
+    if (typeof __wsh_reload === 'undefined') {
+      function __wsh_reload() {
+        chrome.runtime.sendMessage({ type: 'page-loaded' });
+      }
+
+      let __wsh_lastUrl = location.href;
+      new MutationObserver(() => {
+        const url = location.href;
+        if (url !== __wsh_lastUrl) {
+          __wsh_lastUrl = url;
+          setTimeout(__wsh_reload, 500);
+        }
+      }).observe(document, { subtree: true, childList: true });
+    }
+
+    __wsh_reload();
   };
 }
