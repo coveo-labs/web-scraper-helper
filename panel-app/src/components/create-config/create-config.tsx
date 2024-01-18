@@ -1,5 +1,17 @@
 import { Component, Host, Listen, State, h } from '@stencil/core';
-import state, { addExcludedItem, addMetadataItem, addSubItem, addToRecentFiles, formatState, removeSubItem, resetStore, sendMessageToContentScript, updateGlobalName, updateState } from '../store';
+import state, {
+	addExcludedItem,
+	addMetadataItem,
+	addSubItem,
+	addToRecentFiles,
+	formatState,
+	onChange as onStateChange,
+	removeSubItem,
+	resetStore,
+	sendMessageToContentScript,
+	updateGlobalName,
+	updateState,
+} from '../store';
 import { alertController, toastController } from '@ionic/core';
 import infoToken from '../../assets/icon/InfoToken.svg';
 import { SubItem } from '../types';
@@ -15,6 +27,9 @@ export class CreateConfig {
 	@State() subItem: SubItem;
 	@State() activeTab: number = 0;
 
+	_dirtyTimeout: any;
+	_unsubscribes: any[] = [];
+
 	private pageLoadListener: (message: any, sender: any) => void;
 
 	async componentDidLoad() {
@@ -22,11 +37,18 @@ export class CreateConfig {
 		await this.loadFile();
 		// log tab view on eeach current/new-file open
 		logEvent('viewed elements to exclude');
+
+		// listeners for changes
+		['name', 'exclude', 'metadata', 'subItems'].forEach((key) => {
+			this._unsubscribes.push(onStateChange(key, () => this.setAutoSave()));
+		});
 	}
 
 	disconnectedCallback() {
 		try {
 			chrome.runtime.onMessage.removeListener(this.pageLoadListener);
+			clearTimeout(this._dirtyTimeout);
+			this._unsubscribes.forEach((unsubscribe) => unsubscribe());
 		} catch (e) {
 			console.error('create-config :::: disconnectedCallback - ERROR', e);
 		}
@@ -57,6 +79,14 @@ export class CreateConfig {
 		sendMessageToContentScript({ type: 'remove-excluded-on-file-close' });
 	}
 
+	setAutoSave() {
+		// changes were done, set a timeout to save automatically
+		if (state.hasChanges) {
+			clearTimeout(this._dirtyTimeout);
+			this._dirtyTimeout = setTimeout(() => this.onSave(), 10000);
+		}
+	}
+
 	async onDone() {
 		if (state.hasChanges) {
 			const alert = await alertController.create({
@@ -85,6 +115,7 @@ export class CreateConfig {
 	}
 
 	onSave() {
+		clearTimeout(this._dirtyTimeout);
 		try {
 			chrome.storage.local.set({
 				[state.currentFile.name]: JSON.stringify(formatState(), null, 2),

@@ -307,6 +307,7 @@ export {
 	addToRecentFiles,
 	formatState,
 	getMetadataResults,
+	onChange,
 	removeExcludedItem,
 	removeMetadataItem,
 	removeSubItem,
