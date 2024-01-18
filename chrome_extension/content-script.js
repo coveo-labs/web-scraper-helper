@@ -5,6 +5,9 @@
 if (!window.__WSH_content_script_loaded) {
   window.__WSH_content_script_loaded = true;
 
+  const wsh_CLASSES = { EXCLUDE: 'web-scraper-helper-exclude', PARENT: 'web-scraper-subItem-parentSelector' };
+  const wsh_STATES = { INVALID: 'Invalid', VALID: 'Valid', NONE: 'No element found' };
+
   class RulePath {
     constructor(spec, title, subItemName, container) {
       this.path = spec.path;
@@ -32,7 +35,7 @@ if (!window.__WSH_content_script_loaded) {
       let elements = this.getElements(true);
       (elements || []).forEach(e => {
         if (e && e.classList) {
-          e.classList.add('web-scraper-helper-exclude');
+          e.classList.add(wsh_CLASSES.EXCLUDE);
         }
       });
     }
@@ -258,7 +261,7 @@ if (!window.__WSH_content_script_loaded) {
         parents.forEach(parent => {
           const oldElements = createRule(oldItem, null, null, parent).getElements(true);
           oldElements?.forEach(element => {
-            element.classList.remove('web-scraper-helper-exclude');
+            element.classList.remove(wsh_CLASSES.EXCLUDE);
           });
         });
       }
@@ -266,7 +269,7 @@ if (!window.__WSH_content_script_loaded) {
       parents.forEach(parent => {
         let newElements = createRule(newItem, null, null, parent).getElements(true);;
         newElements?.forEach(element => {
-          element?.classList?.add('web-scraper-helper-exclude');
+          element?.classList?.add(wsh_CLASSES.EXCLUDE);
         });
       });
 
@@ -277,9 +280,9 @@ if (!window.__WSH_content_script_loaded) {
 
   function removePreviouslyExcludedStyles() {
     try {
-      document.querySelectorAll('.web-scraper-helper-exclude, .web-scraper-subItem-parentSelector').forEach(e => {
+      document.querySelectorAll(`.${wsh_CLASSES.EXCLUDE}, .${wsh_CLASSES.PARENT}`).forEach(e => {
         if (e && e.classList) {
-          e.classList.remove('web-scraper-helper-exclude', 'web-scraper-subItem-parentSelector');
+          e.classList.remove(wsh_CLASSES.EXCLUDE, wsh_CLASSES.PARENT);
         }
       });
     } catch (e) {
@@ -291,11 +294,6 @@ if (!window.__WSH_content_script_loaded) {
   window.onload = () => {
 
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      // console.log('onMessage', window.__WSH_tabid, message, sender);
-      // if (!(window.__WSH_tabid && window.__WSH_tabid === message.tabId)) {
-      //   console.log('Message is not for this tab, ignoring.', window.__WSH_tabid, '!==', message.tabId);
-      //   return;
-      // }
       console.log('onMessage', window.__WSH_tabid, message);
 
       if (message.type === 'exclude-selector') {
@@ -303,23 +301,20 @@ if (!window.__WSH_content_script_loaded) {
         applyStylesToElements(newItem, oldItem, parentSelector);
       }
       else if (message.type === 'validate-selector') {
-        let response = 'Invalid';
-        const { type, selector } = message.payload;
-
+        let response = wsh_STATES.INVALID;
         try {
           const elements = createRule(message.payload).getElements(true);
           if (elements === null) {
-            response = 'Invalid';
+            response = wsh_STATES.INVALID;
           }
           else if (elements?.length > 0) {
-            response = 'Valid';
+            response = wsh_STATES.VALID;
           } else {
-            response = 'No element found';
+            response = wsh_STATES.NONE;
           }
         } catch (e) {
-          response = 'Invalid';
+          response = wsh_STATES.INVALID;
         }
-
         sendResponse(response);
       }
       else if (message.type === 'update-excludeItem-onLoad') {
@@ -336,7 +331,7 @@ if (!window.__WSH_content_script_loaded) {
           parents.forEach(parent => {
             const elements = createRule(item, null, null, parent).getElements(true);
             elements?.forEach(element => {
-              element.classList?.remove('web-scraper-helper-exclude');
+              element.classList?.remove(wsh_CLASSES.EXCLUDE);
             });
           });
         } catch (e) {
@@ -355,7 +350,7 @@ if (!window.__WSH_content_script_loaded) {
           for (const [, value] of Object.entries(metadata)) {
             const { name } = value;
             const rule = createRule(value, null, null, parent);
-            result.push({ "name": name, "values": rule.getElements() });
+            result.push({ name, values: rule.getElements() });
           }
           results.push(result);
         });
@@ -367,18 +362,18 @@ if (!window.__WSH_content_script_loaded) {
         if (oldSelector && oldSelector.path !== newSelector.path) {
           const oldElements = createRule(oldSelector).getElements(true);
           oldElements?.forEach(element => {
-            element.classList.remove('web-scraper-subItem-parentSelector');
+            element.classList.remove(wsh_CLASSES.PARENT);
           });
         }
 
         const newElements = createRule(newSelector).getElements(true);
         newElements?.forEach(element => {
-          element.classList.add('web-scraper-subItem-parentSelector');
+          element.classList.add(wsh_CLASSES.PARENT);
         });
       }
       else if (message.type === 'remove-parentSelector-style') {
-        document.querySelectorAll('.web-scraper-subItem-parentSelector').forEach(element => {
-          element.classList.remove('web-scraper-subItem-parentSelector');
+        document.querySelectorAll(`.${wsh_CLASSES.PARENT}`).forEach(element => {
+          element.classList.remove(wsh_CLASSES.PARENT);
         });
       }
     });
