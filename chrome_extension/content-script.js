@@ -250,97 +250,6 @@ if (!window.__WSH_content_script_loaded) {
     return parents;
   };
 
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (!(window.__WSH_tabid && window.__WSH_tabid === message.tabId)) {
-      // console.log('Message is not for this tab, ignoring.', window.__WSH_tabid, '!==', message.tabId);
-      return;
-    }
-    // console.log('onMessage', window.__WSH_tabid, message);
-
-    if (message.type === 'exclude-selector') {
-      const { newItem, oldItem, parentSelector } = message.payload;
-      applyStylesToElements(newItem, oldItem, parentSelector);
-    }
-    if (message.type === 'validate-selector') {
-      let response = 'Invalid';
-      const { type, selector } = message.payload;
-
-      try {
-        const elements = createRule(message.payload).getElements(true);
-        if (elements === null) {
-          response = 'Invalid';
-        }
-        else if (elements?.length > 0) {
-          response = 'Valid';
-        } else {
-          response = 'No element found';
-        }
-      } catch (e) {
-        response = 'Invalid';
-      }
-
-      sendResponse(response);
-    }
-    if (message.type === 'update-excludeItem-onLoad') {
-      const { exclude, subItems } = message.payload;
-      exclude.length && exclude.map((element) => applyStylesToElements(element));
-      subItems.map(subItem => {
-        subItem.exclude.length && subItem.exclude.map((element) => applyStylesToElements(element, null, { type: subItem.type, path: subItem.path }));
-      });
-    }
-    if (message.type === 'remove-exclude-selector') {
-      const { item, parentSelector } = message.payload;
-      try {
-        let parents = getParentsElements(parentSelector);
-        parents.forEach(parent => {
-          const elements = createRule(item, null, null, parent).getElements(true);
-          elements?.forEach(element => {
-            element.classList?.remove('web-scraper-helper-exclude');
-          });
-        });
-      } catch (e) {
-        console.log(e);
-      }
-    }
-    if (message.type === 'remove-excluded-on-file-close') {
-      removePreviouslyExcludedStyles();
-    }
-    if (message.type === 'metadata-results') {
-      const { metadata, parentSelector } = message.payload;
-      const results = [];
-      let parents = getParentsElements(parentSelector);
-      parents.forEach(parent => {
-        const result = [];
-        for (const [, value] of Object.entries(metadata)) {
-          const { name } = value;
-          const rule = createRule(value, null, null, parent);
-          result.push({ "name": name, "values": rule.getElements() });
-        }
-        results.push(result);
-      });
-      console.log('metadata-result-array', message, results);
-      sendResponse(results);
-    }
-    if (message.type === 'update-parentSelector-style') {
-      const { newSelector, oldSelector } = message.payload;
-      if (oldSelector && oldSelector.path !== newSelector.path) {
-        const oldElements = createRule(oldSelector).getElements(true);
-        oldElements?.forEach(element => {
-          element.classList.remove('web-scraper-subItem-parentSelector');
-        });
-      }
-
-      const newElements = createRule(newSelector).getElements(true);
-      newElements?.forEach(element => {
-        element.classList.add('web-scraper-subItem-parentSelector');
-      });
-    }
-    if (message.type === 'remove-parentSelector-style') {
-      document.querySelectorAll('.web-scraper-subItem-parentSelector').forEach(element => {
-        element.classList.remove('web-scraper-subItem-parentSelector');
-      });
-    }
-  });
 
   function applyStylesToElements(newItem, oldItem = null, parentSelector = null) {
     try {
@@ -378,4 +287,102 @@ if (!window.__WSH_content_script_loaded) {
     }
   }
 
+
+  window.onload = () => {
+
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      // console.log('onMessage', window.__WSH_tabid, message, sender);
+      // if (!(window.__WSH_tabid && window.__WSH_tabid === message.tabId)) {
+      //   console.log('Message is not for this tab, ignoring.', window.__WSH_tabid, '!==', message.tabId);
+      //   return;
+      // }
+      console.log('onMessage', window.__WSH_tabid, message);
+
+      if (message.type === 'exclude-selector') {
+        const { newItem, oldItem, parentSelector } = message.payload;
+        applyStylesToElements(newItem, oldItem, parentSelector);
+      }
+      else if (message.type === 'validate-selector') {
+        let response = 'Invalid';
+        const { type, selector } = message.payload;
+
+        try {
+          const elements = createRule(message.payload).getElements(true);
+          if (elements === null) {
+            response = 'Invalid';
+          }
+          else if (elements?.length > 0) {
+            response = 'Valid';
+          } else {
+            response = 'No element found';
+          }
+        } catch (e) {
+          response = 'Invalid';
+        }
+
+        sendResponse(response);
+      }
+      else if (message.type === 'update-excludeItem-onLoad') {
+        const { exclude, subItems } = message.payload;
+        exclude.length && exclude.map((element) => applyStylesToElements(element));
+        subItems.map(subItem => {
+          subItem.exclude.length && subItem.exclude.map((element) => applyStylesToElements(element, null, { type: subItem.type, path: subItem.path }));
+        });
+      }
+      else if (message.type === 'remove-exclude-selector') {
+        const { item, parentSelector } = message.payload;
+        try {
+          let parents = getParentsElements(parentSelector);
+          parents.forEach(parent => {
+            const elements = createRule(item, null, null, parent).getElements(true);
+            elements?.forEach(element => {
+              element.classList?.remove('web-scraper-helper-exclude');
+            });
+          });
+        } catch (e) {
+          console.log(e);
+        }
+      }
+      else if (message.type === 'remove-excluded-on-file-close') {
+        removePreviouslyExcludedStyles();
+      }
+      else if (message.type === 'metadata-results') {
+        const { metadata, parentSelector } = message.payload;
+        const results = [];
+        let parents = getParentsElements(parentSelector);
+        parents.forEach(parent => {
+          const result = [];
+          for (const [, value] of Object.entries(metadata)) {
+            const { name } = value;
+            const rule = createRule(value, null, null, parent);
+            result.push({ "name": name, "values": rule.getElements() });
+          }
+          results.push(result);
+        });
+        console.log('metadata-result-array', message, results);
+        sendResponse(results);
+      }
+      else if (message.type === 'update-parentSelector-style') {
+        const { newSelector, oldSelector } = message.payload;
+        if (oldSelector && oldSelector.path !== newSelector.path) {
+          const oldElements = createRule(oldSelector).getElements(true);
+          oldElements?.forEach(element => {
+            element.classList.remove('web-scraper-subItem-parentSelector');
+          });
+        }
+
+        const newElements = createRule(newSelector).getElements(true);
+        newElements?.forEach(element => {
+          element.classList.add('web-scraper-subItem-parentSelector');
+        });
+      }
+      else if (message.type === 'remove-parentSelector-style') {
+        document.querySelectorAll('.web-scraper-subItem-parentSelector').forEach(element => {
+          element.classList.remove('web-scraper-subItem-parentSelector');
+        });
+      }
+    });
+
+    chrome.runtime.sendMessage({ newPage: 1 }, (res) => { console.log('RES:', res); });
+  };
 }

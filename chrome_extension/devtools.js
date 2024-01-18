@@ -5,6 +5,3 @@ chrome.devtools.panels.create(
   "icons/16.png",
   "www/index.html"
 );
-
-const port = chrome.runtime.connect({ name: "web-scraper-helper-v2" });
-port.postMessage({ type: "devtools-opened" });

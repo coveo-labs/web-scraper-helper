@@ -5,11 +5,6 @@ import infoToken from '../../assets/icon/InfoToken.svg';
 import { SubItem } from '../types';
 import { getScraperConfigMetrics, logEvent } from '../analytics';
 
-// This function is run in the context of the inspected page, to set the tabID used in the event handlers.
-function injectedFunction(tabId: number) {
-	(window as any).__WSH_tabid = tabId;
-}
-
 @Component({
 	tag: 'create-config',
 	styleUrl: 'create-config.scss',
@@ -20,18 +15,21 @@ export class CreateConfig {
 	@State() subItem: SubItem;
 	@State() activeTab: number = 0;
 
-	private tabId: number = chrome.devtools?.inspectedWindow?.tabId;
 	private pageLoadListener: (message: any, sender: any) => void;
 
-	constructor() {
-		this.pageLoadListener = (message) => {
-			if (message.type === 'page-loaded') {
-				const tabId = this.tabId;
-				chrome.scripting.executeScript({ target: { tabId }, files: ['content-script.js'] });
-				chrome.scripting.executeScript({ target: { tabId }, func: injectedFunction, args: [this.tabId] });
-				this.loadFile();
-			}
-		};
+	async componentDidLoad() {
+		this.addPageLoadListener();
+		await this.loadFile();
+		// log tab view on eeach current/new-file open
+		logEvent('viewed elements to exclude');
+	}
+
+	disconnectedCallback() {
+		try {
+			chrome.runtime.onMessage.removeListener(this.pageLoadListener);
+		} catch (e) {
+			console.error('create-config :::: disconnectedCallback - ERROR', e);
+		}
 	}
 
 	@Listen('updateSubItemState')
@@ -117,9 +115,6 @@ export class CreateConfig {
 			return;
 		}
 
-		const tabId = this.tabId;
-		await chrome.scripting.executeScript({ target: { tabId }, files: ['content-script.js'] });
-
 		try {
 			if (state.currentFile.triggerType === 'load-file') {
 				const fileName = state.currentFile.name;
@@ -139,17 +134,14 @@ export class CreateConfig {
 	}
 
 	addPageLoadListener() {
+		this.pageLoadListener = (message) => {
+			console.log('pageLoadListener:', message);
+			if (message.type === 'page-loaded' || message.newPage) {
+				this.loadFile();
+			}
+		};
+
 		chrome.runtime.onMessage.addListener(this.pageLoadListener);
-	}
-
-	async componentWillLoad() {
-		await this.loadFile();
-		this.addPageLoadListener();
-	}
-
-	componentDidLoad() {
-		// log tab view on eeach current/new-file open
-		logEvent('viewed elements to exclude');
 	}
 
 	async showPopover(className) {
