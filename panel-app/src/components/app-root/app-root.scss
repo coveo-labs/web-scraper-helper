@@ -42,3 +42,18 @@
 	bottom: 0;
 	padding: 3px 8px;
 }
+
+#tab-error {
+	background: #ee8279;
+	border-radius: 12px;
+	font-size: 18px;
+	margin: 20px;
+	padding: 10px 20px 20px;
+
+	code {
+		color: #1372ec;
+	}
+	ion-icon {
+		vertical-align: middle;
+	}
+}

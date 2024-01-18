@@ -46,8 +46,8 @@ export class CreateConfig {
 
 	disconnectedCallback() {
 		try {
-			chrome.runtime.onMessage.removeListener(this.pageLoadListener);
 			clearTimeout(this._dirtyTimeout);
+			chrome.runtime.onMessage.removeListener(this.pageLoadListener);
 			this._unsubscribes.forEach((unsubscribe) => unsubscribe());
 		} catch (e) {
 			console.error('create-config :::: disconnectedCallback - ERROR', e);
@@ -88,6 +88,7 @@ export class CreateConfig {
 	}
 
 	async onDone() {
+		clearTimeout(this._dirtyTimeout);
 		if (state.hasChanges) {
 			const alert = await alertController.create({
 				header: 'Unsaved Changes',
@@ -160,7 +161,7 @@ export class CreateConfig {
 				sendMessageToContentScript({ type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude, subItems: state.subItems } });
 			}
 		} catch (e) {
-			console.log(e);
+			console.log('LoadFile: error', e);
 		}
 	}
 
@@ -367,7 +368,6 @@ export class CreateConfig {
 								<ion-img id="infoToken-img" src={infoToken}></ion-img>
 							</a>
 						</div>
-						<div class="header_sub-text">Start creating Web Scraper configuration for this file.</div>
 					</div>
 					<div class="header_btn">
 						<ion-button onClick={() => this.onDone()}>Done</ion-button>

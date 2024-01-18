@@ -390,11 +390,11 @@ if (!window.__WSH_content_script_loaded) {
         const url = location.href;
         if (url !== __wsh_lastUrl) {
           __wsh_lastUrl = url;
-          setTimeout(__wsh_reload, 500);
+          setTimeout(() => { (typeof __wsh_reload !== 'undefined') && __wsh_reload(); }, 500);
         }
       }).observe(document, { subtree: true, childList: true });
     }
 
-    __wsh_reload();
+    (typeof __wsh_reload !== 'undefined') && __wsh_reload();
   };
 }

@@ -292,10 +292,10 @@ const addToRecentFiles = async (filename: string): Promise<string[]> => {
 const sendMessageToContentScript = (message: any, callback: any = null): any => {
 	try {
 		const tabId = chrome.devtools?.inspectedWindow?.tabId;
-		console.log('sendMessageToContentScript:', tabId, message);
+		// console.log('sendMessageToContentScript:', tabId, message);
 		chrome.tabs.sendMessage(tabId, { tabId, ...message }, null, callback);
 	} catch (e) {
-		console.log(e);
+		console.log('sendMessage-error:', e);
 	}
 };
 
