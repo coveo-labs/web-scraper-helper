@@ -28,6 +28,11 @@ export function logEvent(name: string, payload = {}) {
 	amplitude.track(name, payload);
 }
 
+export function logErrorEvent(name: string, error: Error) {
+	logEvent(name, { message: error.message, stack: error.stack });
+	console.error(name, { message: error.message, stack: error.stack }, error);
+}
+
 export function getScraperConfigMetrics() {
 	let payload: PayloadForFileSave = { for: 0, exclude: 0, metadata: 0, subItems: 0, excludeSelectors: [], name: 0 };
 	let formattedState = formatState();

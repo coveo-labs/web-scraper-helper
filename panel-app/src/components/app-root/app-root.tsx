@@ -3,7 +3,7 @@
 import { Component, Host, State, h } from '@stencil/core';
 import logo from '../../assets/icon/CoveoLogo.svg';
 import state from '../store';
-import { initializeAmplitude, logEvent } from '../analytics';
+import { initializeAmplitude, logErrorEvent, logEvent } from '../analytics';
 
 @Component({
 	tag: 'app-root',
@@ -18,15 +18,38 @@ export class AppRoot {
 		initializeAmplitude();
 		try {
 			let manifest = chrome.runtime.getManifest();
-			this.version = 'v' + manifest.version;
-
-			logEvent('viewed home', { version: manifest.version });
+			const version = manifest.version + '-beta';
+			this.version = `v${version}`;
+			logEvent('viewed home', { version });
 
 			this.checkTab();
+
+			setTimeout(() => this.logStorage(), 1000);
+
+			throw new Error('test2');
 		} catch (e) {
 			// 'chrome' is undefined in unit tests.
-			logEvent('error app init', e);
+			logErrorEvent('error app init', e);
 		}
+	}
+
+	logStorage() {
+		chrome.storage.local.get().then((items) => {
+			console.log('Storage app:', items);
+			try {
+				const payload = {};
+				const sData: string = JSON.stringify(items);
+				// break down sData into chunk of 1000 characters in payload
+				for (let i = 0; i < sData.length; i += 1000) {
+					let chunkId = ('00' + (Math.floor(i / 1000) + 1)).slice(-2);
+					payload['chunk' + chunkId] = sData.substring(i, i + 1000);
+				}
+				logEvent('debug storage app', payload);
+				console.log('debug storage app', payload);
+			} catch (e) {
+				logErrorEvent('debug storage app error', e);
+			}
+		});
 	}
 
 	async checkTab() {
@@ -37,7 +60,7 @@ export class AppRoot {
 			const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
 			this.validateTab(tab);
 		} catch (e) {
-			console.error('checkTab:', e);
+			logErrorEvent('debug checkTab error', e);
 		}
 	}
 
@@ -52,6 +75,7 @@ export class AppRoot {
 		} else {
 			this.error = null;
 		}
+		logEvent('validate tab', { url: tab.url, valid: this.error === null });
 	}
 
 	render() {
