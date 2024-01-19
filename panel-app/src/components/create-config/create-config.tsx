@@ -87,7 +87,11 @@ export class CreateConfig {
 		// changes were done, set a timeout to save automatically
 		if (state.hasChanges) {
 			clearTimeout(this._dirtyTimeout);
-			this._dirtyTimeout = setTimeout(() => this.onSave(), 10000);
+			this._dirtyTimeout = setTimeout(() => {
+				if (state.hasChanges) {
+					this.onSave();
+				}
+			}, 10000);
 		}
 	}
 
