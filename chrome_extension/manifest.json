@@ -2,7 +2,7 @@
 	"manifest_version": 3,
 	"name": "Web Scraper Helper for Coveo Web Sources",
 	"short_name": "Web Scraper Helper",
-	"version": "2.0.2",
+	"version": "2.0.3",
 	"description": "Helper to quickly create and test web scraping configurations for Coveo Cloud V2 sources.",
 	"icons": {
 		"16": "icons/16.png",
@@ -21,7 +21,7 @@
 				"https://*/*"
 			],
 			"js": [
-				"content-reload.js"
+				"content-script.js"
 			],
 			"css": [
 				"css/inject.css"
@@ -30,9 +30,9 @@
 		}
 	],
 	"permissions": [
-		"scripting",
+		"activeTab",
 		"storage",
-		"activeTab"
+		"tabs"
 	],
 	"host_permissions": [
 		"<all_urls>"

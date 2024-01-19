@@ -1,14 +1,21 @@
 import { Component, Host, Listen, State, h } from '@stencil/core';
-import state, { addExcludedItem, addMetadataItem, addSubItem, addToRecentFiles, formatState, removeSubItem, resetStore, sendMessageToContentScript, updateGlobalName, updateState } from '../store';
+import state, {
+	addExcludedItem,
+	addMetadataItem,
+	addSubItem,
+	addToRecentFiles,
+	formatState,
+	onChange as onStateChange,
+	removeSubItem,
+	resetStore,
+	sendMessageToContentScript,
+	updateGlobalName,
+	updateState,
+} from '../store';
 import { alertController, toastController } from '@ionic/core';
 import infoToken from '../../assets/icon/InfoToken.svg';
 import { SubItem } from '../types';
 import { getScraperConfigMetrics, logEvent } from '../analytics';
-
-// This function is run in the context of the inspected page, to set the tabID used in the event handlers.
-function injectedFunction(tabId: number) {
-	(window as any).__WSH_tabid = tabId;
-}
 
 @Component({
 	tag: 'create-config',
@@ -20,18 +27,35 @@ export class CreateConfig {
 	@State() subItem: SubItem;
 	@State() activeTab: number = 0;
 
-	private tabId: number = chrome.devtools?.inspectedWindow?.tabId;
+	_dirtyTimeout: any;
+	_unsubscribes: any[] = [];
+
 	private pageLoadListener: (message: any, sender: any) => void;
 
-	constructor() {
-		this.pageLoadListener = (message) => {
-			if (message.type === 'page-loaded') {
-				const tabId = this.tabId;
-				chrome.scripting.executeScript({ target: { tabId }, files: ['content-script.js'] });
-				chrome.scripting.executeScript({ target: { tabId }, func: injectedFunction, args: [this.tabId] });
-				this.loadFile();
-			}
-		};
+	async componentDidLoad() {
+		try {
+			this.addPageLoadListener();
+			await this.loadFile();
+			// log tab view on eeach current/new-file open
+			logEvent('viewed elements to exclude');
+
+			// listeners for changes
+			['name', 'exclude', 'metadata', 'subItems'].forEach((key) => {
+				this._unsubscribes.push(onStateChange(key, () => this.setAutoSave()));
+			});
+		} catch (e) {
+			logEvent('error file init', e);
+		}
+	}
+
+	disconnectedCallback() {
+		try {
+			clearTimeout(this._dirtyTimeout);
+			chrome.runtime.onMessage.removeListener(this.pageLoadListener);
+			this._unsubscribes.forEach((unsubscribe) => unsubscribe());
+		} catch (e) {
+			console.error('create-config :::: disconnectedCallback - ERROR', e);
+		}
 	}
 
 	@Listen('updateSubItemState')
@@ -59,7 +83,16 @@ export class CreateConfig {
 		sendMessageToContentScript({ type: 'remove-excluded-on-file-close' });
 	}
 
+	setAutoSave() {
+		// changes were done, set a timeout to save automatically
+		if (state.hasChanges) {
+			clearTimeout(this._dirtyTimeout);
+			this._dirtyTimeout = setTimeout(() => this.onSave(), 10000);
+		}
+	}
+
 	async onDone() {
+		clearTimeout(this._dirtyTimeout);
 		if (state.hasChanges) {
 			const alert = await alertController.create({
 				header: 'Unsaved Changes',
@@ -87,6 +120,7 @@ export class CreateConfig {
 	}
 
 	onSave() {
+		clearTimeout(this._dirtyTimeout);
 		try {
 			chrome.storage.local.set({
 				[state.currentFile.name]: JSON.stringify(formatState(), null, 2),
@@ -105,6 +139,7 @@ export class CreateConfig {
 			logEvent('completed file edit', getScraperConfigMetrics());
 		} catch (e) {
 			console.log(e);
+			logEvent('error file save', e);
 		}
 	}
 
@@ -116,9 +151,6 @@ export class CreateConfig {
 		if (!state.currentFile) {
 			return;
 		}
-
-		const tabId = this.tabId;
-		await chrome.scripting.executeScript({ target: { tabId }, files: ['content-script.js'] });
 
 		try {
 			if (state.currentFile.triggerType === 'load-file') {
@@ -134,22 +166,20 @@ export class CreateConfig {
 				sendMessageToContentScript({ type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude, subItems: state.subItems } });
 			}
 		} catch (e) {
-			console.log(e);
+			console.log('LoadFile: error', e);
+			logEvent('error file load', e);
 		}
 	}
 
 	addPageLoadListener() {
+		this.pageLoadListener = (message) => {
+			console.log('pageLoadListener:', message);
+			if (message.type === 'page-loaded' || message.newPage) {
+				this.loadFile();
+			}
+		};
+
 		chrome.runtime.onMessage.addListener(this.pageLoadListener);
-	}
-
-	async componentWillLoad() {
-		await this.loadFile();
-		this.addPageLoadListener();
-	}
-
-	componentDidLoad() {
-		// log tab view on eeach current/new-file open
-		logEvent('viewed elements to exclude');
 	}
 
 	async showPopover(className) {
@@ -344,7 +374,6 @@ export class CreateConfig {
 								<ion-img id="infoToken-img" src={infoToken}></ion-img>
 							</a>
 						</div>
-						<div class="header_sub-text">Start creating Web Scraper configuration for this file.</div>
 					</div>
 					<div class="header_btn">
 						<ion-button onClick={() => this.onDone()}>Done</ion-button>
