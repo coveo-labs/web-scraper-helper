@@ -18,7 +18,7 @@ export class AppRoot {
 		initializeAmplitude();
 		try {
 			let manifest = chrome.runtime.getManifest();
-			const version = manifest.version + '-beta';
+			const version = manifest.version;
 			this.version = `v${version}`;
 			logEvent('viewed home', { version });
 
