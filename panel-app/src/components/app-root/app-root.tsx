@@ -23,31 +23,10 @@ export class AppRoot {
 			logEvent('viewed home', { version });
 
 			this.checkTab();
-
-			setTimeout(() => this.logStorage(), 1000);
 		} catch (e) {
 			// 'chrome' is undefined in unit tests.
 			logErrorEvent('error app init', e);
 		}
-	}
-
-	logStorage() {
-		chrome.storage.local.get().then((items) => {
-			console.log('Storage app:', items);
-			try {
-				const payload = {};
-				const sData: string = JSON.stringify(items);
-				// break down sData into chunk of 1000 characters in payload
-				for (let i = 0; i < sData.length; i += 1000) {
-					let chunkId = ('00' + (Math.floor(i / 1000) + 1)).slice(-2);
-					payload['chunk' + chunkId] = sData.substring(i, i + 1000);
-				}
-				logEvent('debug storage app', payload);
-				console.log('debug storage app', payload);
-			} catch (e) {
-				logErrorEvent('debug storage app error', e);
-			}
-		});
 	}
 
 	async checkTab() {
@@ -58,12 +37,12 @@ export class AppRoot {
 			const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
 			this.validateTab(tab);
 		} catch (e) {
-			logErrorEvent('debug checkTab error', e);
+			logErrorEvent('checkTab error', e);
 		}
 	}
 
 	validateTab(tab: chrome.tabs.Tab) {
-		console.log('validateTab', tab.url, tab);
+		// console.log('validateTab', tab.url, tab);
 		if (!/https?:\/\/.+/.test(tab.url)) {
 			this.error = (
 				<span>
@@ -73,7 +52,7 @@ export class AppRoot {
 		} else {
 			this.error = null;
 		}
-		logEvent('validate tab', { url: tab.url, valid: this.error === null });
+		// logEvent('validate tab', { url: tab.url, valid: this.error === null });
 	}
 
 	render() {

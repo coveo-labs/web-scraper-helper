@@ -49,25 +49,6 @@ export class FileExplorer {
 		logEvent('completed create new file', getScraperConfigMetrics());
 	}
 
-	componentDidLoad() {
-		chrome.storage.local.get().then((items) => {
-			console.log('Storage file:', items);
-			try {
-				const payload = {};
-				const sData: string = JSON.stringify(items);
-				// break down sData into chunk of 1000 characters in payload
-				for (let i = 0; i < sData.length; i += 1000) {
-					let chunkId = ('00' + (Math.floor(i / 1000) + 1)).slice(-2);
-					payload['chunk' + chunkId] = sData.substring(i, i + 1000);
-				}
-				logEvent('debug storage file', payload);
-				console.log('debug storage file', payload);
-			} catch (e) {
-				logErrorEvent('debug storage file error', e);
-			}
-		});
-	}
-
 	async componentWillRender() {
 		try {
 			const items = await new Promise((resolve) => {
