@@ -14,6 +14,7 @@ const RECENT_FILES_ITEM_NAME = '__Recent__Files__';
 })
 export class FileExplorer {
 	@State() newFileName: string = '';
+	@State() newFileNameError: string = '';
 	@State() showModal = false;
 	@State() fileList = [];
 	@State() recentFiles = [];
@@ -168,6 +169,19 @@ export class FileExplorer {
 		await alert.present();
 	}
 
+	validateFilename(event) {
+		this.newFileName = (event.target as HTMLIonInputElement).value as string;
+		const filename = this.newFileName.trim();
+		if (!filename) {
+			this.newFileNameError = 'Name is required';
+		} else if ((this.fileList || []).map((i) => ('' + i).trim().toLowerCase()).includes(filename.toLowerCase())) {
+			this.newFileNameError = 'Name already exists';
+		} else {
+			this.newFileNameError = '';
+		}
+		return this.newFileNameError ? null : filename;
+	}
+
 	render() {
 		return (
 			<Host id="file-explorer">
@@ -202,39 +216,40 @@ export class FileExplorer {
 							<div>Create new file</div>
 							<ion-icon name="close-outline" onClick={() => (this.showModal = false)}></ion-icon>
 						</div>
-						<form
-							onSubmit={(e) => {
-								e.preventDefault();
-								this.onSaveClick();
-								return true;
-							}}
-						>
-							<div class="modal-content">
-								<div>Enter a name for your Web Scraper file.</div>
-								<ion-input
-									id="form-new-file-input-name"
-									required={true}
-									fill="outline"
-									placeholder="Name"
-									onIonInput={(event) => (this.newFileName = (event.target as HTMLIonInputElement).value as string)}
-									value={this.newFileName}
-								></ion-input>
-							</div>
-							<div class="modal-footer">
-								<ion-button
-									fill="outline"
-									onClick={() => {
-										this.showModal = false;
-										logEvent('cancelled create new file');
-									}}
-								>
-									Cancel
-								</ion-button>
-								<ion-button fill="outline" onClick={() => this.onSaveClick()} disabled={!this.newFileName}>
-									Save
-								</ion-button>
-							</div>
-						</form>
+						<div class="modal-content">
+							<div>Enter a name for your Web Scraper file.</div>
+							<ion-input
+								id="form-new-file-input-name"
+								class={this.newFileNameError ? 'ion-invalid ion-touched' : 'ion-valid'}
+								required={true}
+								fill="outline"
+								placeholder="Name"
+								onIonInput={(event) => this.validateFilename(event)}
+								onIonChange={(event) => {
+									let filename = this.validateFilename(event);
+									if (filename) {
+										this.newFileName = filename;
+										this.onSaveClick();
+									}
+								}}
+								value={this.newFileName}
+								errorText={this.newFileNameError}
+							></ion-input>
+						</div>
+						<div class="modal-footer">
+							<ion-button
+								fill="outline"
+								onClick={() => {
+									this.showModal = false;
+									logEvent('cancelled create new file');
+								}}
+							>
+								Cancel
+							</ion-button>
+							<ion-button fill="outline" onClick={() => this.onSaveClick()} disabled={!this.newFileName || this.newFileNameError !== ''}>
+								Save
+							</ion-button>
+						</div>
 					</ion-modal>
 				</div>
 			</Host>
