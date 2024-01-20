@@ -25,8 +25,6 @@ export class AppRoot {
 			this.checkTab();
 
 			setTimeout(() => this.logStorage(), 1000);
-
-			throw new Error('test2');
 		} catch (e) {
 			// 'chrome' is undefined in unit tests.
 			logErrorEvent('error app init', e);
