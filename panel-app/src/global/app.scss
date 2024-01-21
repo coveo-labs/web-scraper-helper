@@ -73,7 +73,7 @@ ion-modal#create-file-modal .modal-header ion-icon {
 
 ion-modal#create-file-modal .modal-content {
 	border-bottom: 1px solid #e5e8e8;
-	padding: 24px 32px;
+	padding: 26px 32px;
 	color: #565b66;
 	font-family: Gibson;
 	font-size: 14px;
@@ -81,6 +81,10 @@ ion-modal#create-file-modal .modal-content {
 	font-weight: 300;
 	line-height: 21px; /* 150% */
 	letter-spacing: 0.042px;
+
+	.input-bottom.sc-ion-input-md {
+		padding-top: 1px;
+	}
 }
 
 ion-modal#create-file-modal .modal-content ion-input {

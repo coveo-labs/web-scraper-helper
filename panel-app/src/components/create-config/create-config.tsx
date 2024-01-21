@@ -15,7 +15,7 @@ import state, {
 import { alertController, toastController } from '@ionic/core';
 import infoToken from '../../assets/icon/InfoToken.svg';
 import { SubItem } from '../types';
-import { getScraperConfigMetrics, logEvent } from '../analytics';
+import { getScraperConfigMetrics, logErrorEvent, logEvent } from '../analytics';
 
 @Component({
 	tag: 'create-config',
@@ -44,7 +44,7 @@ export class CreateConfig {
 				this._unsubscribes.push(onStateChange(key, () => this.setAutoSave()));
 			});
 		} catch (e) {
-			logEvent('error file init', e);
+			logErrorEvent('error file init', e);
 		}
 	}
 
@@ -54,7 +54,7 @@ export class CreateConfig {
 			chrome.runtime.onMessage.removeListener(this.pageLoadListener);
 			this._unsubscribes.forEach((unsubscribe) => unsubscribe());
 		} catch (e) {
-			console.error('create-config :::: disconnectedCallback - ERROR', e);
+			logErrorEvent('error file disconnectedCallback', e);
 		}
 	}
 
@@ -87,7 +87,11 @@ export class CreateConfig {
 		// changes were done, set a timeout to save automatically
 		if (state.hasChanges) {
 			clearTimeout(this._dirtyTimeout);
-			this._dirtyTimeout = setTimeout(() => this.onSave(), 10000);
+			this._dirtyTimeout = setTimeout(() => {
+				if (state.hasChanges) {
+					this.onSave();
+				}
+			}, 10000);
 		}
 	}
 
@@ -138,8 +142,7 @@ export class CreateConfig {
 
 			logEvent('completed file edit', getScraperConfigMetrics());
 		} catch (e) {
-			console.log(e);
-			logEvent('error file save', e);
+			logErrorEvent('error file save', e);
 		}
 	}
 
@@ -166,8 +169,7 @@ export class CreateConfig {
 				sendMessageToContentScript({ type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude, subItems: state.subItems } });
 			}
 		} catch (e) {
-			console.log('LoadFile: error', e);
-			logEvent('error file load', e);
+			logErrorEvent('error file load', e);
 		}
 	}
 

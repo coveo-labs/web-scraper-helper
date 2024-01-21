@@ -1,6 +1,7 @@
 import { Component, Prop, State, h } from '@stencil/core';
 import { getMetadataResults } from '../store';
 import { Selector } from '../types';
+import { logErrorEvent } from '../analytics';
 @Component({
 	tag: 'metadata-results',
 	styleUrl: 'metadata-results.scss',
@@ -17,7 +18,7 @@ export class MetadataResults {
 			this.results = await getMetadataResults(this.type, this.metadata, this.parentSelector);
 			console.log('results', this.results);
 		} catch (e) {
-			console.log(e);
+			logErrorEvent('error meta render', e);
 			this.results = [];
 		}
 	}

@@ -3,7 +3,7 @@
 import { Component, Host, State, h } from '@stencil/core';
 import logo from '../../assets/icon/CoveoLogo.svg';
 import state from '../store';
-import { initializeAmplitude, logEvent } from '../analytics';
+import { initializeAmplitude, logErrorEvent, logEvent } from '../analytics';
 
 @Component({
 	tag: 'app-root',
@@ -18,14 +18,14 @@ export class AppRoot {
 		initializeAmplitude();
 		try {
 			let manifest = chrome.runtime.getManifest();
-			this.version = 'v' + manifest.version;
-
-			logEvent('viewed home', { version: manifest.version });
+			const version = manifest.version;
+			this.version = `v${version}`;
+			logEvent('viewed home', { version });
 
 			this.checkTab();
 		} catch (e) {
 			// 'chrome' is undefined in unit tests.
-			logEvent('error app init', e);
+			logErrorEvent('error app init', e);
 		}
 	}
 
@@ -37,12 +37,12 @@ export class AppRoot {
 			const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
 			this.validateTab(tab);
 		} catch (e) {
-			console.error('checkTab:', e);
+			logErrorEvent('checkTab error', e);
 		}
 	}
 
 	validateTab(tab: chrome.tabs.Tab) {
-		console.log('validateTab', tab.url, tab);
+		// console.log('validateTab', tab.url, tab);
 		if (!/https?:\/\/.+/.test(tab.url)) {
 			this.error = (
 				<span>
@@ -52,6 +52,7 @@ export class AppRoot {
 		} else {
 			this.error = null;
 		}
+		// logEvent('validate tab', { url: tab.url, valid: this.error === null });
 	}
 
 	render() {

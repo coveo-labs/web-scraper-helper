@@ -1,7 +1,7 @@
 {
 	"name": "web-scraper-helper-panel",
 	"private": true,
-	"version": "2.0.3",
+	"version": "2.1.0",
 	"description": "Stencil App for the Dev Tools panel of the Web Scraper Helper Chrome Extension",
 	"scripts": {
 		"build": "stencil build && rm -rf ../chrome_extension/www && cp -R www ../chrome_extension/www && cp index.html ../chrome_extension/www/index.html",

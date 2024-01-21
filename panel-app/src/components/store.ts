@@ -1,7 +1,7 @@
 import { createStore } from '@stencil/store';
 import { v4 as uuidv4 } from 'uuid';
 import { ConfigState, MetadataMap, Selector, SelectorElement, SelectorType, SubItem } from './types';
-import { logEvent } from './analytics';
+import { logErrorEvent, logEvent } from './analytics';
 
 export function getId(): string {
 	let uniqueId = uuidv4();
@@ -134,9 +134,8 @@ function updateState(newState, hasChanges?: boolean): boolean {
 				state.hasChanges = hasChanges;
 			}
 		}
-	} catch (error) {
-		console.log(error);
-		logEvent('error state update', error);
+	} catch (e) {
+		logErrorEvent('error state update', e);
 		return true;
 	}
 
@@ -296,8 +295,7 @@ const sendMessageToContentScript = (message: any, callback: any = null): any => 
 		// console.log('sendMessageToContentScript:', tabId, message);
 		chrome.tabs.sendMessage(tabId, { tabId, ...message }, null, callback);
 	} catch (e) {
-		console.log('sendMessage-error:', e);
-		logEvent('error send message', e);
+		logErrorEvent('error send message', e);
 	}
 };
 

@@ -294,7 +294,7 @@ if (!window.__WSH_content_script_loaded) {
   window.onload = () => {
 
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      console.log('onMessage', window.__WSH_tabid, message);
+      console.log('onMessage', message);
 
       if (message.type === 'exclude-selector') {
         const { newItem, oldItem, parentSelector } = message.payload;
