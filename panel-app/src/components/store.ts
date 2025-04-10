@@ -9,6 +9,7 @@ export function getId(): string {
 }
 
 const { reset, state, onChange }: { reset: Function; state: ConfigState; onChange: Function; } = createStore({
+	name: '[Default Coveo web scraping configuration]',
 	currentFile: null,
 	hasChanges: false,
 	exclude: [
