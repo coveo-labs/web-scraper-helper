@@ -15,18 +15,138 @@ const { reset, state, onChange }: { reset: Function; state: ConfigState; onChang
 		{
 			id: getId(),
 			type: 'CSS',
-			path: 'header, .header, *[role="header"]',
+			path: 'script',
 		},
 		{
 			id: getId(),
 			type: 'CSS',
-			path: 'footer, .footer',
+			path: 'noscript',
 		},
 		{
 			id: getId(),
 			type: 'CSS',
-			path: 'noscript, nav',
+			path: 'iframe',
 		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: 'menu',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: 'nav',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: 'header',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: 'footer',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: 'video',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: 'audio',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: '.menu',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: '.nav',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: '.navigation',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: '.navbar',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: '.nav-bar',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: '.head',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: '.header',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: '.foot',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: '.footer',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: '.sidebar',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: '.sidenav',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: '.banner',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: '.ad',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: '.advert',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: '.advertisement',
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: '.adsbygoogle'
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: '.popup'
+		},
+		{
+			id: getId(),
+			type: 'CSS',
+			path: '.modal'
+		}
 	],
 	metadata: {},
 	subItems: [],
