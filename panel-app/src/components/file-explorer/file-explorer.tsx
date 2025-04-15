@@ -5,6 +5,7 @@ import infoToken from '../../assets/icon/InfoToken.svg';
 import state, { addToRecentFiles, formatState } from '../store';
 import { alertController } from '@ionic/core';
 import { getScraperConfigMetrics, logErrorEvent, logEvent } from '../analytics';
+import storage from '../storage/storage';
 
 const RECENT_FILES_ITEM_NAME = '__Recent__Files__';
 @Component({
@@ -26,7 +27,7 @@ export class FileExplorer {
 
 		// save the default state right away
 		try {
-			chrome.storage.local.set({ [this.newFileName]: JSON.stringify(formatState(), null, 2) });
+			storage.set(this.newFileName, JSON.stringify(formatState(), null, 2));
 			this.recentFiles = await addToRecentFiles(this.newFileName);
 
 			state.currentFile = {
@@ -52,9 +53,7 @@ export class FileExplorer {
 
 	async componentWillRender() {
 		try {
-			const items = await new Promise((resolve) => {
-				chrome.storage.local.get(null, (items) => resolve(items));
-			});
+			const items = await storage.getAll();
 
 			this.fileList = Object.keys(items).filter((item) => item !== RECENT_FILES_ITEM_NAME);
 			this.recentFiles = (items[RECENT_FILES_ITEM_NAME] || []).filter((item) => this.fileList.includes(item));
@@ -156,7 +155,7 @@ export class FileExplorer {
 				{
 					text: 'Delete',
 					handler: () => {
-						chrome.storage.local.remove(filename);
+						storage.remove(filename);
 						this.recentFiles = this.recentFiles.filter((item) => item !== filename);
 						this.fileList = this.fileList.filter((item) => item !== filename);
 

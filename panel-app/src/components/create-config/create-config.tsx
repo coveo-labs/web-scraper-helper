@@ -14,8 +14,9 @@ import state, {
 } from '../store';
 import { alertController, toastController } from '@ionic/core';
 import infoToken from '../../assets/icon/InfoToken.svg';
-import { SubItem } from '../types';
+import { Configuration, SubItem } from '../types';
 import { getScraperConfigMetrics, logErrorEvent, logEvent } from '../analytics';
+import storage from '../storage/storage';
 
 @Component({
 	tag: 'create-config',
@@ -40,7 +41,7 @@ export class CreateConfig {
 			logEvent('viewed elements to exclude');
 
 			// listeners for changes
-			['name', 'exclude', 'metadata', 'subItems'].forEach((key) => {
+			['configurations', 'index'].forEach((key) => {
 				this._unsubscribes.push(onStateChange(key, () => this.setAutoSave()));
 			});
 		} catch (e) {
@@ -64,13 +65,13 @@ export class CreateConfig {
 	}
 
 	renderExcludedItems() {
-		return state.exclude.map((item) => {
+		return state.currentConfiguration().exclude.map((item) => {
 			return <select-element-item type="excludeItem" selector={item} uniqueId={item.id}></select-element-item>;
 		});
 	}
 
 	renderMetadataItems() {
-		const metadata = state.metadata;
+		const metadata = state.currentConfiguration().metadata;
 		return Object.keys(metadata).map((key) => {
 			const item = metadata[key];
 			return <select-element-item type="metadataItem" uniqueId={key} name={item.name} selector={item}></select-element-item>;
@@ -123,12 +124,10 @@ export class CreateConfig {
 		}
 	}
 
-	onSave() {
+	async onSave() {
 		clearTimeout(this._dirtyTimeout);
 		try {
-			chrome.storage.local.set({
-				[state.currentFile.name]: JSON.stringify(formatState(), null, 2),
-			});
+			await storage.set(state.currentFile.name, JSON.stringify(formatState(), null, 2));
 			toastController
 				.create({
 					message: 'File saved successfully!',
@@ -146,8 +145,25 @@ export class CreateConfig {
 		}
 	}
 
-	handleGlobalNameChange(e) {
+	handleNameChange(e) {
 		updateGlobalName(e.detail.value);
+	}
+
+	handleConfigurationSelection(event: CustomEvent) {
+		state.index = event.detail.value;
+	}
+
+	handleAddConfig(name: string) {
+		const newConfig: Configuration = {
+			name,
+			exclude: [],
+			metadata: {},
+			subItems: []
+		};
+
+		state.configurations = [...state.configurations, newConfig];
+		// It's the index change that triggers the refresh (No need to use 'UpdateConfiguration' method)
+		state.index = state.configurations.length - 1;
 	}
 
 	async loadFile() {
@@ -158,15 +174,12 @@ export class CreateConfig {
 		try {
 			if (state.currentFile.triggerType === 'load-file') {
 				const fileName = state.currentFile.name;
-				const fileItem = await new Promise((resolve) => {
-					chrome.storage.local.get(fileName, (items) => resolve(items));
-				});
-
-				updateState(fileItem[fileName], false);
+				const fileItem = await storage.get(fileName);
+				updateState(fileItem);
 				await addToRecentFiles(fileName);
 				logEvent('completed file open', getScraperConfigMetrics());
 			} else {
-				sendMessageToContentScript({ type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude, subItems: state.subItems } });
+				sendMessageToContentScript({ type: 'update-excludeItem-onLoad', payload: { exclude: state.currentConfiguration().exclude, subItems: state.currentConfiguration().subItems } });
 			}
 		} catch (e) {
 			logErrorEvent('error file load', e);
@@ -174,6 +187,8 @@ export class CreateConfig {
 	}
 
 	addPageLoadListener() {
+		this.loadFile();
+
 		this.pageLoadListener = (message) => {
 			console.log('pageLoadListener:', message);
 			if (message.type === 'page-loaded' || message.newPage) {
@@ -229,8 +244,6 @@ export class CreateConfig {
 						</div>
 					</div>
 				</div>
-				<div style={{ marginTop: '32px' }}>Global section name</div>
-				<ion-input class="global-section-input" fill="outline" placeholder="Name your global section" value={state.name || ''} onIonInput={(e) => this.handleGlobalNameChange(e)}></ion-input>
 			</div>
 		);
 	}
@@ -262,13 +275,13 @@ export class CreateConfig {
 					</div>
 				</div>
 				<div style={{ marginTop: '24px' }}>Results</div>
-				<metadata-results metadata={state.metadata}></metadata-results>
+				<metadata-results metadata={state.currentConfiguration().metadata}></metadata-results>
 			</div>
 		);
 	}
 
 	renderSubItemsTab() {
-		return state.subItems.length == 0 ? (
+		return state.currentConfiguration().subItems.length == 0 ? (
 			<div class="empty-subItem-container">
 				<div class="subItem-text-container">
 					<div class="subItem-text">Sub-items</div>
@@ -296,7 +309,7 @@ export class CreateConfig {
 						</th>
 					</thead>
 					<tbody>
-						{state.subItems.map((item, idx) => (
+						{state.currentConfiguration().subItems.map((item, idx) => (
 							<tr>
 								<div
 									key={item.name}
@@ -383,6 +396,34 @@ export class CreateConfig {
 				</div>
 				<div class="content-section">
 					<div class="content-container">
+						<div>
+							<div class="inline-element">
+								<div style={{ width: '10%', minWidth: '100px' }}>Selected Configuration:</div>
+								<div>
+									<ion-select
+										value={state.index}
+										placeholder="Select Configuration"
+										onIonChange={(e) => this.handleConfigurationSelection(e)}
+									>
+										{state.configurations
+											.map((config, i) => (
+												<ion-select-option key={`${config.name}-${i}`} value={i}>
+													{config.name || `Config ${i + 1}`}
+												</ion-select-option>
+											))}
+									</ion-select>
+								</div>
+								<ion-button
+									style={{ marginLeft: 'auto' }}
+									onClick={() => this.handleAddConfig('New Configuration #' + state.index)}>
+									Add Configuration
+								</ion-button>
+							</div>
+							<div class="inline-element">
+								<div style={{ width: '10%', minWidth: '100px' }}>Configuration Name:</div>
+								<ion-input class="global-section-input" fill="outline" placeholder="Name your global section" value={state.currentConfiguration().name || ''} onIonInput={(e) => this.handleNameChange(e)}></ion-input>
+							</div>
+						</div>
 						{!this.showSubItemConfig ? (
 							<div>
 								{/* <div class="content-text">Create a Web Scraping configuration</div> */}

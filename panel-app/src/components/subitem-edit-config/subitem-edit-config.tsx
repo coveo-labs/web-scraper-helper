@@ -24,7 +24,7 @@ export class SubitemEditConfig {
 	}
 
 	onSave() {
-		state.subItems = state.subItems.map((item: SubItem): SubItem => {
+		state.currentConfiguration().subItems = state.currentConfiguration().subItems.map((item: SubItem): SubItem => {
 			if (item.name === this.subItem['name']) {
 				return {
 					...this.subItemState,
