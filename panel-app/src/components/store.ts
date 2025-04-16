@@ -210,9 +210,6 @@ function updateState(newJsonState: string): boolean {
 	try {
 		const parsedValue = JSON.parse(newJsonState);
 
-
-		console.log(parsedValue);
-
 		if (Array.isArray(parsedValue)) {
 			state.configurations = [];
 
@@ -321,15 +318,17 @@ function formatConfiguration(configuration: Configuration) {
 			exclude: formattedExclude,
 			for: formattedForValue,
 			metadata: formattedMetadata,
-			subItems:
-				subItems &&
-				subItems.reduce((acc, curr) => {
-					acc[curr.name] = {
-						type: curr.type,
-						path: curr.path,
-					};
-					return acc;
-				}, {}),
+			...(subItems?.length > 0
+				? {
+					subItems: subItems.reduce((acc, curr) => {
+						acc[curr.name] = {
+							type: curr.type,
+							path: curr.path,
+						};
+						return acc;
+					}, {}),
+				}
+				: {}),
 		},
 		...formattedSubItems,
 	];
@@ -383,7 +382,6 @@ async function getMetadataResults(type = 'global', metadata: MetadataMap = {}, p
 	const response = await new Promise((resolve) => {
 		sendMessageToContentScript({ type: 'metadata-results', payload: { metadata: type === 'global' ? state.currentConfiguration().metadata : metadata, parentSelector: parentSelector } }, resolve);
 	});
-	console.log('getMetadataResults-response', response);
 	return response;
 }
 
