@@ -16,7 +16,6 @@ export class MetadataResults {
 	async componentWillRender() {
 		try {
 			this.results = await getMetadataResults(this.type, this.metadata, this.parentSelector);
-			console.log('results', this.results);
 		} catch (e) {
 			logErrorEvent('error meta render', e);
 			this.results = [];
