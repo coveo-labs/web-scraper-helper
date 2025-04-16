@@ -213,7 +213,12 @@ function updateState(newJsonState: string): boolean {
 		if (Array.isArray(parsedValue)) {
 			state.configurations = [];
 
-			parsedValue.forEach(({ name, exclude, for: forvalue, metadata, subItems }, _) => {
+			parsedValue.forEach(({ name, exclude, for: forValue, metadata, subItems }, _) => {
+				// Skip iteration of subItems (or any specific type object).
+				if (forValue?.types) {
+					return;
+				}
+
 				const formattedExclude =
 					exclude &&
 					exclude.map((item) => {
@@ -244,7 +249,7 @@ function updateState(newJsonState: string): boolean {
 				const formattedValue: Configuration = {
 					name,
 					exclude: formattedExclude,
-					for: forvalue,
+					for: forValue,
 					metadata: formattedMetadata,
 					subItems: subItems ? formattedSubItems : [],
 				};
