@@ -406,6 +406,38 @@ export class CreateConfig {
 		await alert.present();
 	}
 
+    async openAddConfigPrompt() {
+        const alert = await alertController.create({
+            header: 'New Configuration',
+            cssClass: 'name-edit-alert',
+            inputs: [
+                {
+                    name: 'configName',
+                    type: 'text',
+                    placeholder: 'Enter configuration name',
+                    value: ''
+                }
+            ],
+            buttons: [
+                {
+                    text: 'Cancel',
+                    role: 'cancel'
+                },
+                {
+                    text: 'Add',
+                    handler: (data) => {
+                        if (data.configName) {
+                            this.handleAddConfig(data.configName);
+                            logEvent('added new configuration');
+                        }
+                    }
+                }
+            ]
+        });
+
+        await alert.present();
+    }
+
 	openJsonModal() {
 		this.showJsonModal = true;
 	}
@@ -467,7 +499,7 @@ export class CreateConfig {
 								<ion-button
 									class="add-config-btn"
 									fill="outline"
-									onClick={() => this.handleAddConfig('New Configuration #' + state.configurations.length)}
+									onClick={() => this.openAddConfigPrompt()}
 								>
 									<ion-icon slot="start" name="add-circle-outline"></ion-icon>
 								</ion-button>
