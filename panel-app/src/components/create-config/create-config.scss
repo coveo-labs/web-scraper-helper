@@ -1,6 +1,6 @@
 #create-config {
 	.header-section {
-		padding: 32px 24px;
+		padding: 20px 24px;
 		border-bottom: 1px solid #e5e8e8;
 		height: 60px;
 		display: flex;
@@ -46,7 +46,7 @@
 
 	.content-section {
 		background-color: #fcfcfc;
-		padding: 32px 24px;
+		padding: 20px 24px;
 
 		.inline-element {
 			display: flex;
@@ -122,15 +122,69 @@
 						cursor: pointer;
 						border-radius: 4px;
 						transition: background-color 0.2s;
+						display: flex;
+						align-items: center;
 
-						&:hover {
-							background: #f5f5f5;
+						.tab-content {
+							display: flex;
+							align-items: center;
+							gap: 8px;
+						}
+
+						.tab-actions {
+							display: flex;
+							align-items: center;
+							gap: 4px;
+							margin-left: 8px;
+						}
+
+						.edit-config-name,
+						.delete-config-btn {
+							font-size: 16px;
+							padding: 4px;
+							border-radius: 4px;
+							transition: all 0.2s;
+						}
+
+						.edit-config-name {
+							color: inherit;
+							opacity: 0.7;
+
+							&:hover {
+								opacity: 1;
+								background: rgba(19, 114, 236, 0.1);
+							}
+						}
+
+						.delete-config-btn {
+							color: inherit;
+							opacity: 0.7;
+
+							&:hover {
+								color: #dc3545;
+								background: #fff5f5;
+								opacity: 1;
+							}
 						}
 
 						&.active {
 							background: #1372ec;
 							color: white;
 							border-bottom: none;
+
+							.edit-config-name,
+							.delete-config-btn {
+								color: white;
+
+								&:hover {
+									background: rgba(255, 255, 255, 0.1);
+								}
+							}
+
+							.delete-config-btn:hover {
+								color: #ff6b6b;
+								background: rgba(255, 255, 255, 0.15);
+							}
 						}
 					}
 
@@ -139,10 +193,9 @@
 						font-size: 14px;
 						cursor: pointer;
 						padding: 4px;
-						opacity: 0;
-						margin-left: -24px;
+						opacity: 1;
+						margin-left: 0;
 						transition: opacity 0.2s, background-color 0.2s;
-						border-radius: 4px;
 
 						&:hover {
 							background: #f0f0f0;
@@ -151,6 +204,26 @@
 
 					&:hover .edit-config-name {
 						opacity: 1;
+					}
+
+					.tab-actions {
+						display: flex;
+						align-items: center;
+						gap: 4px;
+					}
+
+					.delete-config-btn {
+						color: #B7BCC0;
+						font-size: 18px;
+						cursor: pointer;
+						padding: 4px;
+						border-radius: 4px;
+						transition: all 0.2s;
+
+						&:hover {
+							color: #dc3545;
+							background: #fff5f5;
+						}
 					}
 				}
 

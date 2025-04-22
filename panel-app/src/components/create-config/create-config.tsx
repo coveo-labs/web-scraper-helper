@@ -372,6 +372,36 @@ export class CreateConfig {
 		logEvent(`viewed ${this.tabs[this.activeTab].toLowerCase()}`);
 	}
 
+	async deleteConfig(index: number) {
+		const alert = await alertController.create({
+			header: 'Delete Configuration',
+			cssClass: 'alert-delete-config',
+			message: 'Are you sure you want to delete this configuration?',
+			buttons: [
+				{
+					text: 'Cancel',
+					role: 'cancel'
+				},
+				{
+					text: 'Delete',
+					role: 'destructive',
+					handler: () => {
+						state.configurations = [
+							...state.configurations.slice(0, index),
+							...state.configurations.slice(index + 1)
+						];
+						if (state.index >= state.configurations.length) {
+							state.index = Math.max(0, state.configurations.length - 1);
+						}
+						logEvent('deleted configuration');
+					}
+				}
+			]
+		});
+
+		await alert.present();
+	}
+
 	tabs = ['Elements to exclude', 'Metadata to extract', 'SubItems'];
 
 	async openNamePrompt() {
@@ -483,17 +513,29 @@ export class CreateConfig {
 								{state.configurations.map((config, index) => (
 									<div class="tab-wrapper">
 										<div class={this.activeConfigIndex === index ? 'active tab-btn' : 'tab-btn'} onClick={() => this.configTabClicked(index)}>
-											{config.name || `Config ${index + 1}`}
+											<span class="tab-content">
+												{config.name || `Config ${index + 1}`}
+												<div class="tab-actions">
+													<ion-icon
+														name="pencil-outline"
+														class="edit-config-name"
+														onClick={(e) => {
+															e.stopPropagation();
+															this.configTabClicked(index);
+															this.openNamePrompt();
+														}}
+													></ion-icon>
+													<ion-icon
+														name="close-circle-outline"
+														class="delete-config-btn"
+														onClick={(e) => {
+															e.stopPropagation();
+															this.deleteConfig(index);
+														}}
+													></ion-icon>
+												</div>
+											</span>
 										</div>
-										<ion-icon
-											name="pencil-outline"
-											class="edit-config-name"
-											onClick={(e) => {
-												e.stopPropagation();
-												this.configTabClicked(index);
-												this.openNamePrompt();
-											}}
-										></ion-icon>
 									</div>
 								))}
 								<ion-button
