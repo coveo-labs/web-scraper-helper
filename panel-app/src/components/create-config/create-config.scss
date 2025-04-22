@@ -522,6 +522,7 @@
 			display: flex;
 			flex-direction: column;
 			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+			overflow: hidden;  // Prevent content from overflowing
 
 			.json-modal-header {
 				display: flex;
@@ -529,6 +530,7 @@
 				align-items: center;
 				padding: 16px 24px;
 				border-bottom: 1px solid #e5e8e8;
+				flex: none;  // Don't grow or shrink
 
 				h2 {
 					margin: 0;
@@ -549,6 +551,12 @@
 						background: #f5f5f5;
 					}
 				}
+			}
+
+			code-viewer {
+				flex: 1;
+				min-height: 0;  // Important for flex overflow behavior
+				overflow: hidden;
 			}
 
 			.code-view-wrapper {
@@ -573,6 +581,7 @@
 				background: #fff;
 				position: relative;
 				z-index: 1;
+				flex: none;  // Don't grow or shrink
 			}
 		}
 	}

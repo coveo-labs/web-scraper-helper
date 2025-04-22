@@ -497,7 +497,7 @@ export class CreateConfig {
 								<h2>Edit JSON Configuration</h2>
 								<ion-icon name="close" onClick={() => this.closeJsonModal()}></ion-icon>
 							</div>
-							<code-viewer style={{ height: "100%" }}></code-viewer>
+							<code-viewer style={{ flex: '1', minHeight: '0', overflow: 'hidden', marginBottom: '16px' }}></code-viewer>
 							<div class="json-modal-footer">
 								<ion-button fill="outline" onClick={() => this.closeJsonModal()}>Close</ion-button>
 							</div>
