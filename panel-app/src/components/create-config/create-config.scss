@@ -91,17 +91,93 @@
 				font-style: normal;
 				font-weight: 300;
 				line-height: 21px;
-				/* 150% */
 				letter-spacing: 0.042px;
 				padding: 0 10px;
 
 				.tab-btn {
 					padding: 14px;
 					cursor: pointer;
+
+					&.active {
+						border-bottom: 2px solid #1372ec;
+						color: #1372ec;
+					}
+				}
+			}
+
+			// Configuration tabs (first row) specific styles
+			div>.custom-tab-bar {
+				justify-content: flex-start;
+				padding: 8px 16px;
+				gap: 4px;
+				overflow-x: auto;
+
+				.tab-wrapper {
+					display: flex;
+					align-items: center;
+					position: relative;
+
+					.tab-btn {
+						padding: 8px 16px;
+						cursor: pointer;
+						border-radius: 4px;
+						transition: background-color 0.2s;
+
+						&:hover {
+							background: #f5f5f5;
+						}
+
+						&.active {
+							background: #1372ec;
+							color: white;
+							border-bottom: none;
+						}
+					}
+
+					.edit-config-name {
+						color: #1372ec;
+						font-size: 14px;
+						cursor: pointer;
+						padding: 4px;
+						opacity: 0;
+						margin-left: -24px;
+						transition: opacity 0.2s, background-color 0.2s;
+						border-radius: 4px;
+
+						&:hover {
+							background: #f0f0f0;
+						}
+					}
+
+					&:hover .edit-config-name {
+						opacity: 1;
+					}
 				}
 
-				.active {
-					border-bottom: 1px solid #1372ec;
+				.add-config-btn {
+					margin-left: auto;
+					--padding-start: 12px;
+					--padding-end: 12px;
+					--background: transparent;
+					--background-activated: #f5f5f5;
+					--background-hover: #f5f5f5;
+					--border-width: 0;
+					--color: #1372ec;
+					font-family: Gibson;
+					font-size: 14px;
+					font-weight: 300;
+					text-transform: none;
+					height: 36px;
+
+					&::part(native) {
+						padding: 8px 16px;
+						border-radius: 4px;
+					}
+
+					ion-icon {
+						margin-right: 8px;
+						font-size: 16px;
+					}
 				}
 			}
 
@@ -305,6 +381,10 @@
 				}
 			}
 		}
+
+		.content-container+.content-container {
+			margin-top: 16px;
+		}
 	}
 
 	.config-action-btns {
@@ -330,6 +410,28 @@
 			&:hover {
 				color: #fff;
 			}
+		}
+	}
+
+	.config-name {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 8px 16px;
+		border-radius: 4px;
+		cursor: pointer;
+		color: #282829;
+		font-family: Gibson;
+		font-size: 14px;
+		transition: background-color 0.2s;
+
+		&:hover {
+			background: #f5f5f5;
+		}
+
+		ion-icon {
+			color: #1372ec;
+			font-size: 16px;
 		}
 	}
 }

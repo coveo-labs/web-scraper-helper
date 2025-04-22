@@ -28,6 +28,8 @@ export class CreateConfig {
 	@State() subItem: SubItem;
 	@State() activeTab: number = 0;
 	@State() activeConfigIndex: number = 0;
+	@State() showNamePrompt: boolean = false;
+	@State() editingName: string = '';
 
 	_dirtyTimeout: any;
 	_unsubscribes: any[] = [];
@@ -377,6 +379,38 @@ export class CreateConfig {
 
 	tabs = ['Elements to exclude', 'Metadata to extract', 'SubItems', 'JSON'];
 
+	async openNamePrompt() {
+		const alert = await alertController.create({
+			header: 'Edit Configuration Name',
+			cssClass: 'name-edit-alert',
+			inputs: [
+				{
+					name: 'configName',
+					type: 'text',
+					placeholder: 'Enter configuration name',
+					value: state.currentConfiguration().name || ''
+				}
+			],
+			buttons: [
+				{
+					text: 'Cancel',
+					role: 'cancel'
+				},
+				{
+					text: 'Save',
+					handler: (data) => {
+						if (data.configName) {
+							updateGlobalName(data.configName);
+							logEvent('edited configuration name');
+						}
+					}
+				}
+			]
+		});
+
+		await alert.present();
+	}
+
 	render() {
 		const dirty = state.hasChanges ? (
 			<span class="is-dirty" title="Unsaved changes">*</span>
@@ -403,13 +437,23 @@ export class CreateConfig {
 					</div>
 				</div>
 				<div class="content-section">
-					<div style={{ width: '10%', minWidth: '100px' }}>Configurations:</div>
 					<div class="content-container">
-						<div class="content-tabs">
+						<div class="config-tabs">
 							<div class="custom-tab-bar">
 								{state.configurations.map((config, index) => (
-									<div class={this.activeConfigIndex === index ? 'active tab-btn' : 'tab-btn'} onClick={() => this.configTabClicked(index)}>
-										{config.name || `Config ${index + 1}`}
+									<div class="tab-wrapper">
+										<div class={this.activeConfigIndex === index ? 'active tab-btn' : 'tab-btn'} onClick={() => this.configTabClicked(index)}>
+											{config.name || `Config ${index + 1}`}
+										</div>
+										<ion-icon
+											name="pencil-outline"
+											class="edit-config-name"
+											onClick={(e) => {
+												e.stopPropagation();
+												this.configTabClicked(index);
+												this.openNamePrompt();
+											}}
+										></ion-icon>
 									</div>
 								))}
 								<ion-button
@@ -418,36 +462,19 @@ export class CreateConfig {
 									onClick={() => this.handleAddConfig('New Configuration #' + state.configurations.length)}
 								>
 									<ion-icon slot="start" name="add-circle-outline"></ion-icon>
-									Add Configuration
 								</ion-button>
 							</div>
 						</div>
-					</div>
-					<div class="content-container">
-						<div class="collection-subContainer">
-							<div class="inline-element">
-								<div style={{ width: '10%', minWidth: '100px' }}>Name:</div>
-								<ion-input
-									class="global-section-input"
-									fill="outline"
-									placeholder="Name your global section"
-									value={state.currentConfiguration().name || ''}
-									onIonInput={(e) => this.handleNameChange(e)}
-								></ion-input>
-							</div>
-						</div>
 						{!this.showSubItemConfig ? (
-							<div>
-								<div class="content-tabs">
-									<div class="custom-tab-bar">
-										{this.tabs.map((tab, index) => (
-											<div class={this.activeTab === index ? 'active tab-btn' : 'tab-btn'} onClick={() => this.tabClicked(index)}>
-												{tab}
-											</div>
-										))}
-									</div>
-									<div id="collection-container">{this.renderTabContent()}</div>
+							<div class="content-tabs">
+								<div class="custom-tab-bar">
+									{this.tabs.map((tab, index) => (
+										<div class={this.activeTab === index ? 'active tab-btn' : 'tab-btn'} onClick={() => this.tabClicked(index)}>
+											{tab}
+										</div>
+									))}
 								</div>
+								<div id="collection-container">{this.renderTabContent()}</div>
 							</div>
 						) : (
 							<subitem-edit-config subItem={this.subItem}></subitem-edit-config>
