@@ -27,6 +27,7 @@ export class CreateConfig {
 	@State() showSubItemConfig: boolean;
 	@State() subItem: SubItem;
 	@State() activeTab: number = 0;
+	@State() activeConfigIndex: number = 0;
 
 	_dirtyTimeout: any;
 	_unsubscribes: any[] = [];
@@ -363,6 +364,12 @@ export class CreateConfig {
 		}
 	}
 
+	configTabClicked(index: number) {
+		this.activeConfigIndex = index;
+		state.index = index;
+		logEvent(`switched to configuration ${index + 1}`);
+	}
+
 	tabClicked(index: number) {
 		this.activeTab = index;
 		logEvent(`viewed ${this.tabs[this.activeTab].toLowerCase()}`);
@@ -372,9 +379,7 @@ export class CreateConfig {
 
 	render() {
 		const dirty = state.hasChanges ? (
-			<span class="is-dirty" title="Unsaved changes">
-				*
-			</span>
+			<span class="is-dirty" title="Unsaved changes">*</span>
 		) : (
 			''
 		);
@@ -398,38 +403,41 @@ export class CreateConfig {
 					</div>
 				</div>
 				<div class="content-section">
+					<div style={{ width: '10%', minWidth: '100px' }}>Configurations:</div>
 					<div class="content-container">
-						<div>
-							<div class="inline-element">
-								<div style={{ width: '10%', minWidth: '100px' }}>Selected Configuration:</div>
-								<div>
-									<ion-select
-										value={state.index}
-										placeholder="Select Configuration"
-										onIonChange={(e) => this.handleConfigurationSelection(e)}
-									>
-										{state.configurations
-											.map((config, i) => (
-												<ion-select-option key={`${config.name}-${i}`} value={i}>
-													{config.name || `Config ${i + 1}`}
-												</ion-select-option>
-											))}
-									</ion-select>
-								</div>
+						<div class="content-tabs">
+							<div class="custom-tab-bar">
+								{state.configurations.map((config, index) => (
+									<div class={this.activeConfigIndex === index ? 'active tab-btn' : 'tab-btn'} onClick={() => this.configTabClicked(index)}>
+										{config.name || `Config ${index + 1}`}
+									</div>
+								))}
 								<ion-button
-									style={{ marginLeft: 'auto' }}
-									onClick={() => this.handleAddConfig('New Configuration #' + state.index)}>
+									class="add-config-btn"
+									fill="outline"
+									onClick={() => this.handleAddConfig('New Configuration #' + state.configurations.length)}
+								>
+									<ion-icon slot="start" name="add-circle-outline"></ion-icon>
 									Add Configuration
 								</ion-button>
 							</div>
+						</div>
+					</div>
+					<div class="content-container">
+						<div class="collection-subContainer">
 							<div class="inline-element">
-								<div style={{ width: '10%', minWidth: '100px' }}>Configuration Name:</div>
-								<ion-input class="global-section-input" fill="outline" placeholder="Name your global section" value={state.currentConfiguration().name || ''} onIonInput={(e) => this.handleNameChange(e)}></ion-input>
+								<div style={{ width: '10%', minWidth: '100px' }}>Name:</div>
+								<ion-input
+									class="global-section-input"
+									fill="outline"
+									placeholder="Name your global section"
+									value={state.currentConfiguration().name || ''}
+									onIonInput={(e) => this.handleNameChange(e)}
+								></ion-input>
 							</div>
 						</div>
 						{!this.showSubItemConfig ? (
 							<div>
-								{/* <div class="content-text">Create a Web Scraping configuration</div> */}
 								<div class="content-tabs">
 									<div class="custom-tab-bar">
 										{this.tabs.map((tab, index) => (
