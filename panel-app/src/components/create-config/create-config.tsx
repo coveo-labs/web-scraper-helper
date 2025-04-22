@@ -158,7 +158,10 @@ export class CreateConfig {
 			name,
 			exclude: [],
 			metadata: {},
-			subItems: []
+			subItems: [],
+			for: {
+				urls: [".*"]
+			}
 		};
 
 		state.configurations = [...state.configurations, newConfig];
