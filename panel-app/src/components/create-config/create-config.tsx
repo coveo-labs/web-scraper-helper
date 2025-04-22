@@ -437,6 +437,9 @@ export class CreateConfig {
 					</div>
 				</div>
 				<div class="content-section">
+					<div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+                        <ion-button class="edit-json-btn" fill="outline" onClick={() => this.tabClicked(3)}>Edit with JSON</ion-button>
+                    </div>
 					<div class="content-container">
 						<div class="config-tabs">
 							<div class="custom-tab-bar">

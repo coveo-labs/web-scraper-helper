@@ -181,6 +181,47 @@
 				}
 			}
 
+			.config-tabs {
+				> .custom-tab-bar {
+					display: flex;
+					align-items: center;
+					padding: 0;
+					gap: 4px;
+					overflow-x: auto;
+					overflow-y: hidden;
+					white-space: nowrap;
+					background: #fff;
+					border-bottom: 1px solid #e5e8e8;
+
+					.tab-wrapper {
+						display: flex;
+						align-items: center;
+						position: relative;
+
+						.tab-btn {
+							padding: 12px 16px;
+							cursor: pointer;
+							transition: all 0.2s;
+							margin: 4px 4px 0;
+							border: 1px solid #e5e8e8;
+							border-radius: 4px 4px 0 0;
+							background: #f9f9f9;
+
+							&:hover:not(.active) {
+								background: #f5f5f5;
+							}
+
+							&.active {
+								background: #fff;
+								color: #1372ec;
+								border-bottom-color: #fff;
+								margin-bottom: -1px;
+							}
+						}
+					}
+				}
+			}
+
 			#collection-container {
 				.collection-subContainer {
 					padding: 0px 24px;
@@ -432,6 +473,22 @@
 		ion-icon {
 			color: #1372ec;
 			font-size: 16px;
+		}
+	}
+
+	.edit-json-btn {
+		--padding-start: 12px;
+		--padding-end: 12px;
+		--background: transparent;
+		--background-activated: #f5f5f5;
+		--background-hover: #f5f5f5;
+		--border-width: 1px;
+		--color: #1372ec;
+		
+		&::part(native) {
+			padding: 8px 16px;
+			border-radius: 4px;
+			border: 1px solid #1372ec;
 		}
 	}
 }
