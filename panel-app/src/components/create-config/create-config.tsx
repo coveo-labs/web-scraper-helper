@@ -1,4 +1,4 @@
-import { Component, Host, Listen, State, h } from '@stencil/core';
+import { Component, Fragment, Host, Listen, State, h } from '@stencil/core';
 import state, {
 	addExcludedItem,
 	addMetadataItem,
@@ -390,9 +390,10 @@ export class CreateConfig {
 							...state.configurations.slice(0, index),
 							...state.configurations.slice(index + 1)
 						];
-						if (state.index >= state.configurations.length) {
-							state.index = Math.max(0, state.configurations.length - 1);
-						}
+						// Reset index to 0 when there are no configurations
+						state.index = state.configurations.length > 0 ? Math.min(index, state.configurations.length - 1) : 0;
+						this.activeConfigIndex = state.index;
+						this.activeTab = 0;
 						logEvent('deleted configuration');
 					}
 				}
@@ -436,37 +437,37 @@ export class CreateConfig {
 		await alert.present();
 	}
 
-    async openAddConfigPrompt() {
-        const alert = await alertController.create({
-            header: 'New Configuration',
-            cssClass: 'name-edit-alert',
-            inputs: [
-                {
-                    name: 'configName',
-                    type: 'text',
-                    placeholder: 'Enter configuration name',
-                    value: ''
-                }
-            ],
-            buttons: [
-                {
-                    text: 'Cancel',
-                    role: 'cancel'
-                },
-                {
-                    text: 'Add',
-                    handler: (data) => {
-                        if (data.configName) {
-                            this.handleAddConfig(data.configName);
-                            logEvent('added new configuration');
-                        }
-                    }
-                }
-            ]
-        });
+	async openAddConfigPrompt() {
+		const alert = await alertController.create({
+			header: 'New Configuration',
+			cssClass: 'name-edit-alert',
+			inputs: [
+				{
+					name: 'configName',
+					type: 'text',
+					placeholder: 'Enter configuration name',
+					value: ''
+				}
+			],
+			buttons: [
+				{
+					text: 'Cancel',
+					role: 'cancel'
+				},
+				{
+					text: 'Add',
+					handler: (data) => {
+						if (data.configName) {
+							this.handleAddConfig(data.configName);
+							logEvent('added new configuration');
+						}
+					}
+				}
+			]
+		});
 
-        await alert.present();
-    }
+		await alert.present();
+	}
 
 	openJsonModal() {
 		this.showJsonModal = true;
@@ -508,58 +509,77 @@ export class CreateConfig {
 						</ion-button>
 					</div>
 					<div class="content-container">
-						<div class="config-tabs">
-							<div class="custom-tab-bar">
-								{state.configurations.map((config, index) => (
-									<div class="tab-wrapper">
-										<div class={this.activeConfigIndex === index ? 'active tab-btn' : 'tab-btn'} onClick={() => this.configTabClicked(index)}>
-											<span class="tab-content">
-												{config.name || `Config ${index + 1}`}
-												<div class="tab-actions">
-													<ion-icon
-														name="pencil-outline"
-														class="edit-config-name"
-														onClick={(e) => {
-															e.stopPropagation();
-															this.configTabClicked(index);
-															this.openNamePrompt();
-														}}
-													></ion-icon>
-													<ion-icon
-														name="close-circle-outline"
-														class="delete-config-btn"
-														onClick={(e) => {
-															e.stopPropagation();
-															this.deleteConfig(index);
-														}}
-													></ion-icon>
-												</div>
-											</span>
-										</div>
-									</div>
-								))}
+						{state.configurations.length === 0 ? (
+							<div style={{ padding: '32px 24px', textAlign: 'center' }}>
+								<div style={{ marginBottom: '24px' }}>
+									<div style={{ fontSize: '16px', fontWeight: '500', marginBottom: '8px' }}>No Configurations</div>
+									<div style={{ color: '#565b66', fontSize: '14px' }}>Add a new configuration to get started</div>
+								</div>
 								<ion-button
-									class="add-config-btn"
 									fill="outline"
 									onClick={() => this.openAddConfigPrompt()}
+									style={{ '--border-radius': '8px', '--border-color': '#1372ec', '--color': '#1372ec' }}
 								>
 									<ion-icon slot="start" name="add-circle-outline"></ion-icon>
+									Add Configuration
 								</ion-button>
 							</div>
-						</div>
-						{!this.showSubItemConfig ? (
-							<div class="content-tabs">
-								<div class="custom-tab-bar">
-									{this.tabs.map((tab, index) => (
-										<div class={this.activeTab === index ? 'active tab-btn' : 'tab-btn'} onClick={() => this.tabClicked(index)}>
-											{tab}
-										</div>
-									))}
-								</div>
-								<div id="collection-container">{this.renderTabContent()}</div>
-							</div>
 						) : (
-							<subitem-edit-config subItem={this.subItem}></subitem-edit-config>
+							<>
+								<div class="config-tabs">
+									<div class="custom-tab-bar">
+										{state.configurations.map((config, index) => (
+											<div class="tab-wrapper">
+												<div class={this.activeConfigIndex === index ? 'active tab-btn' : 'tab-btn'} onClick={() => this.configTabClicked(index)}>
+													<span class="tab-content">
+														{config.name || `Config ${index + 1}`}
+														<div class="tab-actions">
+															<ion-icon
+																name="pencil-outline"
+																class="edit-config-name"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	this.configTabClicked(index);
+																	this.openNamePrompt();
+																}}
+															></ion-icon>
+															<ion-icon
+																name="close-circle-outline"
+																class="delete-config-btn"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	this.deleteConfig(index);
+																}}
+															></ion-icon>
+														</div>
+													</span>
+												</div>
+											</div>
+										))}
+										<ion-button
+											class="add-config-btn"
+											fill="outline"
+											onClick={() => this.openAddConfigPrompt()}
+										>
+											<ion-icon slot="start" name="add-circle-outline"></ion-icon>
+										</ion-button>
+									</div>
+								</div>
+								{!this.showSubItemConfig ? (
+									<div class="content-tabs">
+										<div class="custom-tab-bar">
+											{this.tabs.map((tab, index) => (
+												<div class={this.activeTab === index ? 'active tab-btn' : 'tab-btn'} onClick={() => this.tabClicked(index)}>
+													{tab}
+												</div>
+											))}
+										</div>
+										<div id="collection-container">{this.renderTabContent()}</div>
+									</div>
+								) : (
+									<subitem-edit-config subItem={this.subItem}></subitem-edit-config>
+								)}
+							</>
 						)}
 					</div>
 				</div>
@@ -578,23 +598,21 @@ export class CreateConfig {
 						</div>
 					</div>
 				)}
-				{!this.showSubItemConfig && (
-					<div class="config-action-btns">
-						<ion-button
-							onClick={() => {
-								this.onDone();
-								logEvent('cancelled file edit');
-							}}
-							fill="outline"
-							class="cancel-btn"
-						>
-							Cancel
-						</ion-button>
-						<ion-button onClick={() => this.onSave()} fill="outline" class="save-btn">
-							Save
-						</ion-button>
-					</div>
-				)}
+				<div class="config-action-btns">
+					<ion-button
+						onClick={() => {
+							this.onDone();
+							logEvent('cancelled file edit');
+						}}
+						fill="outline"
+						class="cancel-btn"
+					>
+						Cancel
+					</ion-button>
+					<ion-button onClick={() => this.onSave()} fill="outline" class="save-btn">
+						Save
+					</ion-button>
+				</div>
 			</Host>
 		);
 	}
