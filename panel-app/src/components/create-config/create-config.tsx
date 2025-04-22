@@ -30,6 +30,7 @@ export class CreateConfig {
 	@State() activeConfigIndex: number = 0;
 	@State() showNamePrompt: boolean = false;
 	@State() editingName: string = '';
+	@State() showJsonModal: boolean = false;
 
 	_dirtyTimeout: any;
 	_unsubscribes: any[] = [];
@@ -347,10 +348,6 @@ export class CreateConfig {
 		);
 	}
 
-	renderJSONTab() {
-		return <code-viewer></code-viewer>;
-	}
-
 	renderTabContent() {
 		switch (this.activeTab) {
 			case 0:
@@ -359,8 +356,6 @@ export class CreateConfig {
 				return this.renderMetadataToExtractTab();
 			case 2:
 				return this.renderSubItemsTab();
-			case 3:
-				return this.renderJSONTab();
 			default:
 				return null;
 		}
@@ -377,7 +372,7 @@ export class CreateConfig {
 		logEvent(`viewed ${this.tabs[this.activeTab].toLowerCase()}`);
 	}
 
-	tabs = ['Elements to exclude', 'Metadata to extract', 'SubItems', 'JSON'];
+	tabs = ['Elements to exclude', 'Metadata to extract', 'SubItems'];
 
 	async openNamePrompt() {
 		const alert = await alertController.create({
@@ -411,6 +406,14 @@ export class CreateConfig {
 		await alert.present();
 	}
 
+	openJsonModal() {
+		this.showJsonModal = true;
+	}
+
+	closeJsonModal() {
+		this.showJsonModal = false;
+	}
+
 	render() {
 		const dirty = state.hasChanges ? (
 			<span class="is-dirty" title="Unsaved changes">*</span>
@@ -438,8 +441,10 @@ export class CreateConfig {
 				</div>
 				<div class="content-section">
 					<div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
-                        <ion-button class="edit-json-btn" fill="outline" onClick={() => this.tabClicked(3)}>Edit with JSON</ion-button>
-                    </div>
+						<ion-button class="edit-json-btn" fill="outline" onClick={() => this.openJsonModal()}>
+							Edit with JSON
+						</ion-button>
+					</div>
 					<div class="content-container">
 						<div class="config-tabs">
 							<div class="custom-tab-bar">
@@ -484,6 +489,21 @@ export class CreateConfig {
 						)}
 					</div>
 				</div>
+				{this.showJsonModal && (
+					<div class="json-modal">
+						<div class="json-modal-overlay" onClick={() => this.closeJsonModal()}></div>
+						<div class="json-modal-content">
+							<div class="json-modal-header">
+								<h2>Edit JSON Configuration</h2>
+								<ion-icon name="close" onClick={() => this.closeJsonModal()}></ion-icon>
+							</div>
+							<code-viewer style={{ height: "100%" }}></code-viewer>
+							<div class="json-modal-footer">
+								<ion-button fill="outline" onClick={() => this.closeJsonModal()}>Close</ion-button>
+							</div>
+						</div>
+					</div>
+				)}
 				{!this.showSubItemConfig && (
 					<div class="config-action-btns">
 						<ion-button

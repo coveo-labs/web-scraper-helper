@@ -5,8 +5,10 @@
 	font-size: 14px;
 	font-style: normal;
 	font-weight: 500;
-	line-height: 21px; /* 150% */
+	line-height: 21px;
+	/* 150% */
 	letter-spacing: 0.154px;
+	height: 100%;
 
 	.copy-to-clipboard {
 		color: #1372ec;
@@ -14,10 +16,25 @@
 		letter-spacing: 0.042px;
 		display: flex;
 		cursor: pointer;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		cursor: pointer;
+		color: #1372ec;
+		font-size: 14px;
+
+		&:hover {
+			text-decoration: underline;
+		}
 
 		ion-img::part(image) {
 			width: 12.5px;
 			margin-right: 8px;
+		}
+
+		ion-img {
+			width: 16px;
+			height: 16px;
 		}
 	}
 
@@ -32,20 +49,39 @@
 		font-size: 12px;
 		font-style: normal;
 		font-weight: 400;
-		line-height: 14px; /* 116.667% */
+		line-height: 14px;
+		/* 116.667% */
 		letter-spacing: 0.036px;
-		height: 600px;
+		height: calc(100% - 40px);
 
 		textarea {
 			width: 100%;
-			height: 600px;
+			height: 100%;
 			border: unset;
 			background-color: transparent;
-			padding: 8px;
+			padding: 16px 16px 48px 16px; // Increased bottom padding
+			border: 1px solid #e5e8e8;
+			border-radius: 8px;
+			font-family: monospace;
+			font-size: 14px;
+			line-height: 1.4;
+			resize: none;
+			outline: none;
+			background: #fcfcfc;
 
 			&:focus-visible {
 				outline: unset;
 				background-color: #fff;
+			}
+
+			&.invalid-JSON {
+				border-color: #dc3545;
+				background-color: #fff5f5;
+			}
+
+			&:focus {
+				border-color: #1372ec;
+				background: #fff;
 			}
 		}
 	}
