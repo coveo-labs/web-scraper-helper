@@ -42,7 +42,6 @@ export class AppRoot {
 	}
 
 	validateTab(tab: chrome.tabs.Tab) {
-		// console.log('validateTab', tab.url, tab);
 		if (!/https?:\/\/.+/.test(tab.url)) {
 			this.error = (
 				<span>

@@ -1,54 +1,178 @@
 import { createStore } from '@stencil/store';
 import { v4 as uuidv4 } from 'uuid';
-import { ConfigState, MetadataMap, Selector, SelectorElement, SelectorType, SubItem } from './types';
+import { OverallConfiguration, Configuration, MetadataMap, Selector, SelectorElement, SelectorType, SubItem } from './types';
 import { logErrorEvent, logEvent } from './analytics';
+import storage from './storage/storage';
 
 export function getId(): string {
 	let uniqueId = uuidv4();
 	return `uid-${uniqueId}-${Date.now()}`;
 }
 
-const { reset, state, onChange }: { reset: Function; state: ConfigState; onChange: Function; } = createStore({
-	currentFile: null,
-	hasChanges: false,
-	exclude: [
-		{
-			id: getId(),
-			type: 'CSS',
-			path: 'header, .header, *[role="header"]',
+const { reset, state, onChange }: { reset: Function; state: OverallConfiguration; onChange: Function; } = createStore(
+	{
+		currentFile: null,
+		index: 0,
+		currentConfiguration: () => {
+			return state.configurations[state.index];
 		},
-		{
-			id: getId(),
-			type: 'CSS',
-			path: 'footer, .footer',
-		},
-		{
-			id: getId(),
-			type: 'CSS',
-			path: 'noscript, nav',
-		},
-	],
-	metadata: {},
-	subItems: [],
-});
+		configurations: [
+			{
+				name: '[Default Coveo web scraping configuration]',
+				hasChanges: false,
+				exclude: [
+					{
+						id: getId(),
+						type: 'CSS',
+						path: 'script',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: 'noscript',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: 'iframe',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: 'menu',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: 'nav',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: 'header',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: 'footer',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: 'video',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: 'audio',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: '.menu',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: '.nav',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: '.navigation',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: '.navbar',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: '.nav-bar',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: '.head',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: '.header',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: '.foot',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: '.footer',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: '.sidebar',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: '.sidenav',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: '.banner',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: '.ad',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: '.advert',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: '.advertisement',
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: '.adsbygoogle'
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: '.popup'
+					},
+					{
+						id: getId(),
+						type: 'CSS',
+						path: '.modal'
+					}
+				],
+				metadata: {},
+				subItems: [],
+			}
+		],
+		hasChanges: false,
+	});
 
 function resetStore() {
 	reset();
 }
 
-onChange('name', () => {
+onChange('configurations', () => {
 	state.hasChanges = true;
 });
 
-onChange('exclude', () => {
-	state.hasChanges = true;
-});
-
-onChange('metadata', () => {
-	state.hasChanges = true;
-});
-
-onChange('subItems', () => {
+onChange('index', () => {
 	state.hasChanges = true;
 });
 
@@ -82,57 +206,61 @@ function getFormattedMetadata(action, metadata) {
 	return formattedMetadata;
 }
 
-function updateState(newState, hasChanges?: boolean): boolean {
+function updateState(newJsonState: string): boolean {
 	try {
-		const parsedValue = JSON.parse(newState);
-		if (parsedValue) {
-			const { name, exclude, metadata, subItems } = parsedValue[0];
+		const parsedValue = JSON.parse(newJsonState);
 
-			const formattedExclude =
-				exclude &&
-				exclude.map((item) => {
-					return { id: getId(), type: item.type, path: item.path };
-				});
+		if (Array.isArray(parsedValue)) {
+			state.configurations = [];
 
-			const formattedMetadata = getFormattedMetadata('updateState', metadata);
+			parsedValue.forEach(({ name, exclude, for: forValue, metadata, subItems }, _) => {
+				// Skip iteration of subItems (or any specific type object).
+				if (forValue?.types) {
+					return;
+				}
 
-			const formattedSubItems =
-				subItems &&
-				Object.keys(subItems).map((key) => {
-					const { exclude, metadata } = getSubItemValues(parsedValue, key);
-					const formattedSubItemExclude =
-						exclude &&
-						exclude.map((item) => {
-							return { id: getId(), type: item.type, path: item.path };
-						});
-					const formattedSubItemMetadata = getFormattedMetadata('updateState', metadata);
-					return {
-						name: key,
-						type: subItems[key].type,
-						path: subItems[key].path,
-						exclude: formattedSubItemExclude,
-						metadata: formattedSubItemMetadata,
-					};
-				});
+				const formattedExclude =
+					exclude &&
+					exclude.map((item) => {
+						return { id: getId(), type: item.type, path: item.path };
+					});
 
-			const formattedValue = {
-				name,
-				exclude: formattedExclude,
-				metadata: formattedMetadata,
-				subItems: subItems ? formattedSubItems : [],
-			};
+				const formattedMetadata = getFormattedMetadata('updateState', metadata);
 
-			state.name = formattedValue.name;
-			state.exclude = formattedValue.exclude;
-			state.metadata = formattedValue.metadata;
-			state.subItems = formattedValue.subItems && formattedValue.subItems;
+				const formattedSubItems =
+					subItems &&
+					Object.keys(subItems).map((key) => {
+						const { exclude, metadata } = getSubItemValues(parsedValue, key);
+						const formattedSubItemExclude =
+							exclude &&
+							exclude.map((item) => {
+								return { id: getId(), type: item.type, path: item.path };
+							});
+						const formattedSubItemMetadata = getFormattedMetadata('updateState', metadata);
+						return {
+							name: key,
+							type: subItems[key].type,
+							path: subItems[key].path,
+							exclude: formattedSubItemExclude,
+							metadata: formattedSubItemMetadata,
+						};
+					});
 
-			// add opacity to the elements onLoad
-			sendMessageToContentScript({ type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude, subItems: state.subItems } });
+				const formattedValue: Configuration = {
+					name,
+					exclude: formattedExclude,
+					for: forValue,
+					metadata: formattedMetadata,
+					subItems: subItems ? formattedSubItems : [],
+				};
 
-			if (hasChanges !== undefined) {
-				state.hasChanges = hasChanges;
-			}
+				state.configurations.push(formattedValue);
+				// It's the index change triggers the refresh (No need to use 'UpdateConfiguration' method)
+				state.index = state.configurations.length - 1;
+
+				// add opacity to the elements onLoad
+				sendMessageToContentScript({ type: 'update-excludeItem-onLoad', payload: { exclude: formattedValue.exclude, subItems: formattedValue.subItems } });
+			});
 		}
 	} catch (e) {
 		logErrorEvent('error state update', e);
@@ -143,7 +271,17 @@ function updateState(newState, hasChanges?: boolean): boolean {
 }
 
 function formatState() {
-	const { exclude, metadata, subItems, name } = state;
+	const formattedState = [];
+
+	state.configurations.forEach((config, _) => {
+		formattedState.push(...formatConfiguration(config));
+	});
+
+	return formattedState;
+}
+
+function formatConfiguration(configuration: Configuration) {
+	const { exclude, for: forValue, metadata, subItems, name } = configuration;
 
 	const formattedExclude =
 		exclude &&
@@ -152,6 +290,11 @@ function formatState() {
 		});
 
 	const formattedMetadata = getFormattedMetadata('formatState', metadata);
+
+	const formattedForValue = forValue && {
+		urls: forValue.urls,
+		types: forValue.types,
+	};
 
 	const formattedSubItems =
 		subItems &&
@@ -177,20 +320,20 @@ function formatState() {
 	const formattedState = [
 		{
 			name: name,
-			for: {
-				urls: ['.*'],
-			},
 			exclude: formattedExclude,
+			for: formattedForValue,
 			metadata: formattedMetadata,
-			subItems:
-				subItems &&
-				subItems.reduce((acc, curr) => {
-					acc[curr.name] = {
-						type: curr.type,
-						path: curr.path,
-					};
-					return acc;
-				}, {}),
+			...(subItems?.length > 0
+				? {
+					subItems: subItems.reduce((acc, curr) => {
+						acc[curr.name] = {
+							type: curr.type,
+							path: curr.path,
+						};
+						return acc;
+					}, {}),
+				}
+				: {}),
 		},
 		...formattedSubItems,
 	];
@@ -199,100 +342,109 @@ function formatState() {
 }
 
 function updateGlobalName(newName) {
-	state.name = newName;
+	state.currentConfiguration().name = newName;
+	updateConfiguration({ ...state.currentConfiguration() });
 }
 
 function addExcludedItem(item) {
 	const id = getId();
-	state.exclude = [...state.exclude, { ...item, id }];
+	const exclude = [...state.currentConfiguration().exclude, { ...item, id }];
+	updateConfiguration({ ...state.currentConfiguration(), exclude });
+}
+
+/*
+* Stencil doesn't support deep mutation.
+* If we want to ensure onChange'configs' is triggered, we have to update the higher hierarchy element.
+*/
+function updateConfiguration(partial: Partial<Configuration>) {
+	const updated = {
+		...state.configurations[state.index],
+		...partial
+	};
+	state.configurations[state.index] = updated;
+	state.configurations = [...state.configurations];
 }
 
 function removeExcludedItem(item: SelectorElement) {
-	state.exclude = state.exclude.filter((excludedItem) => {
+	const exclude = state.currentConfiguration().exclude.filter((excludedItem) => {
 		return excludedItem.id !== item.id;
 	});
-
+	updateConfiguration({ ...state.currentConfiguration(), exclude });
 	sendMessageToContentScript({ type: 'remove-exclude-selector', payload: { item } });
 }
 
 function addMetadataItem(item: { name: string; type: SelectorType; path: string; }) {
-	state.metadata = { ...state.metadata, [getId()]: { name: item.name, type: item.type, path: item.path } };
+	const metadata = { ...state.currentConfiguration().metadata, [getId()]: { name: item.name, type: item.type, path: item.path } };
+	updateConfiguration({ ...state.currentConfiguration(), metadata });
 }
 
 function removeMetadataItem(uid: string) {
-	const { [uid]: _, ...metadata } = state.metadata;
-	state.metadata = metadata;
+	const { [uid]: _, ...metadata } = state.currentConfiguration().metadata;
+	updateConfiguration({ ...state.currentConfiguration(), metadata });
 }
 
 async function getMetadataResults(type = 'global', metadata: MetadataMap = {}, parentSelector: Selector = null) {
 	const response = await new Promise((resolve) => {
-		sendMessageToContentScript({ type: 'metadata-results', payload: { metadata: type === 'global' ? state.metadata : metadata, parentSelector: parentSelector } }, resolve);
+		sendMessageToContentScript({ type: 'metadata-results', payload: { metadata: type === 'global' ? state.currentConfiguration().metadata : metadata, parentSelector: parentSelector } }, resolve);
 	});
-	console.log('getMetadataResults-response', response);
 	return response;
 }
 
 function addSubItem() {
-	state.subItems = [...state.subItems, { name: 'subItem', type: 'CSS', path: '', exclude: [], metadata: {} }];
+	state.currentConfiguration().subItems = [...state.currentConfiguration().subItems, { name: 'subItem', type: 'CSS', path: '', exclude: [], metadata: {} }];
+	updateConfiguration({ ...state.currentConfiguration() });
 	logEvent('added subitem');
 }
 
 function removeSubItem(itemName: string) {
-	state.subItems = state.subItems.filter((subItem) => {
+	state.currentConfiguration().subItems = state.currentConfiguration().subItems.filter((subItem) => {
 		return subItem.name !== itemName;
 	});
+	updateConfiguration({ ...state.currentConfiguration() });
 	logEvent('deleted subitem');
 }
 
 function updateMetadataItem(newItem: { id: string; name: string; type: string; path: string; isBoolean?: boolean; }) {
-	state.metadata = Object.keys(state.metadata).reduce((acc, key) => {
+	const metadata = Object.keys(state.currentConfiguration().metadata).reduce((acc, key) => {
 		if (key === newItem.id) {
 			acc[key] = { name: newItem.name, type: newItem.type, path: newItem.path, ...(newItem.isBoolean && { isBoolean: newItem.isBoolean }) };
 		} else {
-			acc[key] = state.metadata[key];
+			acc[key] = state.currentConfiguration().metadata[key];
 		}
 		return acc;
 	}, {});
+	updateConfiguration({ ...state.currentConfiguration(), metadata });
 }
 
 function updateExcludedItem(newItem: SelectorElement, oldItem: SelectorElement) {
 	// add opacity to the element
 	sendMessageToContentScript({ type: 'exclude-selector', payload: { newItem, oldItem } });
-	state.exclude = state.exclude.map((excludedItem) => {
+	const exclude = state.currentConfiguration().exclude.map((excludedItem) => {
 		if (excludedItem.id === oldItem.id) {
 			return newItem;
 		}
 		return excludedItem;
 	});
+	updateConfiguration({ ...state.currentConfiguration(), exclude });
 }
 
 function updateSubItem(newItem: SubItem, oldItem: SubItem) {
-	state.subItems = state.subItems.map((subItem) => {
+	const subItems = state.currentConfiguration().subItems.map((subItem) => {
 		if (subItem.name === oldItem.name && subItem.type === oldItem.type && subItem.path === oldItem.path) {
 			return newItem;
 		}
 		return subItem;
 	});
+	updateConfiguration({ ...state.currentConfiguration(), subItems });
 }
 
 const addToRecentFiles = async (filename: string): Promise<string[]> => {
-	const RECENT_FILES_ITEM_NAME = '__Recent__Files__';
-
-	return new Promise((resolve) => {
-		chrome.storage.local.get(RECENT_FILES_ITEM_NAME, (items) => {
-			let recentFiles = items[RECENT_FILES_ITEM_NAME] || [];
-			recentFiles = [filename, ...recentFiles.filter((item) => item !== filename)];
-			chrome.storage.local.set({ [RECENT_FILES_ITEM_NAME]: recentFiles });
-
-			resolve(recentFiles);
-		});
-	});
+	return storage.addToRecentFiles(filename);
 };
 
 const sendMessageToContentScript = (message: any, callback: any = null): any => {
 	try {
 		const tabId = chrome.devtools?.inspectedWindow?.tabId;
-		// console.log('sendMessageToContentScript:', tabId, message);
 		chrome.tabs.sendMessage(tabId, { tabId, ...message }, null, callback);
 	} catch (e) {
 		logErrorEvent('error send message', e);

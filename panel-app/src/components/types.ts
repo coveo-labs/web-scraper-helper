@@ -19,16 +19,23 @@ export type SubItem = Selector & {
 	metadata?: MetadataMap;
 };
 
-export type ConfigState = {
+export type Configuration = {
 	name?: string;
+	for?: any;
+	exclude: SelectorElement[];
+	metadata: MetadataMap;
+	subItems: SubItem[];
+};
+
+export type OverallConfiguration = {
 	currentFile: {
 		name: string;
 		triggerType: 'new-file' | 'load-file';
 	} | null;
+	index: number,
+	configurations: Configuration[];
 	hasChanges: boolean;
-	exclude: SelectorElement[];
-	metadata: MetadataMap;
-	subItems: SubItem[];
+	currentConfiguration: () => Configuration;
 };
 
 export type PayloadForFileSave = {

@@ -19,7 +19,6 @@ chrome.runtime.onConnect.addListener(function (port) {
     }
 
     const tabId = message.tabId;
-    console.log('b: ', tabId, message);
     if (tabId) {
       chrome.tabs.sendMessage(tabId, message, null, function (response) {
         console.log('RESPONSE: ', response);

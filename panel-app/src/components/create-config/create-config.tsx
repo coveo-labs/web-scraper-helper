@@ -1,4 +1,4 @@
-import { Component, Host, Listen, State, h } from '@stencil/core';
+import { Component, Fragment, Host, Listen, State, h } from '@stencil/core';
 import state, {
 	addExcludedItem,
 	addMetadataItem,
@@ -14,8 +14,9 @@ import state, {
 } from '../store';
 import { alertController, toastController } from '@ionic/core';
 import infoToken from '../../assets/icon/InfoToken.svg';
-import { SubItem } from '../types';
+import { Configuration, SubItem } from '../types';
 import { getScraperConfigMetrics, logErrorEvent, logEvent } from '../analytics';
+import storage from '../storage/storage';
 
 @Component({
 	tag: 'create-config',
@@ -26,6 +27,10 @@ export class CreateConfig {
 	@State() showSubItemConfig: boolean;
 	@State() subItem: SubItem;
 	@State() activeTab: number = 0;
+	@State() activeConfigIndex: number = 0;
+	@State() showNamePrompt: boolean = false;
+	@State() editingName: string = '';
+	@State() showJsonModal: boolean = false;
 
 	_dirtyTimeout: any;
 	_unsubscribes: any[] = [];
@@ -40,7 +45,7 @@ export class CreateConfig {
 			logEvent('viewed elements to exclude');
 
 			// listeners for changes
-			['name', 'exclude', 'metadata', 'subItems'].forEach((key) => {
+			['configurations', 'index'].forEach((key) => {
 				this._unsubscribes.push(onStateChange(key, () => this.setAutoSave()));
 			});
 		} catch (e) {
@@ -64,13 +69,13 @@ export class CreateConfig {
 	}
 
 	renderExcludedItems() {
-		return state.exclude.map((item) => {
+		return state.currentConfiguration().exclude.map((item) => {
 			return <select-element-item type="excludeItem" selector={item} uniqueId={item.id}></select-element-item>;
 		});
 	}
 
 	renderMetadataItems() {
-		const metadata = state.metadata;
+		const metadata = state.currentConfiguration().metadata;
 		return Object.keys(metadata).map((key) => {
 			const item = metadata[key];
 			return <select-element-item type="metadataItem" uniqueId={key} name={item.name} selector={item}></select-element-item>;
@@ -123,12 +128,10 @@ export class CreateConfig {
 		}
 	}
 
-	onSave() {
+	async onSave() {
 		clearTimeout(this._dirtyTimeout);
 		try {
-			chrome.storage.local.set({
-				[state.currentFile.name]: JSON.stringify(formatState(), null, 2),
-			});
+			await storage.set(state.currentFile.name, JSON.stringify(formatState(), null, 2));
 			toastController
 				.create({
 					message: 'File saved successfully!',
@@ -146,8 +149,28 @@ export class CreateConfig {
 		}
 	}
 
-	handleGlobalNameChange(e) {
+	handleNameChange(e) {
 		updateGlobalName(e.detail.value);
+	}
+
+	handleConfigurationSelection(event: CustomEvent) {
+		state.index = event.detail.value;
+	}
+
+	handleAddConfig(name: string) {
+		const newConfig: Configuration = {
+			name,
+			exclude: [],
+			metadata: {},
+			subItems: [],
+			for: {
+				urls: [".*"]
+			}
+		};
+
+		state.configurations = [...state.configurations, newConfig];
+		// It's the index change that triggers the refresh (No need to use 'UpdateConfiguration' method)
+		state.index = state.configurations.length - 1;
 	}
 
 	async loadFile() {
@@ -158,15 +181,12 @@ export class CreateConfig {
 		try {
 			if (state.currentFile.triggerType === 'load-file') {
 				const fileName = state.currentFile.name;
-				const fileItem = await new Promise((resolve) => {
-					chrome.storage.local.get(fileName, (items) => resolve(items));
-				});
-
-				updateState(fileItem[fileName], false);
+				const fileItem = await storage.get(fileName);
+				updateState(fileItem);
 				await addToRecentFiles(fileName);
 				logEvent('completed file open', getScraperConfigMetrics());
 			} else {
-				sendMessageToContentScript({ type: 'update-excludeItem-onLoad', payload: { exclude: state.exclude, subItems: state.subItems } });
+				sendMessageToContentScript({ type: 'update-excludeItem-onLoad', payload: { exclude: state.currentConfiguration().exclude, subItems: state.currentConfiguration().subItems } });
 			}
 		} catch (e) {
 			logErrorEvent('error file load', e);
@@ -174,6 +194,8 @@ export class CreateConfig {
 	}
 
 	addPageLoadListener() {
+		this.loadFile();
+
 		this.pageLoadListener = (message) => {
 			console.log('pageLoadListener:', message);
 			if (message.type === 'page-loaded' || message.newPage) {
@@ -229,8 +251,6 @@ export class CreateConfig {
 						</div>
 					</div>
 				</div>
-				<div style={{ marginTop: '32px' }}>Global section name</div>
-				<ion-input class="global-section-input" fill="outline" placeholder="Name your global section" value={state.name || ''} onIonInput={(e) => this.handleGlobalNameChange(e)}></ion-input>
 			</div>
 		);
 	}
@@ -262,13 +282,13 @@ export class CreateConfig {
 					</div>
 				</div>
 				<div style={{ marginTop: '24px' }}>Results</div>
-				<metadata-results metadata={state.metadata}></metadata-results>
+				<metadata-results metadata={state.currentConfiguration().metadata}></metadata-results>
 			</div>
 		);
 	}
 
 	renderSubItemsTab() {
-		return state.subItems.length == 0 ? (
+		return state.currentConfiguration().subItems.length == 0 ? (
 			<div class="empty-subItem-container">
 				<div class="subItem-text-container">
 					<div class="subItem-text">Sub-items</div>
@@ -296,7 +316,7 @@ export class CreateConfig {
 						</th>
 					</thead>
 					<tbody>
-						{state.subItems.map((item, idx) => (
+						{state.currentConfiguration().subItems.map((item, idx) => (
 							<tr>
 								<div
 									key={item.name}
@@ -328,10 +348,6 @@ export class CreateConfig {
 		);
 	}
 
-	renderJSONTab() {
-		return <code-viewer></code-viewer>;
-	}
-
 	renderTabContent() {
 		switch (this.activeTab) {
 			case 0:
@@ -340,11 +356,15 @@ export class CreateConfig {
 				return this.renderMetadataToExtractTab();
 			case 2:
 				return this.renderSubItemsTab();
-			case 3:
-				return this.renderJSONTab();
 			default:
 				return null;
 		}
+	}
+
+	configTabClicked(index: number) {
+		this.activeConfigIndex = index;
+		state.index = index;
+		logEvent(`switched to configuration ${index + 1}`);
 	}
 
 	tabClicked(index: number) {
@@ -352,13 +372,114 @@ export class CreateConfig {
 		logEvent(`viewed ${this.tabs[this.activeTab].toLowerCase()}`);
 	}
 
-	tabs = ['Elements to exclude', 'Metadata to extract', 'SubItems', 'JSON'];
+	async deleteConfig(index: number) {
+		const alert = await alertController.create({
+			header: 'Delete Configuration',
+			cssClass: 'alert-delete-config',
+			message: 'Are you sure you want to delete this configuration?',
+			buttons: [
+				{
+					text: 'Cancel',
+					role: 'cancel'
+				},
+				{
+					text: 'Delete',
+					role: 'destructive',
+					handler: () => {
+						state.configurations = [
+							...state.configurations.slice(0, index),
+							...state.configurations.slice(index + 1)
+						];
+						// Reset index to 0 when there are no configurations
+						state.index = state.configurations.length > 0 ? Math.min(index, state.configurations.length - 1) : 0;
+						this.activeConfigIndex = state.index;
+						this.activeTab = 0;
+						logEvent('deleted configuration');
+					}
+				}
+			]
+		});
+
+		await alert.present();
+	}
+
+	tabs = ['Elements to exclude', 'Metadata to extract', 'SubItems'];
+
+	async openNamePrompt() {
+		const alert = await alertController.create({
+			header: 'Edit Configuration Name',
+			cssClass: 'name-edit-alert',
+			inputs: [
+				{
+					name: 'configName',
+					type: 'text',
+					placeholder: 'Enter configuration name',
+					value: state.currentConfiguration().name || ''
+				}
+			],
+			buttons: [
+				{
+					text: 'Cancel',
+					role: 'cancel'
+				},
+				{
+					text: 'Save',
+					handler: (data) => {
+						if (data.configName) {
+							updateGlobalName(data.configName);
+							logEvent('edited configuration name');
+						}
+					}
+				}
+			]
+		});
+
+		await alert.present();
+	}
+
+	async openAddConfigPrompt() {
+		const alert = await alertController.create({
+			header: 'New Configuration',
+			cssClass: 'name-edit-alert',
+			inputs: [
+				{
+					name: 'configName',
+					type: 'text',
+					placeholder: 'Enter configuration name',
+					value: ''
+				}
+			],
+			buttons: [
+				{
+					text: 'Cancel',
+					role: 'cancel'
+				},
+				{
+					text: 'Add',
+					handler: (data) => {
+						if (data.configName) {
+							this.handleAddConfig(data.configName);
+							logEvent('added new configuration');
+						}
+					}
+				}
+			]
+		});
+
+		await alert.present();
+	}
+
+	openJsonModal() {
+		this.showJsonModal = true;
+	}
+
+	closeJsonModal() {
+		this.showJsonModal = false;
+	}
 
 	render() {
 		const dirty = state.hasChanges ? (
-			<span class="is-dirty" title="Unsaved changes">
-				*
-			</span>
+			<span class="is-dirty" title="Unsaved changes">*</span>
 		) : (
 			''
 		);
@@ -382,43 +503,116 @@ export class CreateConfig {
 					</div>
 				</div>
 				<div class="content-section">
+					<div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+						<ion-button class="edit-json-btn" fill="outline" onClick={() => this.openJsonModal()}>
+							Edit with JSON
+						</ion-button>
+					</div>
 					<div class="content-container">
-						{!this.showSubItemConfig ? (
-							<div>
-								{/* <div class="content-text">Create a Web Scraping configuration</div> */}
-								<div class="content-tabs">
-									<div class="custom-tab-bar">
-										{this.tabs.map((tab, index) => (
-											<div class={this.activeTab === index ? 'active tab-btn' : 'tab-btn'} onClick={() => this.tabClicked(index)}>
-												{tab}
-											</div>
-										))}
-									</div>
-									<div id="collection-container">{this.renderTabContent()}</div>
+						{state.configurations.length === 0 ? (
+							<div style={{ padding: '32px 24px', textAlign: 'center' }}>
+								<div style={{ marginBottom: '24px' }}>
+									<div style={{ fontSize: '16px', fontWeight: '500', marginBottom: '8px' }}>No Configurations</div>
+									<div style={{ color: '#565b66', fontSize: '14px' }}>Add a new configuration to get started</div>
 								</div>
+								<ion-button
+									fill="outline"
+									onClick={() => this.openAddConfigPrompt()}
+									style={{ '--border-radius': '8px', '--border-color': '#1372ec', '--color': '#1372ec' }}
+								>
+									<ion-icon slot="start" name="add-circle-outline"></ion-icon>
+									Add Configuration
+								</ion-button>
 							</div>
 						) : (
-							<subitem-edit-config subItem={this.subItem}></subitem-edit-config>
+							<>
+								<div class="config-tabs">
+									<div class="custom-tab-bar">
+										{state.configurations.map((config, index) => (
+											<div class="tab-wrapper">
+												<div class={this.activeConfigIndex === index ? 'active tab-btn' : 'tab-btn'} onClick={() => this.configTabClicked(index)}>
+													<span class="tab-content">
+														{config.name || `Config ${index + 1}`}
+														<div class="tab-actions">
+															<ion-icon
+																name="pencil-outline"
+																class="edit-config-name"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	this.configTabClicked(index);
+																	this.openNamePrompt();
+																}}
+															></ion-icon>
+															<ion-icon
+																name="close-circle-outline"
+																class="delete-config-btn"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	this.deleteConfig(index);
+																}}
+															></ion-icon>
+														</div>
+													</span>
+												</div>
+											</div>
+										))}
+										<ion-button
+											class="add-config-btn"
+											fill="outline"
+											onClick={() => this.openAddConfigPrompt()}
+										>
+											<ion-icon slot="start" name="add-circle-outline"></ion-icon>
+										</ion-button>
+									</div>
+								</div>
+								{!this.showSubItemConfig ? (
+									<div class="content-tabs">
+										<div class="custom-tab-bar">
+											{this.tabs.map((tab, index) => (
+												<div class={this.activeTab === index ? 'active tab-btn' : 'tab-btn'} onClick={() => this.tabClicked(index)}>
+													{tab}
+												</div>
+											))}
+										</div>
+										<div id="collection-container">{this.renderTabContent()}</div>
+									</div>
+								) : (
+									<subitem-edit-config subItem={this.subItem}></subitem-edit-config>
+								)}
+							</>
 						)}
 					</div>
 				</div>
-				{!this.showSubItemConfig && (
-					<div class="config-action-btns">
-						<ion-button
-							onClick={() => {
-								this.onDone();
-								logEvent('cancelled file edit');
-							}}
-							fill="outline"
-							class="cancel-btn"
-						>
-							Cancel
-						</ion-button>
-						<ion-button onClick={() => this.onSave()} fill="outline" class="save-btn">
-							Save
-						</ion-button>
+				{this.showJsonModal && (
+					<div class="json-modal">
+						<div class="json-modal-overlay" onClick={() => this.closeJsonModal()}></div>
+						<div class="json-modal-content">
+							<div class="json-modal-header">
+								<h2>Edit JSON Configuration</h2>
+								<ion-icon name="close" onClick={() => this.closeJsonModal()}></ion-icon>
+							</div>
+							<code-viewer style={{ flex: '1', minHeight: '0', overflow: 'hidden', marginBottom: '16px' }}></code-viewer>
+							<div class="json-modal-footer">
+								<ion-button fill="outline" onClick={() => this.closeJsonModal()}>Close</ion-button>
+							</div>
+						</div>
 					</div>
 				)}
+				<div class="config-action-btns">
+					<ion-button
+						onClick={() => {
+							this.onDone();
+							logEvent('cancelled file edit');
+						}}
+						fill="outline"
+						class="cancel-btn"
+					>
+						Cancel
+					</ion-button>
+					<ion-button onClick={() => this.onSave()} fill="outline" class="save-btn">
+						Save
+					</ion-button>
+				</div>
 			</Host>
 		);
 	}

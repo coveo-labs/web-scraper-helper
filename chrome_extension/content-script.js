@@ -294,8 +294,6 @@ if (!window.__WSH_content_script_loaded) {
   window.onload = () => {
 
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      console.log('onMessage', message);
-
       if (message.type === 'exclude-selector') {
         const { newItem, oldItem, parentSelector } = message.payload;
         applyStylesToElements(newItem, oldItem, parentSelector);
@@ -354,7 +352,6 @@ if (!window.__WSH_content_script_loaded) {
           }
           results.push(result);
         });
-        console.log('metadata-result-array', message, results);
         sendResponse(results);
       }
       else if (message.type === 'update-parentSelector-style') {
